@@ -47,7 +47,7 @@
 - **As a**: [User Persona]
 - **I want to**: [Action / Goal]
 - **So that**: [Value / Benefit]
-- **Priority**: [Must Have / Should Have / Could Have]
+- **Priority**: [Must Have / Should Have / Could Have / Won't Have]
 
 #### Acceptance Criteria (Given-When-Then)
 ```gherkin

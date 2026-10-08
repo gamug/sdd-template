@@ -50,6 +50,8 @@ The SDSS Spectra Classifier is an AI-driven web application designed for astrono
 | `FR-004` | Optional | WHERE GPU acceleration is present, the inference service shall utilize CUDA tensor processing. | Could Have | `UC-01` |
 | `FR-005` | Unwanted / Error | IF the file payload exceeds 50MB, THEN the system shall return an HTTP 413 error message. | Must Have | `UC-01` |
 
+**MVP Won't Have**: Batch processing of multiple FITS files in one request.
+
 ---
 
 ### User Story `US-01`: Interactive Spectral Visualization
