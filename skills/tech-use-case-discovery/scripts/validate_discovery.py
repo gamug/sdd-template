@@ -9,6 +9,9 @@ and MoSCoW prioritization.
 
 Usage:
     python validate_discovery.py <path_to_markdown_file_or_directory>
+
+Directory mode requires exactly one file named PRODUCT.md somewhere below the
+provided directory and validates that file only.
 """
 
 import sys
@@ -157,17 +160,30 @@ def main():
         if not success:
             all_success = False
     else:
-        md_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(target_path) for f in filenames if f.endswith(".md")]
-        if not md_files:
-            print(f"No Markdown files found in directory '{target_path}'.")
+        product_files = [
+            os.path.join(dp, filename)
+            for dp, _, filenames in os.walk(target_path)
+            for filename in filenames
+            if filename.lower() == "product.md"
+        ]
+        if not product_files:
+            print(
+                f"No PRODUCT.md found below directory '{target_path}'. "
+                "Directory mode validates the generated PRODUCT.md only."
+            )
             sys.exit(1)
-            
-        combined_content = ""
-        for file_path in md_files:
-            with open(file_path, "r", encoding="utf-8") as f:
-                combined_content += f"\n\n--- FILE: {file_path} ---\n\n" + f.read()
-                
-        success = analyze_content(combined_content, f"Directory: {target_path}")
+        if len(product_files) > 1:
+            print(
+                f"Multiple PRODUCT.md files found below directory '{target_path}': "
+                f"{', '.join(product_files)}"
+            )
+            sys.exit(1)
+
+        product_file = product_files[0]
+        with open(product_file, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        success = analyze_content(content, product_file)
         if not success:
             all_success = False
 
