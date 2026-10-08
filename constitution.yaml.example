@@ -14,14 +14,16 @@ project:
   apps_dir: apps
   cli_dir: cli
   scripts_dir: scripts
-  sdd_dir: .specify/memory
+  # `.specify/memory` contains immutable template inputs. WI-003 creates the
+  # canonical project artifacts under `.sdd`.
+  sdd_dir: .sdd
 
 sdd:
-  constitution_file: .specify/memory/constitution.md
-  spec_file: .specify/memory/SPEC.md
-  plan_file: .specify/memory/PLAN.md
-  tasks_file: .specify/memory/TASKS.md
-  changelog_file: .specify/memory/CHANGELOG.md
+  constitution_file: .sdd/constitution.md
+  spec_file: .sdd/SPEC.md
+  plan_file: .sdd/PLAN.md
+  tasks_file: .sdd/TASKS.md
+  changelog_file: .sdd/CHANGELOG.md
 
 runtime:
   language: Python
