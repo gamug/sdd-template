@@ -58,7 +58,10 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Depends on:** TASK-005
 - **Acceptance criteria:** AC-FR001-02
 - **Action:** Validate required fields in `config.yaml` and trace each non-obvious value to
-  PRODUCT.md or an explicit user decision.
+  PRODUCT.md or an explicit user decision. Run
+  `uv run --with pyyaml python .specify/scripts/validate_config.py config.yaml`
+  so related values, such as `runtime.version` and `devcontainer.image`,
+  cannot drift.
 
 ## WI-003 — Render constitution.md and synchronize SDD objects
 

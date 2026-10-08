@@ -45,8 +45,19 @@ def get_sections(content: str):
             if len(next_heading.group(1)) <= level:
                 end = next_heading.start()
                 break
-        sections.append((heading.group(2), content[heading.end():end]))
+        sections.append((heading.group(2), content[heading.end():end], heading.start(), end))
     return sections
+
+
+def most_specific(sections):
+    """Drop sections that enclose another section in the same list."""
+    return [
+        section for section in sections
+        if not any(
+            other is not section and section[2] < other[2] < section[3]
+            for other in sections
+        )
+    ]
 
 
 def analyze_content(content: str, filename: str):
@@ -64,21 +75,22 @@ def analyze_content(content: str, filename: str):
     # 1. Check Mandatory Sections
     print("--- 1. Mandatory Section Coverage ---")
     for section_name, heading_pattern, identifier_pattern in REQUIRED_SECTIONS:
-        matching_sections = [
-            section_content
-            for heading, section_content in sections
-            if re.match(heading_pattern, f"# {heading}", re.IGNORECASE)
-        ]
-        has_heading = bool(matching_sections)
-        has_identifier = (
-            identifier_pattern is None
-            or any(
-                re.search(identifier_pattern, section_content, re.IGNORECASE)
-                for section_content in matching_sections
+        # An enclosing heading (e.g. a document title) must not satisfy the
+        # check on behalf of a more specific, empty section beneath it.
+        matching_sections = most_specific([
+            section
+            for section in sections
+            if re.match(heading_pattern, f"# {section[0]}", re.IGNORECASE)
+        ])
+        is_complete = any(
+            section_content.strip()
+            and (
+                identifier_pattern is None
+                or re.search(identifier_pattern, f"{heading}\n{section_content}", re.IGNORECASE)
             )
+            for heading, section_content, _, _ in matching_sections
         )
-        has_content = any(section_content.strip() for section_content in matching_sections)
-        if has_heading and has_identifier and has_content:
+        if is_complete:
             print(f"  [PASS] {section_name}")
             passes.append(f"Section present: {section_name}")
         else:
@@ -119,13 +131,13 @@ def analyze_content(content: str, filename: str):
     print("\n--- 3. Architecture Decision Records (ADR) Check ---")
     adr_sections = [
         section_content
-        for heading, section_content in sections
+        for heading, section_content, _, _ in sections
         if re.search(r"\bADR-\d+\b", heading, re.IGNORECASE)
     ]
     if adr_sections:
         adr_ids = [
             adr_id
-            for heading, _ in sections
+            for heading, *_ in sections
             for adr_id in re.findall(r"ADR-\d+", heading, re.IGNORECASE)
         ]
         print(f"  [PASS] Found {len(set(adr_ids))} unique ADR ID(s): {', '.join(sorted(set(adr_ids)))}")

@@ -41,6 +41,8 @@ The template is based on these principles:
 .
 ├── constitution.yaml.example       # Starting point for root config.yaml
 ├── .specify/
+│   ├── scripts/
+│   │   └── validate_config.py      # Config consistency checks
 │   └── memory/
 │       ├── constitution.md         # Immutable constitution template
 │       ├── SPEC.md                 # Initial specification template
@@ -108,6 +110,12 @@ Copy-Item constitution.yaml.example config.yaml
 Replace every example value with an approved decision from
 `docs/PRODUCT.md`. Validate every required field and ask the user about
 missing or ambiguous values before writing them.
+
+Check that related values have not drifted apart:
+
+```bash
+uv run --with pyyaml python .specify/scripts/validate_config.py config.yaml
+```
 
 ### WI-003: create the canonical SDD objects
 
