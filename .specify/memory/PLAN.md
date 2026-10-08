@@ -6,12 +6,28 @@ FR-001 is the only functional requirement. It is fulfilled by completing
 WI-001 through WI-006 in order. The project remains intentionally undefined
 until discovery produces `docs/PRODUCT.md`.
 
+### Acceptance criteria
+
+- **AC-FR001-01:** `docs/PRODUCT.md` contains the approved discovery package
+  and clearly identifies unresolved decisions.
+- **AC-FR001-02:** Root `config.yaml` contains only approved project values
+  traceable to `docs/PRODUCT.md` or an explicit user decision.
+- **AC-FR001-03:** Canonical `.sdd/` artifacts are created from the approved
+  configuration and synchronized with `docs/PRODUCT.md`.
+- **AC-FR001-04:** The approved project structure and non-programmatic
+  dependencies exist without implementing product source code.
+- **AC-FR001-05:** The selected development environment can be created and
+  its documented baseline checks pass without committed secrets.
+- **AC-FR001-06:** Environment initialization can reproduce the documented
+  setup from a clean checkout or reports actionable errors.
+
 ## Work items
 
 ### WI-001 — Run the discovery skill and create PRODUCT.md
 
 **Parent:** FR-001  
 **Depends on:** none
+**Acceptance criteria:** AC-FR001-01
 
 Run [`skills/tech-use-case-discovery/SKILL.md`](../../skills/tech-use-case-discovery/SKILL.md)
 through all six phases. Collect the user's problem definition, actors,
@@ -30,6 +46,7 @@ package, and unresolved decisions are clearly marked for user approval.
 
 **Parent:** FR-001  
 **Depends on:** WI-001
+**Acceptance criteria:** AC-FR001-02
 
 Create root `config.yaml` from `constitution.yaml.example` using only the
 approved decisions in `docs/PRODUCT.md`. For every missing value, ask a clear,
@@ -44,6 +61,7 @@ decision.
 
 **Parent:** FR-001  
 **Depends on:** WI-002
+**Acceptance criteria:** AC-FR001-03
 
 Use root `config.yaml` and the approved `docs/PRODUCT.md` decisions to create
 `.sdd/constitution.md` from the immutable `.specify/memory/constitution.md`
@@ -63,6 +81,7 @@ remaining user decisions explicitly.
 
 **Parent:** FR-001  
 **Depends on:** WI-003
+**Acceptance criteria:** AC-FR001-04
 
 Create the directories, configuration locations, documentation locations,
 environment templates, container metadata, and other non-programmatic
@@ -76,6 +95,7 @@ matches the approved constitution and PRODUCT definition.
 
 **Parent:** FR-001  
 **Depends on:** WI-004
+**Acceptance criteria:** AC-FR001-05
 
 Set up the development environment using the approach selected in
 `docs/PRODUCT.md`: devcontainer, Docker, host tooling, or an explicitly
@@ -89,6 +109,7 @@ baseline checks can run without committed secrets.
 
 **Parent:** FR-001  
 **Depends on:** WI-005
+**Acceptance criteria:** AC-FR001-06
 
 Create the automation needed to reproduce the environment setup from a clean
 checkout. Prefer `scripts/init.sh` when compatible with the approved

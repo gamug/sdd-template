@@ -26,7 +26,7 @@ REQUIRED_SECTIONS = [
 ]
 
 EARS_PATTERNS = [
-    re.compile(r"\b(?:the system|the backend|the service|the ui|the application)\b.*\bshall\b", re.IGNORECASE),
+    re.compile(r"\b(?:the|a|an)\s+[a-z][\w -]*?\s+shall\b", re.IGNORECASE),
     re.compile(r"\b(?:when|while|where|if)\b.*\bshall\b", re.IGNORECASE),
 ]
 MOSCOW_KEYWORDS = ["must have", "should have", "could have", "won't have"]
@@ -68,10 +68,12 @@ def analyze_content(content: str, filename: str):
         print("  [WARN] No FR-xxx requirement IDs found.")
         warnings.append("No FR-xxx requirement IDs found.")
 
-    requirement_lines = [
-        line for line in content.splitlines()
-        if re.search(r"\bFR-\d+\b", line, re.IGNORECASE)
-    ]
+    requirement_lines = []
+    for line in content.splitlines():
+        table_match = re.match(r"^\s*\|\s*`?(FR-\d+)`?\s*\|", line, re.IGNORECASE)
+        bullet_match = re.match(r"^\s*[-*]\s*`?(FR-\d+)`?\s*[:|-]", line, re.IGNORECASE)
+        if table_match or bullet_match:
+            requirement_lines.append(line)
     invalid_requirement_lines = [
         line for line in requirement_lines
         if not any(pattern.search(line) for pattern in EARS_PATTERNS)

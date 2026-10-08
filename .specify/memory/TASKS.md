@@ -10,6 +10,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-001
 - **Status:** pending
 - **Depends on:** none
+- **Acceptance criteria:** AC-FR001-01
 - **Action:** Run all six phases of `skills/tech-use-case-discovery/SKILL.md`.
 
 ### TASK-002 — Collect discovery outputs
@@ -17,6 +18,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-001
 - **Status:** pending
 - **Depends on:** TASK-001
+- **Acceptance criteria:** AC-FR001-01
 - **Action:** Assemble use cases, requirements, user stories, stack evaluation,
   ADRs, environment decisions, risks, and roadmap.
 
@@ -25,6 +27,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-001
 - **Status:** pending
 - **Depends on:** TASK-002
+- **Acceptance criteria:** AC-FR001-01
 - **Action:** Write `docs/PRODUCT.md`, mark unresolved decisions, and run the
   skill validation script against the discovery package.
 
@@ -35,6 +38,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-002
 - **Status:** pending
 - **Depends on:** TASK-003
+- **Acceptance criteria:** AC-FR001-02
 - **Action:** Copy `constitution.yaml.example` to root `config.yaml` and map
   only approved values from `docs/PRODUCT.md`.
 
@@ -43,6 +47,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-002
 - **Status:** pending
 - **Depends on:** TASK-004
+- **Acceptance criteria:** AC-FR001-02
 - **Action:** Ask context-rich questions for every missing or ambiguous value;
   do not guess or silently retain example values.
 
@@ -51,6 +56,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-002
 - **Status:** pending
 - **Depends on:** TASK-005
+- **Acceptance criteria:** AC-FR001-02
 - **Action:** Validate required fields in `config.yaml` and trace each non-obvious value to
   PRODUCT.md or an explicit user decision.
 
@@ -61,6 +67,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-003
 - **Status:** pending
 - **Depends on:** TASK-006
+- **Acceptance criteria:** AC-FR001-03
 - **Action:** Render `.sdd/constitution.md` from root `config.yaml` and the
   immutable `.specify/memory/constitution.md` template, asking clear
   questions instead of guessing pending inputs.
@@ -70,6 +77,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-003
 - **Status:** pending
 - **Depends on:** TASK-007
+- **Acceptance criteria:** AC-FR001-03
 - **Action:** Create or update `.sdd/SPEC.md`, `.sdd/PLAN.md`, `.sdd/TASKS.md`,
   and `.sdd/constitution.md` to match the approved PRODUCT.md definition and
   preserve traceability.
@@ -81,6 +89,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-004
 - **Status:** pending
 - **Depends on:** TASK-008
+- **Acceptance criteria:** AC-FR001-04
 - **Action:** Create approved folders, configuration locations, documentation
   paths, environment templates, and other non-programmatic dependencies.
 
@@ -89,6 +98,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-004
 - **Status:** pending
 - **Depends on:** TASK-009
+- **Acceptance criteria:** AC-FR001-04
 - **Action:** Check that the structure matches PRODUCT.md and constitution.md
   without adding application source code.
 
@@ -99,6 +109,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-005
 - **Status:** pending
 - **Depends on:** TASK-010
+- **Acceptance criteria:** AC-FR001-05
 - **Action:** Configure the approved devcontainer, Docker, host-only, or
   explicitly no-container environment.
 
@@ -107,6 +118,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-005
 - **Status:** pending
 - **Depends on:** TASK-011
+- **Acceptance criteria:** AC-FR001-05
 - **Action:** Create the environment and run the documented baseline checks
   without committing secrets.
 
@@ -117,6 +129,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-006
 - **Status:** pending
 - **Depends on:** TASK-012
+- **Acceptance criteria:** AC-FR001-06
 - **Action:** Create `scripts/init.sh` or the approved equivalent to reproduce
   the environment from a clean checkout.
 
@@ -125,5 +138,6 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Work Item:** WI-006
 - **Status:** pending
 - **Depends on:** TASK-013
+- **Acceptance criteria:** AC-FR001-06
 - **Action:** Re-run initialization, verify actionable failures, and document
   the recovery/reproduction procedure for contributors.
