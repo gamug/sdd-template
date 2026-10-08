@@ -95,7 +95,9 @@ The discovery process is executed in six sequential phases. For each phase, cons
 ### Phase 6: Feasibility, Risk Assessment & MVP Roadmap
 1. Assess technical, delivery, and organizational risks; define explicit mitigation strategies.
 2. Define the Minimum Viable Product (MVP) boundary and establish a phased project roadmap.
-3. **Output format**: Combine into the final Discovery Specification Package.
+3. **Output format**: Consolidate all approved discovery decisions into
+   `docs/PRODUCT.md`. Keep unresolved decisions clearly marked for user
+   approval.
 
 ---
 
@@ -104,14 +106,19 @@ The discovery process is executed in six sequential phases. For each phase, cons
 To ensure all discovery deliverables meet quality standards and completeness rules, run the bundled validation script:
 
 ```bash
-python scripts/validate_discovery.py path/to/discovery_package.md
+python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
 ```
 
 The script verifies:
-- Presence of required sections (Use Cases, Functional Requirements, Tech Stack, ADRs, Dev Environment, Risks).
+- Presence of required sections in `docs/PRODUCT.md` (Use Cases, Functional
+  Requirements, Tech Stack, ADRs, Dev Environment, Risks).
 - EARS syntax syntax compliance and unique Requirement IDs.
 - ADR completeness (Context, Decision, Trade-offs, Consequences).
 - MoSCoW priority distribution for the MVP.
+
+When validating from a directory, pass the project root or a directory that
+contains exactly one generated `PRODUCT.md`; bundled templates, references,
+and examples are not discovery output and are not aggregated.
 
 ---
 
