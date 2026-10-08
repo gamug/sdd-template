@@ -35,6 +35,20 @@ EARS_PATTERNS = [
 MOSCOW_KEYWORDS = ["must have", "should have", "could have", "won't have"]
 
 
+def get_sections(content: str):
+    headings = list(re.finditer(r"^(#{1,6})\s+(.+?)\s*$", content, re.MULTILINE))
+    sections = []
+    for index, heading in enumerate(headings):
+        level = len(heading.group(1))
+        end = len(content)
+        for next_heading in headings[index + 1:]:
+            if len(next_heading.group(1)) <= level:
+                end = next_heading.start()
+                break
+        sections.append((heading.group(2), content[heading.end():end]))
+    return sections
+
+
 def analyze_content(content: str, filename: str):
     print(f"\n==========================================")
     print(f" Validating Discovery Spec: {filename}")
@@ -45,14 +59,23 @@ def analyze_content(content: str, filename: str):
     passes = []
 
     content_lower = content.lower()
+    sections = get_sections(content)
 
     # 1. Check Mandatory Sections
     print("--- 1. Mandatory Section Coverage ---")
     for section_name, heading_pattern, identifier_pattern in REQUIRED_SECTIONS:
-        has_heading = re.search(heading_pattern, content, re.IGNORECASE | re.MULTILINE)
+        matching_sections = [
+            section_content
+            for heading, section_content in sections
+            if re.match(heading_pattern, f"# {heading}", re.IGNORECASE)
+        ]
+        has_heading = bool(matching_sections)
         has_identifier = (
             identifier_pattern is None
-            or re.search(identifier_pattern, content, re.IGNORECASE)
+            or any(
+                re.search(identifier_pattern, section_content, re.IGNORECASE)
+                for section_content in matching_sections
+            )
         )
         if has_heading and has_identifier:
             print(f"  [PASS] {section_name}")
@@ -93,22 +116,37 @@ def analyze_content(content: str, filename: str):
 
     # 3. Check ADR Completeness
     print("\n--- 3. Architecture Decision Records (ADR) Check ---")
-    adr_matches = re.findall(r"ADR-\d+", content, re.IGNORECASE)
-    if adr_matches:
-        print(f"  [PASS] Found {len(set(adr_matches))} unique ADR ID(s): {', '.join(sorted(set(adr_matches)))}")
-        has_context = "context" in content_lower
-        has_decision = "decision" in content_lower
-        has_consequences = "consequences" in content_lower or "trade-off" in content_lower or "pros" in content_lower
-        
-        if has_context and has_decision and has_consequences:
+    adr_sections = [
+        section_content
+        for heading, section_content in sections
+        if re.search(r"\bADR-\d+\b", heading, re.IGNORECASE)
+    ]
+    if adr_sections:
+        adr_ids = [
+            adr_id
+            for heading, _ in sections
+            for adr_id in re.findall(r"ADR-\d+", heading, re.IGNORECASE)
+        ]
+        print(f"  [PASS] Found {len(set(adr_ids))} unique ADR ID(s): {', '.join(sorted(set(adr_ids)))}")
+        incomplete_adrs = [
+            section_content
+            for section_content in adr_sections
+            if "context" not in section_content.lower()
+            or "decision" not in section_content.lower()
+            or not any(
+                marker in section_content.lower()
+                for marker in ("consequences", "trade-off", "pros")
+            )
+        ]
+        if not incomplete_adrs:
             print("  [PASS] ADR structural elements complete (Context, Decision, Consequences/Trade-offs).")
             passes.append("ADR structural elements complete")
         else:
-            print("  [WARN] Incomplete ADR structure. Ensure Context, Decision, and Consequences are documented.")
-            warnings.append("Incomplete ADR structure")
+            print("  [FAIL] One or more ADRs are missing Context, Decision, or Consequences/Trade-offs.")
+            issues.append("Incomplete ADR structure")
     else:
-        print("  [WARN] No ADR-xxx records detected.")
-        warnings.append("No ADR-xxx records detected.")
+        print("  [FAIL] No ADR-xxx records detected.")
+        issues.append("No ADR-xxx records detected")
 
     # 4. Check MoSCoW Prioritization
     print("\n--- 4. MoSCoW MVP Scoping Check ---")
