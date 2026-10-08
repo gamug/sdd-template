@@ -77,7 +77,8 @@ def analyze_content(content: str, filename: str):
                 for section_content in matching_sections
             )
         )
-        if has_heading and has_identifier:
+        has_content = any(section_content.strip() for section_content in matching_sections)
+        if has_heading and has_identifier and has_content:
             print(f"  [PASS] {section_name}")
             passes.append(f"Section present: {section_name}")
         else:
@@ -133,10 +134,8 @@ def analyze_content(content: str, filename: str):
             for section_content in adr_sections
             if "context" not in section_content.lower()
             or "decision" not in section_content.lower()
-            or not any(
-                marker in section_content.lower()
-                for marker in ("consequences", "trade-off", "pros")
-            )
+            or "consequences" not in section_content.lower()
+            or "trade-off" not in section_content.lower()
         ]
         if not incomplete_adrs:
             print("  [PASS] ADR structural elements complete (Context, Decision, Consequences/Trade-offs).")
