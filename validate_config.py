@@ -56,6 +56,9 @@ SOURCE_PATTERN = re.compile(r"^(?:PRODUCT\.md\s*§\s*\S.*|user,\s*\d{4}-\d{2}-\d
 
 NULL_VALUES = ("", "null", "~")
 ROW_SPLIT = re.compile(r"(?<!\\)\|")
+# Synthesized by the agent (TASK-006), so they can't be quoted from PRODUCT.md
+# and must be confirmed by the user.
+USER_CONFIRMED_KEYS = ("domain_sections",)
 
 SCALAR = "scalar"
 LIST = "list"
@@ -423,12 +426,12 @@ def strip_code(text: str) -> str:
 
 
 def product_sections(product: str):
-    """Return [(heading, text)] for every PRODUCT.md section except the decisions table."""
+    """Return [(heading, text)] for every PRODUCT.md section except the decisions table and approval."""
     headings = list(re.finditer(r"^(#{1,6})\s+(.+?)\s*$", product, re.MULTILINE))
     sections = []
     for index, heading in enumerate(headings):
         level, title = len(heading.group(1)), heading.group(2).strip()
-        if title == DECISIONS_HEADING:
+        if title == DECISIONS_HEADING or re.match(r"^(?:\d+\.\s*)?approval$", title, re.IGNORECASE):
             continue
         end = len(product)
         for following in headings[index + 1:]:
@@ -449,6 +452,27 @@ def cited_sections(product: str, reference: str):
         if heading == wanted or (number and number.group(1) == wanted) or (len(wanted) >= 3 and wanted in heading):
             matches.append(text)
     return matches
+
+
+def appears_in(value: str, text: str) -> bool:
+    """True when value occurs in text as a whole token, not inside a longer one.
+
+    "3.1" does not match "3.12.2" and "main" does not match "domain"; a value
+    may still end a sentence ("Python 3.12.").
+    """
+    pattern = rf"(?<![\w.]){re.escape(value.strip())}(?!\w|\.\w)"
+    return re.search(pattern, text, re.IGNORECASE) is not None
+
+
+def scalar_items(value):
+    if isinstance(value, dict):
+        for item in value.values():
+            yield from scalar_items(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from scalar_items(item)
+    elif isinstance(value, str) and not is_empty(value):
+        yield value
 
 
 def collection_text(value) -> str:
@@ -481,19 +505,26 @@ def check_decisions(config, required, product) -> list:
                 f"Invalid source for {key}: {source!r} "
                 "(use 'PRODUCT.md § <section>' or 'user, YYYY-MM-DD')"
             )
+        elif key in USER_CONFIRMED_KEYS and source.startswith("PRODUCT.md"):
+            issues.append(
+                f"Source for {key} must be 'user, YYYY-MM-DD': it is proposed from PRODUCT.md "
+                "and confirmed by the user, not quoted from it"
+            )
         elif source.startswith("PRODUCT.md"):
             reference = source.split("§", 1)[1]
             sections = cited_sections(product, reference)
             if not sections:
                 issues.append(f"Source for {key} cites a section PRODUCT.md does not have: {source!r}")
-            elif (
-                found and isinstance(value, str) and not is_empty(value)
-                and not any(value.lower() in text.lower() for text in sections)
-            ):
-                issues.append(
-                    f"Value of {key} ({value!r}) does not appear in the cited section {source!r}; "
-                    "if the user decided it, use 'user, YYYY-MM-DD'"
-                )
+            elif found:
+                unsupported = [
+                    item for item in scalar_items(value)
+                    if not any(appears_in(item, text) for text in sections)
+                ]
+                if unsupported:
+                    issues.append(
+                        f"Value of {key} ({', '.join(map(repr, unsupported))}) does not appear in "
+                        f"the cited section {source!r}; if the user decided it, use 'user, YYYY-MM-DD'"
+                    )
         if not found or is_empty(value):
             continue
         if isinstance(value, (list, dict)):
