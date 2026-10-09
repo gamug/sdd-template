@@ -3,7 +3,7 @@
 import os
 import unittest
 
-from fixtures import Project, read, write
+from fixtures import CONFIG_SCRIPT, TEMPLATE, Project, read, run, write
 import validate_config
 
 
@@ -206,6 +206,21 @@ class RenderTest(unittest.TestCase):
         result = project.run("render", "--verify")
         self.assertEqual(result.returncode, 1)
         self.assertIn("out of date", result.stdout)
+
+    def test_default_template_is_the_skills_memory_template(self):
+        # Run from a directory outside the skill, without --template.
+        project = Project(self)
+        project.write()
+        result = run(
+            CONFIG_SCRIPT,
+            "--config", project.config_path,
+            "--product", project.product_path,
+            "render",
+            cwd=project.dir,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertTrue(os.path.isfile(TEMPLATE))
+        self.assertTrue(os.path.isfile(os.path.join(project.dir, ".sdd", "constitution.md")))
 
 
 if __name__ == "__main__":

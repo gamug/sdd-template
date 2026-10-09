@@ -20,7 +20,7 @@ criterion it satisfies.
 **Depends on:** none  
 **Acceptance criteria:** AC-FR001-01
 
-Run [`skills/sdd-init/SKILL.md`](../../skills/sdd-init/SKILL.md)
+Run [`skills/sdd-init/SKILL.md`](../SKILL.md)
 through all six phases. Collect the user's problem definition, actors,
 workflows, requirements, user stories, stack evaluation, ADRs, environment and
 governance decisions, risks, and roadmap in `docs/PRODUCT.md`, built from the

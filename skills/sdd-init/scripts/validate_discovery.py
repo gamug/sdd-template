@@ -3,7 +3,7 @@
 Software Discovery Package Validator
 
 This script inspects a discovery specification Markdown file or directory
-to verify compliance with the Tech Use Case Discovery framework.
+to verify compliance with the SDD discovery framework.
 Checks for mandatory sections, requirement IDs (FR-001 is reserved for
 initialization), three-digit FR/UC/US/ADR/RSK IDs defined once, EARS syntax,
 ADR completeness, the risk matrix (Score = Impact x Probability, and a
