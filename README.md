@@ -308,6 +308,9 @@ Keep real environment files out of Git:
 
 ## Testing the template tooling
 
+The tests live outside the skill: the skill ships only what a project needs to
+start, while `tests/` and `.github/workflows/validators.yml` maintain this template.
+
 The tests live outside the skill on purpose: the skill is only the starting point
 of a project, and a fork carries no reference back to it. `tests/` and the
 template steps of `validators.yml` are this repository's maintenance files; WI-006
