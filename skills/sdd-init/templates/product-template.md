@@ -5,8 +5,7 @@
 > the first table column and use three digits (`UC-001`, `FR-002`, `US-001`,
 > `ADR-001`, `RSK-001`); `FR-001` is reserved for SDD initialization, and each
 > ID is defined once. Mark every open decision with a line containing
-> `UNRESOLVED:` and the question to ask. Validate the draft with
-> `python skills/sdd-init/scripts/validate_discovery.py --draft docs/PRODUCT.md`.
+> `UNRESOLVED:` and the question to ask.
 
 ## Application: [Project Name]
 
