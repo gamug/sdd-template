@@ -85,6 +85,20 @@ The complete definitions and dependencies are in
 task register is in [`.specify/memory/TASKS.md`](./.specify/memory/TASKS.md).
 Complete the tasks in dependency order.
 
+### Running the tooling
+
+`validate_config.py` needs the PyYAML version pinned in
+`skills/tech-use-case-discovery/scripts/requirements.txt`. Run it from the
+repository root as:
+
+```bash
+uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py <mode>
+```
+
+Everywhere else in this repository, `validate_config.py <mode>` (for example
+`validate_config.py check`) stands for this command. `validate_discovery.py`
+needs only the standard library and runs with plain `python`.
+
 ### WI-001: discover the use case
 
 Discovery always runs first. Run
@@ -104,7 +118,8 @@ with three-digit IDs (`UC-001`, `FR-002`, …). The skill must ask focused quest
 not invent missing product, technical, or operational decisions. Open
 decisions are marked `UNRESOLVED:` and must all be resolved with the user,
 who then approves the document in its `## Approval` section. The approval
-records who, when, and a hash of the approved content:
+records who, when it was first approved, when it was last approved, and a
+hash of the approved content:
 
 ```bash
 python skills/tech-use-case-discovery/scripts/validate_discovery.py --hash docs/PRODUCT.md
@@ -114,6 +129,9 @@ python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT
 `validate_config.py` refuses to run until this passes. Editing
 `docs/PRODUCT.md` after approval, outside the Approval and Configuration
 Decisions sections, invalidates the approval until the user approves again.
+A re-approval updates `Approved on` and the hash but keeps
+`First approved on`, so configuration decisions recorded since the first
+approval stay valid.
 
 ### WI-002: create the configuration
 
@@ -121,7 +139,7 @@ The constitution template is generic. Every placeholder it contains is a
 decision the project must make. Generate the root configuration skeleton:
 
 ```bash
-uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py scaffold
+validate_config.py scaffold
 ```
 
 This writes `config.yaml`, with the PRODUCT.md section each key usually comes
@@ -143,11 +161,12 @@ from, and appends a `Configuration Decisions` table (key, value, source) to
    `user, YYYY-MM-DD`.
 
 ```bash
-uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check
+validate_config.py check
 ```
 
 The check fails on missing or empty keys, sources that are malformed or cite
-a section that doesn't contain the value, recorded values (including
+a section that doesn't contain the value, `user` dates that are invalid, in
+the future, or earlier than PRODUCT.md's `First approved on`, recorded values (including
 collections) that differ from `config.yaml`, and malformed table rows. A cited
 section must have no subsections, and the Approval and Configuration Decisions
 sections are never evidence.
@@ -157,7 +176,7 @@ unchanged.
 ### WI-003: render the constitution and create the SDD objects
 
 ```bash
-uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render
+validate_config.py render
 ```
 
 `render` re-runs `check`, then writes `.sdd/constitution.md` and fails on any
@@ -312,8 +331,8 @@ change, so these artifacts cannot drift silently:
 
 ```bash
 python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
-uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check
-uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render --verify
+validate_config.py check
+validate_config.py render --verify
 ```
 
 Every production code commit must use Conventional Commits and include the

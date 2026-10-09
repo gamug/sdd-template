@@ -53,8 +53,8 @@ from then on.
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Ask the user about every `UNRESOLVED:` item and update
   `docs/PRODUCT.md`. Present the document for approval and record it in its
-  `## Approval` section (`Approved by:`, `Approved on: YYYY-MM-DD`, and
-  `Approved content:` with the hash printed by `validate_discovery.py --hash
+  `## Approval` section (`Approved by:`, `First approved on: YYYY-MM-DD`,
+  `Approved on: YYYY-MM-DD`, and `Approved content:` with the hash printed by `validate_discovery.py --hash
   docs/PRODUCT.md` once the user has approved). Run the validator without
   `--draft`; it must pass. Any later edit outside the Approval and
   Configuration Decisions sections invalidates the approval until the user
@@ -69,7 +69,7 @@ from then on.
 - **Status:** pending
 - **Depends on:** TASK-004
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** Run `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py scaffold`. It writes the `config.yaml` skeleton,
+- **Action:** Run `validate_config.py scaffold`. It writes the `config.yaml` skeleton,
   with the PRODUCT.md section each key usually comes from, and appends the
   `Configuration Decisions` table to `docs/PRODUCT.md`. Fill only values that
   `docs/PRODUCT.md` states explicitly, and record each one in the table with
@@ -114,7 +114,7 @@ from then on.
 - **Status:** pending
 - **Depends on:** TASK-007
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** Run `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check`. It fails on missing or empty keys, keys
+- **Action:** Run `validate_config.py check`. It fails on missing or empty keys, keys
   without a valid recorded source, and recorded values that differ from
   `config.yaml`. Return to TASK-007 for every reported key.
 
@@ -126,7 +126,7 @@ from then on.
 - **Status:** pending
 - **Depends on:** TASK-008
 - **Acceptance criteria:** AC-FR001-03
-- **Action:** Run `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render` to create `.sdd/constitution.md` from root
+- **Action:** Run `validate_config.py render` to create `.sdd/constitution.md` from root
   `config.yaml` and the immutable `.specify/memory/constitution.md`. Rendering
   re-runs `check` and fails on any missing value or leftover placeholder. Do
   not edit the rendered file by hand; re-run `render` after any
@@ -144,7 +144,7 @@ from then on.
   requirement and add the product requirements from `docs/PRODUCT.md`, which
   are numbered from `FR-002`. Carry this task register into `.sdd/TASKS.md`
   with TASK-001 through TASK-009 marked done; status is tracked there from now
-  on. Finish with `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`.
+  on. Finish with `validate_config.py render --verify`.
 
 ## WI-004 — Create folders and non-programmatic dependencies
 
@@ -201,8 +201,8 @@ from then on.
   template sample and test steps, so `docs/PRODUCT.md`, `config.yaml`, and
   `.sdd/constitution.md` cannot drift after initialization:
   - `python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md`
-  - `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check`
-  - `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`
+  - `validate_config.py check`
+  - `validate_config.py render --verify`
 
   Show that a hand edit to `.sdd/constitution.md` fails the hook.
 
