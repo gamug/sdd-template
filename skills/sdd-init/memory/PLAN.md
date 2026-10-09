@@ -124,15 +124,14 @@ baseline checks can run without committed secrets.
 Create the automation needed to reproduce the environment setup from a clean
 checkout. Prefer `scripts/init.sh` when compatible with the approved
 environment; otherwise use the project-appropriate equivalent and document why.
-Add the initialization checks (`validate_discovery.py`, `validate_config.py
-check`, and `validate_config.py render --verify`) to the fork's pre-commit
-hook and as steps in `.github/workflows/validators.yml`, so the rendered
-constitution stays in sync after WI-003.
+Configure the fork's pre-commit hook and `.github/workflows/validators.yml`
+with the project's own quality gates. The discovery and configuration
+validators serve initialization only and are not part of them.
 
 **Exit criteria:** Re-running the initialization automation produces the
 documented environment or reports actionable errors, the procedure is
-documented for contributors, and pre-commit and CI fail when
-`docs/PRODUCT.md`, `config.yaml`, or `.sdd/constitution.md` drift.
+documented for contributors, and the pre-commit hook and CI run the project's
+quality gates.
 
 ## Planning rules
 

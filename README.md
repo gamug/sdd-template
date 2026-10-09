@@ -256,15 +256,9 @@ After initialization, every product change follows this cycle:
    content of `docs/PRODUCT.md` needs the user's re-approval.
 7. Move completed work to `.sdd/CHANGELOG.md`.
 
-The pre-commit hook and the steps WI-006 adds to
-`.github/workflows/validators.yml` run the initialization checks on every
-change, so these artifacts cannot drift silently:
-
-```bash
-python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
-validate_config.py check
-validate_config.py render --verify
-```
+The validators, the template tests and the sample check prepare the repository;
+the pre-commit hook and CI that WI-006 configures run the project's own quality
+gates, not the skill's.
 
 Every production code commit must use Conventional Commits and include the
 traceability suffix required by the constitution:

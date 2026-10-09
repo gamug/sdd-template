@@ -5,9 +5,8 @@ on:
   push:
     branches: [master]
 
-# Forks keep these steps and add their initialization checks (TASK-015):
-# validate_discovery.py docs/PRODUCT.md, validate_config.py check, and
-# validate_config.py render --verify.
+# Template maintenance: validates the bundled sample and runs the validator
+# tests. A fork replaces these steps with its project's quality gates.
 jobs:
   test:
     runs-on: ubuntu-latest
