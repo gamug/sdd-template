@@ -138,70 +138,21 @@ approval stay valid.
 
 ### WI-002: create the configuration
 
-The constitution template is generic. Every placeholder it contains is a
-decision the project must make. Generate the root configuration skeleton:
-
-```bash
-validate_config.py scaffold
-```
-
-This writes `config.yaml`, with the PRODUCT.md section each key usually comes
-from, and appends a `Configuration Decisions` table (key, value, source) to
-`docs/PRODUCT.md`. Then:
-
-1. Fill the values `docs/PRODUCT.md` states, with source
-   `PRODUCT.md § <section>`. The cited section must exist and contain the
-   value (every item, for lists and maps) as a whole token. Lists and maps
-   are recorded as compact JSON, and `|` in a value is escaped as `\|`.
-2. Define the project's domain sections (`domain_sections`: a `title` and
-   `rules` each), such as models, services, storage, or evaluation, from the
-   use cases, requirements, and ADRs, and confirm them with the user. Their
-   source is always `user, YYYY-MM-DD`.
-3. Ask the user for every other value, including the coding-agent instruction
-   file (for example `CLAUDE.md`, `AGENTS.md`, or
-   `.github/copilot-instructions.md`). Values PRODUCT.md only implies are
-   proposed and confirmed, never written silently. Record answers with source
-   `user, YYYY-MM-DD`.
-
-```bash
-validate_config.py check
-```
-
-The check fails on missing or empty keys, sources that are malformed or cite
-a section that doesn't contain the value, `user` dates that are invalid, in
-the future, or earlier than PRODUCT.md's `First approved on`, recorded values (including
-collections) that differ from `config.yaml`, and malformed table rows. A cited
-section must have no subsections, and the Approval and Configuration Decisions
-sections are never evidence.
-Values are read as written, so dates and versions such as `1.10` render
-unchanged.
+Every placeholder in the constitution template is a decision the project must
+make. The skill's [Initialization Workflow](./skills/sdd-init/SKILL.md#wi-002-create-the-configuration)
+walks through `validate_config.py scaffold` and `check`: it builds root
+`config.yaml` and the `Configuration Decisions` table in `docs/PRODUCT.md`,
+recording the source of every value (`PRODUCT.md § <section>` or
+`user, YYYY-MM-DD`). Values PRODUCT.md only implies are proposed and
+confirmed with the user, never written silently.
 
 ### WI-003: render the constitution and create the SDD objects
 
-```bash
-validate_config.py render
-```
-
-`render` re-runs `check`, then writes `.sdd/constitution.md` and fails on any
-leftover placeholder. Never edit the rendered file by hand. After any
-`config.yaml` change, update its `Configuration Decisions` row and render
-again; `render --verify` fails when the file is out of date.
-
-Then create the remaining canonical objects from `docs/PRODUCT.md`:
-
-```text
-.sdd/SPEC.md
-.sdd/PLAN.md
-.sdd/TASKS.md
-.sdd/CHANGELOG.md
-```
-
-Preserve the `FR > WI > Task` hierarchy and acceptance-criteria traceability.
-`FR-001` stays the initialization requirement, and product requirements are
-numbered from `FR-002` (discovery rejects an `FR-001` row in `docs/PRODUCT.md`).
-Do not modify the template inputs in `skills/sdd-init/memory/`: task status is not
-tracked before this step, and `.sdd/TASKS.md` starts tracking it with the
-completed initialization tasks marked done.
+`validate_config.py render` writes `.sdd/constitution.md` (never edit it by
+hand; `render --verify` fails when it is out of date). The remaining objects,
+`.sdd/SPEC.md`, `.sdd/PLAN.md`, `.sdd/TASKS.md` and `.sdd/CHANGELOG.md`, are
+created from `docs/PRODUCT.md`. Details are in the skill's
+[Initialization Workflow](./skills/sdd-init/SKILL.md#wi-003-render-the-constitution-and-create-the-sdd-objects).
 
 ### WI-004 through WI-006: prepare and reproduce the environment
 

@@ -20,7 +20,7 @@ criterion it satisfies.
 **Depends on:** none  
 **Acceptance criteria:** AC-FR001-01
 
-Run [`skills/sdd-init/SKILL.md`](../../skills/sdd-init/SKILL.md)
+Run [`SKILL.md`](../SKILL.md)
 through all six phases. Collect the user's problem definition, actors,
 workflows, requirements, user stories, stack evaluation, ADRs, environment and
 governance decisions, risks, and roadmap in `docs/PRODUCT.md`, built from the
@@ -44,7 +44,7 @@ approved content in its `## Approval` section, and
 **Acceptance criteria:** AC-FR001-02
 
 Build root `config.yaml` from scratch with `validate_config.py scaffold`, which lists
-every key required by the generic `skills/sdd-init/memory/constitution.md` template
+every key required by the generic `$SKILL_DIR/memory/constitution.md` template
 and the PRODUCT.md section each one usually comes from.
 
 1. Fill values that `docs/PRODUCT.md` states explicitly, with source
@@ -71,7 +71,7 @@ source matching its value.
 **Acceptance criteria:** AC-FR001-03
 
 Render `.sdd/constitution.md` from root `config.yaml` and the immutable
-`skills/sdd-init/memory/constitution.md` template with `validate_config.py render`. Rendering
+`$SKILL_DIR/memory/constitution.md` template with `validate_config.py render`. Rendering
 re-runs `check` and fails on any missing value or leftover placeholder; no
 questions are asked in this WI. The rendered file is never edited by hand:
 any later `config.yaml` change updates its `Configuration Decisions` row and

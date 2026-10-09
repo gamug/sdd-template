@@ -22,7 +22,7 @@ import validate_config  # noqa: E402
 
 CONFIG_SCRIPT = os.path.join(SCRIPTS, "validate_config.py")
 DISCOVERY_SCRIPT = os.path.join(SCRIPTS, "validate_discovery.py")
-TEMPLATE = os.path.join(ROOT, validate_config.DEFAULT_TEMPLATE)
+TEMPLATE = os.path.normpath(validate_config.DEFAULT_TEMPLATE)
 SAMPLE = os.path.join(ROOT, "skills", "sdd-init", "examples", "sample-discovery-output.md")
 TEMPLATES = os.path.join(ROOT, "skills", "sdd-init", "templates")
 PRODUCT_TEMPLATE = os.path.join(TEMPLATES, "product-template.md")
