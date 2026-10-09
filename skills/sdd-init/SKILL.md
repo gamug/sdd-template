@@ -1,11 +1,11 @@
 ---
 name: sdd-init
-description: Initializes a Specification-Driven Development project end to end. Guides users through the software development discovery phase, then builds config.yaml, renders the constitution and creates the SDD objects and environment. Assists in defining use cases, functional requirements, technology stack selection, Architecture Decision Records (ADRs), development environment setup, and risk/roadmap planning. Use when taking a project idea from concept to a complete technical specification.
+description: Initializes a Specification-Driven Development project end to end. Runs the six-phase discovery (use cases, requirements, stack selection, ADRs, environment, risks and roadmap) to produce an approved docs/PRODUCT.md, then builds config.yaml, renders the constitution, creates the SDD objects and sets up a reproducible environment. Use when taking a project idea from concept to an initialized, specification-driven repository.
 ---
 
 # SDD Initialization Skill
 
-This Skill provides a structured, interactive workflow to guide users through the entire software discovery phase. It transforms an initial application idea into a build-ready technical specification package, preventing scope creep, technical debt, and architectural misalignment.
+This Skill initializes a project end to end. Its discovery workflow (Phases 1-6 below, WI-001) transforms an initial application idea into an approved technical specification package, preventing scope creep, technical debt, and architectural misalignment. Its initialization workflow (WI-002 to WI-006, further below) then turns that package into `config.yaml`, a rendered constitution, the SDD objects, and a reproducible environment.
 
 ---
 
@@ -130,24 +130,112 @@ This skill is the whole initialization procedure. The immutable template
 inputs live in [`memory/`](memory/): `constitution.md`, `SPEC.md`, `PLAN.md`,
 `TASKS.md`, and `CHANGELOG.md`. Read them first; do not modify them.
 
-1. Execute the tasks in `memory/TASKS.md` in dependency order, starting with
-   TASK-001 under WI-001. `memory/PLAN.md` defines FR-001 and its six Work
-   Items. Do not skip tasks, invent unresolved decisions, or implement
-   application code before the plan allows it.
-2. WI-001 is the six discovery phases above and ends with the approved
-   `docs/PRODUCT.md`.
-3. WI-002 to WI-006 use `scripts/validate_config.py`: `scaffold` and `check`
-   build root `config.yaml` and the Configuration Decisions table, and
-   `render` writes `.sdd/constitution.md`. Then create `.sdd/SPEC.md`,
-   `.sdd/PLAN.md`, `.sdd/TASKS.md` and `.sdd/CHANGELOG.md`, the project
-   folders, the environment, and `scripts/init.sh`.
-4. After each task: from WI-003 on, update the task and Work Item status in
-   `.sdd/TASKS.md` (before that, report progress in the handoff); record
-   decisions in the required SDD artifact; run the relevant validation; and
-   report what changed and what evidence was produced.
-5. When information is missing, stop and ask one clear question that explains
-   the decision, its impact, and the acceptable answers. Continue only after
-   the user resolves it.
+### Rules
+
+- Execute the tasks in `memory/TASKS.md` in dependency order, starting with
+  TASK-001 under WI-001. `memory/PLAN.md` defines FR-001 and its six Work
+  Items. Do not skip tasks, invent unresolved decisions, or implement
+  application code before the plan allows it.
+- The hierarchy is strict: `FR > WI > Task`. Every Work Item belongs to a
+  functional requirement and every task to exactly one Work Item. `FR-001` is
+  reserved for initialization; product requirements start at `FR-002`.
+- After each task: from WI-003 on, update the task and Work Item status in
+  `.sdd/TASKS.md` (before that, report progress in the handoff); record
+  decisions in the required SDD artifact; run the relevant validation; and
+  report what changed and what evidence was produced.
+- When information is missing, stop and ask one clear question that explains
+  the decision, its impact, and the acceptable answers. Continue only after
+  the user resolves it.
+
+### Running the tooling
+
+Commands are written for a project root that contains this skill at
+`skills/sdd-init/`; if the skill is installed elsewhere, substitute its path.
+`validate_discovery.py` needs only the standard library and runs with plain
+`python`. `validate_config.py` needs the PyYAML version pinned in
+`scripts/requirements.txt`:
+
+```bash
+uv run --with-requirements skills/sdd-init/scripts/requirements.txt python skills/sdd-init/scripts/validate_config.py <mode>
+```
+
+Below, `validate_config.py <mode>` stands for this command, run from the
+project root.
+
+### WI-002: create the configuration
+
+The constitution template is generic. Every placeholder it contains is a
+decision the project must make. Generate the root configuration skeleton:
+
+```bash
+validate_config.py scaffold
+```
+
+This writes `config.yaml`, with the PRODUCT.md section each key usually comes
+from, and appends a `Configuration Decisions` table (key, value, source) to
+`docs/PRODUCT.md`. Then:
+
+1. Fill the values `docs/PRODUCT.md` states, with source
+   `PRODUCT.md § <section>`. The cited section must exist and contain the
+   value (every item, for lists and maps) as a whole token. Lists and maps
+   are recorded as compact JSON, and `|` in a value is escaped as `\|`.
+2. Define the project's domain sections (`domain_sections`: a `title` and
+   `rules` each), such as models, services, storage, or evaluation, from the
+   use cases, requirements, and ADRs, and confirm them with the user. Their
+   source is always `user, YYYY-MM-DD`.
+3. Ask the user for every other value, including the coding-agent instruction
+   file (for example `CLAUDE.md`, `AGENTS.md`, or
+   `.github/copilot-instructions.md`). Values PRODUCT.md only implies are
+   proposed and confirmed, never written silently. Record answers with source
+   `user, YYYY-MM-DD`.
+
+```bash
+validate_config.py check
+```
+
+The check fails on missing or empty keys, sources that are malformed or cite
+a section that doesn't contain the value, `user` dates that are invalid, in
+the future, or earlier than PRODUCT.md's `First approved on`, recorded values (including
+collections) that differ from `config.yaml`, and malformed table rows. A cited
+section must have no subsections, and the Approval and Configuration Decisions
+sections are never evidence.
+Values are read as written, so dates and versions such as `1.10` render
+unchanged.
+
+### WI-003: render the constitution and create the SDD objects
+
+```bash
+validate_config.py render
+```
+
+`render` re-runs `check`, then writes `.sdd/constitution.md` and fails on any
+leftover placeholder. Never edit the rendered file by hand. After any
+`config.yaml` change, update its `Configuration Decisions` row and render
+again; `render --verify` fails when the file is out of date.
+
+Then create the remaining canonical objects from `docs/PRODUCT.md`:
+
+```text
+.sdd/SPEC.md
+.sdd/PLAN.md
+.sdd/TASKS.md
+.sdd/CHANGELOG.md
+```
+
+Preserve the hierarchy above and acceptance-criteria traceability.
+`FR-001` stays the initialization requirement, and product requirements are
+numbered from `FR-002` (discovery rejects an `FR-001` row in `docs/PRODUCT.md`).
+Do not modify the template inputs in `skills/sdd-init/memory/`: task status is not
+tracked before this step, and `.sdd/TASKS.md` starts tracking it with the
+completed initialization tasks marked done.
+
+### WI-004 through WI-006: prepare and reproduce the environment
+
+Create the approved folders and non-programmatic dependencies in WI-004. Set
+up the approved devcontainer, Docker, host-only, or no-container environment
+in WI-005. In WI-006, create `scripts/init.sh` or the approved equivalent so
+the environment can be reproduced from a clean checkout, and add the
+initialization checks to the fork's pre-commit hook and CI.
 
 ---
 
