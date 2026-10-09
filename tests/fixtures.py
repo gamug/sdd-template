@@ -15,7 +15,7 @@ import sys
 import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SCRIPTS = os.path.join(ROOT, "skills", "tech-use-case-discovery", "scripts")
+SCRIPTS = os.path.join(ROOT, "skills", "sdd-init", "scripts")
 sys.path.insert(0, SCRIPTS)
 
 import validate_config  # noqa: E402
@@ -23,8 +23,8 @@ import validate_config  # noqa: E402
 CONFIG_SCRIPT = os.path.join(SCRIPTS, "validate_config.py")
 DISCOVERY_SCRIPT = os.path.join(SCRIPTS, "validate_discovery.py")
 TEMPLATE = os.path.join(ROOT, validate_config.DEFAULT_TEMPLATE)
-SAMPLE = os.path.join(ROOT, "skills", "tech-use-case-discovery", "examples", "sample-discovery-output.md")
-TEMPLATES = os.path.join(ROOT, "skills", "tech-use-case-discovery", "templates")
+SAMPLE = os.path.join(ROOT, "skills", "sdd-init", "examples", "sample-discovery-output.md")
+TEMPLATES = os.path.join(ROOT, "skills", "sdd-init", "templates")
 PRODUCT_TEMPLATE = os.path.join(TEMPLATES, "product-template.md")
 FRAGMENTS = (
     "use-case-template.md", "prd-user-stories-template.md", "tech-stack-evaluation-matrix.md",

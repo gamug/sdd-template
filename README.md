@@ -38,17 +38,16 @@ The template is based on these principles:
 
 ```text
 .
-├── .specify/
-│   └── memory/
-│       ├── constitution.md         # Immutable constitution template
-│       ├── SPEC.md                 # Initial specification template
-│       ├── PLAN.md                 # Initial FR/WI plan
-│       ├── TASKS.md                # Initial task register
-│       └── CHANGELOG.md            # Changelog usage placeholder
 ├── skills/
-│   └── tech-use-case-discovery/    # Required discovery workflow
-│       ├── SKILL.md                # Six-phase discovery workflow
-│       ├── references/             # One guide per phase
+│   └── sdd-init/                   # The whole template: one skill
+│       ├── SKILL.md                # Discovery (phases 1-6) and initialization (WI-002..006)
+│       ├── memory/                 # Immutable template inputs
+│       │   ├── constitution.md     # Constitution template
+│       │   ├── SPEC.md             # Initial specification template
+│       │   ├── PLAN.md             # Initial FR/WI plan
+│       │   ├── TASKS.md            # Initial task register
+│       │   └── CHANGELOG.md        # Changelog usage placeholder
+│       ├── references/             # One guide per discovery phase
 │       ├── templates/              # product-template.md and per-phase fragments
 │       ├── examples/               # Approved sample discovery package
 │       └── scripts/                # validate_discovery.py, validate_config.py, requirements.txt
@@ -64,7 +63,7 @@ The constitution template uses `{{key}}` placeholders for scalar values,
 content, and `{{!-- --}}` comments. `validate_config.py render` implements this
 subset and fails when a required value is missing.
 
-The files under [`.specify/memory/`](./.specify/memory/) are immutable template
+The files under [`skills/sdd-init/memory/`](./skills/sdd-init/memory/) are immutable template
 inputs. After discovery, root `config.yaml` becomes the authoritative
 normalized configuration. WI-003 creates the canonical project artifacts
 under `.sdd/`.
@@ -85,18 +84,18 @@ FR-001 — Discover and initialize the project
 ```
 
 The complete definitions and dependencies are in
-[`.specify/memory/PLAN.md`](./.specify/memory/PLAN.md), and the executable
-task register is in [`.specify/memory/TASKS.md`](./.specify/memory/TASKS.md).
+[`skills/sdd-init/memory/PLAN.md`](./skills/sdd-init/memory/PLAN.md), and the executable
+task register is in [`skills/sdd-init/memory/TASKS.md`](./skills/sdd-init/memory/TASKS.md).
 Complete the tasks in dependency order.
 
 ### Running the tooling
 
 `validate_config.py` needs the PyYAML version pinned in
-`skills/tech-use-case-discovery/scripts/requirements.txt`. Run it from the
+`skills/sdd-init/scripts/requirements.txt`. Run it from the
 repository root as:
 
 ```bash
-uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py <mode>
+uv run --with-requirements skills/sdd-init/scripts/requirements.txt python skills/sdd-init/scripts/validate_config.py <mode>
 ```
 
 Everywhere else in this repository, `validate_config.py <mode>` (for example
@@ -106,7 +105,7 @@ needs only the standard library and runs with plain `python`.
 ### WI-001: discover the use case
 
 Discovery always runs first. Run
-[`skills/tech-use-case-discovery/SKILL.md`](./skills/tech-use-case-discovery/SKILL.md)
+[`skills/sdd-init/SKILL.md`](./skills/sdd-init/SKILL.md)
 through all six phases. The skill guides the user through:
 
 - use-case definition and stakeholders;
@@ -117,7 +116,7 @@ through all six phases. The skill guides the user through:
 - risks, validation, and roadmap.
 
 The output is `docs/PRODUCT.md`, built from the skill's
-[`product-template.md`](./skills/tech-use-case-discovery/templates/product-template.md)
+[`product-template.md`](./skills/sdd-init/templates/product-template.md)
 with three-digit IDs (`UC-001`, `FR-002`, …). The skill must ask focused questions and must
 not invent missing product, technical, or operational decisions. Open
 decisions are marked `UNRESOLVED:` and must all be resolved with the user,
@@ -126,8 +125,8 @@ records who, when it was first approved, when it was last approved, and a
 hash of the approved content:
 
 ```bash
-python skills/tech-use-case-discovery/scripts/validate_discovery.py --hash docs/PRODUCT.md
-python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
+python skills/sdd-init/scripts/validate_discovery.py --hash docs/PRODUCT.md
+python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
 ```
 
 `validate_config.py` refuses to run until this passes. Editing
@@ -200,7 +199,7 @@ Then create the remaining canonical objects from `docs/PRODUCT.md`:
 Preserve the `FR > WI > Task` hierarchy and acceptance-criteria traceability.
 `FR-001` stays the initialization requirement, and product requirements are
 numbered from `FR-002` (discovery rejects an `FR-001` row in `docs/PRODUCT.md`).
-Do not modify the template inputs in `.specify/memory/`: task status is not
+Do not modify the template inputs in `skills/sdd-init/memory/`: task status is not
 tracked before this step, and `.sdd/TASKS.md` starts tracking it with the
 completed initialization tasks marked done.
 
@@ -242,7 +241,7 @@ Before starting the agent, prepare:
 6. Python 3.10 or later and [`uv`](https://docs.astral.sh/uv/) on the host.
    The initialization tooling (`validate_discovery.py` and
    `validate_config.py`, which needs the PyYAML version pinned in
-   `skills/tech-use-case-discovery/scripts/requirements.txt`, installed by
+   `skills/sdd-init/scripts/requirements.txt`, installed by
    `uv run --with-requirements`) runs in WI-001 to WI-003, before the
    project's own environment exists.
 
@@ -259,35 +258,12 @@ initial SDD plan. Use the equivalent action command or task instruction for
 the selected framework:
 
 ```text
-Act as the implementation agent for this SDD repository.
-
-Read README.md, .specify/memory/constitution.md,
-.specify/memory/SPEC.md, .specify/memory/PLAN.md,
-.specify/memory/TASKS.md, and the skills available under skills/.
-
-Start the development described in .specify/memory/PLAN.md. Execute the
-tasks in .specify/memory/TASKS.md in dependency order, beginning with TASK-001
-under WI-001. Run the tech-use-case-discovery skill and produce docs/PRODUCT.md
-from its product template before proceeding to WI-002. Do not skip tasks, invent unresolved decisions,
-or implement application code before the plan allows it.
-
-After each task:
-- from WI-003 on, update the task and Work Item status in .sdd/TASKS.md;
-  before that, report progress in your handoff (status is not tracked
-  before WI-003);
-- record decisions and outputs in the required SDD artifact;
-- run the relevant validation;
-- report what changed and what evidence was produced.
-
-When required information is missing, stop and ask one clear, context-rich
-question explaining the decision, its impact, and the acceptable answers.
-Continue only after the user resolves it. Preserve the FR > WI > Task
-hierarchy and do not modify the immutable .specify/memory/ templates.
+Use the sdd-init skill (skills/sdd-init/SKILL.md) to initialize this project.
 ```
 
 The text above is an execution instruction, not a brainstorming prompt. The
-skill, [`.specify/memory/PLAN.md`](./.specify/memory/PLAN.md), and
-[`.specify/memory/TASKS.md`](./.specify/memory/TASKS.md) contain the workflow
+skill, [`skills/sdd-init/memory/PLAN.md`](./skills/sdd-init/memory/PLAN.md), and
+[`skills/sdd-init/memory/TASKS.md`](./skills/sdd-init/memory/TASKS.md) contain the workflow
 the agent must follow.
 
 ### Agent initialization responsibilities
@@ -295,10 +271,10 @@ the agent must follow.
 The agent must:
 
 1. Execute WI-001 and use
-   [`skills/tech-use-case-discovery/SKILL.md`](./skills/tech-use-case-discovery/SKILL.md)
+   [`skills/sdd-init/SKILL.md`](./skills/sdd-init/SKILL.md)
    to create `docs/PRODUCT.md`.
 2. Execute WI-002 to build root `config.yaml` with
-   [`validate_config.py`](./skills/tech-use-case-discovery/scripts/validate_config.py), recording the source of every
+   [`validate_config.py`](./skills/sdd-init/scripts/validate_config.py), recording the source of every
    value (`docs/PRODUCT.md` or an explicit user decision).
 3. Execute WI-003 to render `.sdd/constitution.md` with
    `validate_config.py render` and create `.sdd/SPEC.md`, `.sdd/PLAN.md`,
@@ -334,7 +310,7 @@ The pre-commit hook and the steps WI-006 adds to
 change, so these artifacts cannot drift silently:
 
 ```bash
-python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
+python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
 validate_config.py check
 validate_config.py render --verify
 ```
@@ -385,7 +361,7 @@ which `.github/workflows/validators.yml` runs on Python 3.10 and the latest
 Python for every pull request:
 
 ```bash
-uv run --no-project --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python -m unittest discover -s tests
+uv run --no-project --with-requirements skills/sdd-init/scripts/requirements.txt python -m unittest discover -s tests
 ```
 
 ## License and ownership

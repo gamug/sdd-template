@@ -16,7 +16,7 @@ from then on.
 - **Status:** pending
 - **Depends on:** none
 - **Acceptance criteria:** AC-FR001-01
-- **Action:** Run all six phases of `skills/tech-use-case-discovery/SKILL.md`,
+- **Action:** Run all six phases of `skills/sdd-init/SKILL.md`,
   including the Governance & Workflow checklist. Nothing else in FR-001 may
   start before this task.
 
@@ -36,12 +36,12 @@ from then on.
 - **Depends on:** TASK-002
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Write `docs/PRODUCT.md` from
-  `skills/tech-use-case-discovery/templates/product-template.md`, filling each
+  `skills/sdd-init/templates/product-template.md`, filling each
   numbered section from its phase fragment. Use three-digit IDs, each defined
   once and every reference resolving; give each FR an EARS pattern that matches
   its statement and one MoSCoW priority; score risks as Impact × Probability.
   Mark every open decision with `UNRESOLVED:`, and run
-  `python skills/tech-use-case-discovery/scripts/validate_discovery.py --draft docs/PRODUCT.md`
+  `python skills/sdd-init/scripts/validate_discovery.py --draft docs/PRODUCT.md`
   until it passes. Draft mode lists the template placeholders still to
   replace; approval fails while any remain.
 
@@ -127,7 +127,7 @@ from then on.
 - **Depends on:** TASK-008
 - **Acceptance criteria:** AC-FR001-03
 - **Action:** Run `validate_config.py render` to create `.sdd/constitution.md` from root
-  `config.yaml` and the immutable `.specify/memory/constitution.md`. Rendering
+  `config.yaml` and the immutable `skills/sdd-init/memory/constitution.md`. Rendering
   re-runs `check` and fails on any missing value or leftover placeholder. Do
   not edit the rendered file by hand; re-run `render` after any
   `config.yaml` change.
@@ -201,7 +201,7 @@ from then on.
   `.github/workflows/validators.yml`, keeping its template sample and test
   steps, so `docs/PRODUCT.md`, `config.yaml`, and `.sdd/constitution.md`
   cannot drift after initialization:
-  - `python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md`
+  - `python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md`
   - `validate_config.py check`
   - `validate_config.py render --verify`
 

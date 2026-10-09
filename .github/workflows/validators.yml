@@ -26,6 +26,6 @@ jobs:
       # Run the documented commands with the matrix interpreter.
       - run: echo "UV_PYTHON=${{ steps.python.outputs.python-path }}" >> "$GITHUB_ENV"
       - name: Validate the bundled discovery sample
-        run: python skills/tech-use-case-discovery/scripts/validate_discovery.py skills/tech-use-case-discovery/examples/sample-discovery-output.md
+        run: python skills/sdd-init/scripts/validate_discovery.py skills/sdd-init/examples/sample-discovery-output.md
       - name: Run validator regression tests
-        run: uv run --no-project --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python -m unittest discover -s tests -v
+        run: uv run --no-project --with-requirements skills/sdd-init/scripts/requirements.txt python -m unittest discover -s tests -v

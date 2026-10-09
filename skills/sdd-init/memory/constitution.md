@@ -13,7 +13,7 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - Project-specific parameters and operational variables are defined exclusively
   in the root `config.yaml`; informal task notes and prompts cannot replace
   configuration.
-- The files under `.specify/memory/` are immutable template inputs.
+- The files under `skills/sdd-init/memory/` are immutable template inputs.
   Initialization creates the canonical project artifacts under `.sdd/`,
   including `.sdd/constitution.md`; from then on, `.sdd/constitution.md` is the
   generated governance contract and is not an independent source of project

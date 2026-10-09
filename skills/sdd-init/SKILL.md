@@ -1,9 +1,9 @@
 ---
-name: tech-use-case-discovery
-description: Guides users through the software development discovery phase. Assists in defining use cases, functional requirements, technology stack selection, Architecture Decision Records (ADRs), development environment setup, and risk/roadmap planning. Use when taking a project idea from concept to a complete technical specification.
+name: sdd-init
+description: Initializes a Specification-Driven Development project end to end. Guides users through the software development discovery phase, then builds config.yaml, renders the constitution and creates the SDD objects and environment. Assists in defining use cases, functional requirements, technology stack selection, Architecture Decision Records (ADRs), development environment setup, and risk/roadmap planning. Use when taking a project idea from concept to a complete technical specification.
 ---
 
-# Tech Use Case Discovery Skill
+# SDD Initialization Skill
 
 This Skill provides a structured, interactive workflow to guide users through the entire software discovery phase. It transforms an initial application idea into a build-ready technical specification package, preventing scope creep, technical debt, and architectural misalignment.
 
@@ -124,17 +124,44 @@ The discovery process is executed in six sequential phases and produces one docu
 
 ---
 
+## Initialization Workflow (WI-001 to WI-006)
+
+This skill is the whole initialization procedure. The immutable template
+inputs live in [`memory/`](memory/): `constitution.md`, `SPEC.md`, `PLAN.md`,
+`TASKS.md`, and `CHANGELOG.md`. Read them first; do not modify them.
+
+1. Execute the tasks in `memory/TASKS.md` in dependency order, starting with
+   TASK-001 under WI-001. `memory/PLAN.md` defines FR-001 and its six Work
+   Items. Do not skip tasks, invent unresolved decisions, or implement
+   application code before the plan allows it.
+2. WI-001 is the six discovery phases above and ends with the approved
+   `docs/PRODUCT.md`.
+3. WI-002 to WI-006 use `scripts/validate_config.py`: `scaffold` and `check`
+   build root `config.yaml` and the Configuration Decisions table, and
+   `render` writes `.sdd/constitution.md`. Then create `.sdd/SPEC.md`,
+   `.sdd/PLAN.md`, `.sdd/TASKS.md` and `.sdd/CHANGELOG.md`, the project
+   folders, the environment, and `scripts/init.sh`.
+4. After each task: from WI-003 on, update the task and Work Item status in
+   `.sdd/TASKS.md` (before that, report progress in the handoff); record
+   decisions in the required SDD artifact; run the relevant validation; and
+   report what changed and what evidence was produced.
+5. When information is missing, stop and ask one clear question that explains
+   the decision, its impact, and the acceptable answers. Continue only after
+   the user resolves it.
+
+---
+
 ## Validation Protocol
 
 To ensure all discovery deliverables meet quality standards and completeness rules, run the bundled validation script:
 
 ```bash
 # While writing PRODUCT.md (approval not required yet)
-python skills/tech-use-case-discovery/scripts/validate_discovery.py --draft docs/PRODUCT.md
+python skills/sdd-init/scripts/validate_discovery.py --draft docs/PRODUCT.md
 # After user approval: print the hash to record as "Approved content"
-python skills/tech-use-case-discovery/scripts/validate_discovery.py --hash docs/PRODUCT.md
+python skills/sdd-init/scripts/validate_discovery.py --hash docs/PRODUCT.md
 # Then validate the approved document (required before WI-002)
-python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
+python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
 ```
 
 The script verifies:
@@ -189,6 +216,9 @@ and examples are not discovery output and are not aggregated.
 - [tech-stack-evaluation-matrix.md](templates/tech-stack-evaluation-matrix.md): Fragment for section 4, the MCDM matrix.
 - [adr-template.md](templates/adr-template.md): Fragment for section 5, one block per ADR.
 - [dev-environment-checklist.md](templates/dev-environment-checklist.md): Fragments for sections 6 and 8, environment and governance decisions.
+
+### Initialization inputs
+- [memory/](memory/): constitution template, SPEC, PLAN, TASKS and CHANGELOG templates.
 
 ### Examples
 - [sample-discovery-output.md](examples/sample-discovery-output.md): Full end-to-end example of a completed discovery package for an AI-powered web platform.
