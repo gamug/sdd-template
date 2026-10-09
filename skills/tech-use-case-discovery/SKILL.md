@@ -109,8 +109,10 @@ The discovery process is executed in six sequential phases and produces one docu
    now holds every phase's decisions, including `## 8. Governance & Workflow`
    from Phase 5. Mark every open decision with a line containing
    `UNRESOLVED:` and the question to ask.
-4. **Approval**: Resolve every `UNRESOLVED:` item with the user, then end
-   `docs/PRODUCT.md` with an `## Approval` section containing
+4. **Approval**: Resolve every `UNRESOLVED:` item with the user, then close
+   the approved content of `docs/PRODUCT.md` with an `## Approval` section
+   (`validate_config.py scaffold` later appends `## Configuration Decisions`
+   after it) containing
    `Approved by: <name or role>`, `First approved on: YYYY-MM-DD`,
    `Approved on: YYYY-MM-DD`, and `Approved content: <hash>`, where `<hash>`
    is the output of `validate_discovery.py --hash docs/PRODUCT.md` for the

@@ -196,7 +196,8 @@ from then on.
 - **Acceptance criteria:** AC-FR001-06
 - **Action:** Create `scripts/init.sh` or the approved equivalent to reproduce
   the environment from a clean checkout. Wire these checks into the fork's
-  pre-commit hook (the configured `quality.commit_hook`) and add them as
+  pre-commit hook (the configured `quality.commit_hook`, which also enforces the
+  commit convention) and add them as
   steps to the inherited `.github/workflows/validators.yml`, keeping its
   template sample and test steps, so `docs/PRODUCT.md`, `config.yaml`, and
   `.sdd/constitution.md` cannot drift after initialization:
