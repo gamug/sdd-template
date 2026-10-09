@@ -33,7 +33,7 @@ mitigation plan for scores of 6 or more.
 ## 2. MVP Scope Definition & Phased Roadmap
 
 ### MVP Definition Guidelines
-- Include **ONLY** items classified as **Must Have** in the MoSCoW prioritization.
+- Recommended: include only items classified as **Must Have** in the MoSCoW prioritization (guidance; the validator does not enforce it).
 - Focus on end-to-end core user value rather than exhaustive feature coverage.
 - Establish clear success metrics and feedback loops for the MVP release.
 

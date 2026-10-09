@@ -23,8 +23,8 @@ criterion it satisfies.
 Run [`skills/tech-use-case-discovery/SKILL.md`](../../skills/tech-use-case-discovery/SKILL.md)
 through all six phases. Collect the user's problem definition, actors,
 workflows, requirements, user stories, stack evaluation, ADRs, environment and
-governance decisions, risks, and roadmap in `docs/PRODUCT.md`. Discovery runs
-first: no other FR-001 work starts before it, and `validate_config.py` refuses
+governance decisions, risks, and roadmap in `docs/PRODUCT.md`, built from the
+skill's `templates/product-template.md`. Discovery runs first: no other FR-001 work starts before it, and `validate_config.py` refuses
 to run until `docs/PRODUCT.md` is approved.
 
 The skill must ask focused questions interactively. It must not guess missing
@@ -43,7 +43,7 @@ approved content in its `## Approval` section, and
 **Depends on:** WI-001 (approved `docs/PRODUCT.md`)
 **Acceptance criteria:** AC-FR001-02
 
-Build root `config.yaml` from scratch with `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py scaffold`, which lists
+Build root `config.yaml` from scratch with `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py scaffold`, which lists
 every key required by the generic `.specify/memory/constitution.md` template
 and the PRODUCT.md section each one usually comes from.
 
@@ -59,7 +59,7 @@ and the PRODUCT.md section each one usually comes from.
    `user, YYYY-MM-DD`.
 
 Every value and its source is recorded in the `Configuration Decisions` table
-of `docs/PRODUCT.md`. `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check` must pass.
+of `docs/PRODUCT.md`. `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check` must pass.
 
 **Exit criteria:** `check` passes: every key is defined and has a recorded
 source matching its value.
@@ -71,7 +71,7 @@ source matching its value.
 **Acceptance criteria:** AC-FR001-03
 
 Render `.sdd/constitution.md` from root `config.yaml` and the immutable
-`.specify/memory/constitution.md` template with `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render`. Rendering
+`.specify/memory/constitution.md` template with `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render`. Rendering
 re-runs `check` and fails on any missing value or leftover placeholder; no
 questions are asked in this WI. The rendered file is never edited by hand:
 any later `config.yaml` change updates its `Configuration Decisions` row and
@@ -84,7 +84,7 @@ definition while preserving the `FR > WI > Task` hierarchy and traceability.
 numbered from `FR-002`. Task status starts being tracked in `.sdd/TASKS.md`
 here, with the tasks completed so far marked done.
 
-**Exit criteria:** `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify` passes, and all SDD objects agree
+**Exit criteria:** `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render --verify` passes, and all SDD objects agree
 with `docs/PRODUCT.md`.
 
 ### WI-004 — Create folders and non-programmatic dependencies

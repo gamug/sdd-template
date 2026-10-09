@@ -35,10 +35,15 @@ from then on.
 - **Status:** pending
 - **Depends on:** TASK-002
 - **Acceptance criteria:** AC-FR001-01
-- **Action:** Write `docs/PRODUCT.md`, mark every open decision with
-  `UNRESOLVED:`, and run
+- **Action:** Write `docs/PRODUCT.md` from
+  `skills/tech-use-case-discovery/templates/product-template.md`, filling each
+  numbered section from its phase fragment. Use three-digit IDs, each defined
+  once and every reference resolving; give each FR an EARS pattern that matches
+  its statement and one MoSCoW priority; score risks as Impact × Probability.
+  Mark every open decision with `UNRESOLVED:`, and run
   `python skills/tech-use-case-discovery/scripts/validate_discovery.py --draft docs/PRODUCT.md`
-  until it passes.
+  until it passes. Draft mode lists the template placeholders still to
+  replace; approval fails while any remain.
 
 ### TASK-004 — Resolve open decisions and record approval
 
@@ -64,7 +69,7 @@ from then on.
 - **Status:** pending
 - **Depends on:** TASK-004
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** Run `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py scaffold`. It writes the `config.yaml` skeleton,
+- **Action:** Run `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py scaffold`. It writes the `config.yaml` skeleton,
   with the PRODUCT.md section each key usually comes from, and appends the
   `Configuration Decisions` table to `docs/PRODUCT.md`. Fill only values that
   `docs/PRODUCT.md` states explicitly, and record each one in the table with
@@ -109,7 +114,7 @@ from then on.
 - **Status:** pending
 - **Depends on:** TASK-007
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** Run `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check`. It fails on missing or empty keys, keys
+- **Action:** Run `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check`. It fails on missing or empty keys, keys
   without a valid recorded source, and recorded values that differ from
   `config.yaml`. Return to TASK-007 for every reported key.
 
@@ -121,7 +126,7 @@ from then on.
 - **Status:** pending
 - **Depends on:** TASK-008
 - **Acceptance criteria:** AC-FR001-03
-- **Action:** Run `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render` to create `.sdd/constitution.md` from root
+- **Action:** Run `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render` to create `.sdd/constitution.md` from root
   `config.yaml` and the immutable `.specify/memory/constitution.md`. Rendering
   re-runs `check` and fails on any missing value or leftover placeholder. Do
   not edit the rendered file by hand; re-run `render` after any
@@ -139,7 +144,7 @@ from then on.
   requirement and add the product requirements from `docs/PRODUCT.md`, which
   are numbered from `FR-002`. Carry this task register into `.sdd/TASKS.md`
   with TASK-001 through TASK-009 marked done; status is tracked there from now
-  on. Finish with `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`.
+  on. Finish with `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`.
 
 ## WI-004 — Create folders and non-programmatic dependencies
 
@@ -196,8 +201,8 @@ from then on.
   template sample and test steps, so `docs/PRODUCT.md`, `config.yaml`, and
   `.sdd/constitution.md` cannot drift after initialization:
   - `python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md`
-  - `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check`
-  - `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`
+  - `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check`
+  - `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`
 
   Show that a hand edit to `.sdd/constitution.md` fails the hook.
 

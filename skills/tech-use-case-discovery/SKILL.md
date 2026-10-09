@@ -143,10 +143,17 @@ The script verifies:
 - ADR completeness (Context, Decision, Trade-offs, Consequences).
 - The risk matrix: at least one `RSK-xxx` row, Score = Impact × Probability on
   1-3 scales, and a mitigation plan for every score of 6 or more.
-- MoSCoW priority distribution for the MVP.
+- MoSCoW: every FR and user story has exactly one valid priority, at least
+  one is Must Have, and Won't Have is stated (as a priority or a
+  `Won't Have:` line).
+- Each FR's EARS pattern column matches its statement (WHEN, WHILE, WHERE,
+  IF … THEN, or none for Ubiquitous), and every referenced ID is defined.
+- No template `[...]` placeholders are left outside code and `>` guidance
+  notes (a warning with `--draft`).
 - User approval: an `Approval` section with a non-empty approver, date, and a
   content hash on their own lines that matches the current document, and no
-  remaining `UNRESOLVED:` markers (skipped with `--draft`).
+  remaining `UNRESOLVED:` markers outside `>` guidance notes (skipped with
+  `--draft`).
 
 When validating from a directory, pass the project root or a directory that
 contains exactly one generated `PRODUCT.md`; bundled templates, references,
