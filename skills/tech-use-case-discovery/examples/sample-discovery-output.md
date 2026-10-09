@@ -127,3 +127,10 @@ Evaluating Backend API Framework Options:
 - **Sprint 1 (Weeks 1-2)**: Core API routes, Astropy parser, ResNet1D model integration.
 - **Sprint 2 (Weeks 3-4)**: Vanilla JS / Chart.js frontend, interactive curve visualization, end-to-end integration.
 - **Sprint 3 (Weeks 5-6)**: Dockerization, CI pipeline integration, automated benchmark testing.
+
+---
+
+## 8. Approval
+
+- **Approved by**: Product Owner (example)
+- **Approved on**: 2026-01-15

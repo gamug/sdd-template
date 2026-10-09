@@ -1,115 +1,210 @@
 #!/usr/bin/env python3
 """
-Configuration Builder and Validator
+Configuration Builder, Validator, and Constitution Renderer
 
-Scans the constitution template for every `{{key}}` and `{{#each key}}`
-placeholder and uses that list as the contract for the root config.yaml.
+The constitution template (.specify/memory/constitution.md) is the contract for
+the root config.yaml: every {{key}}, {{#each key}}, and {{#if key}} placeholder
+is a key the project must decide. Decisions come from the approved
+docs/PRODUCT.md; the source of every value is recorded in its
+"Configuration Decisions" table.
 
 Usage:
-    python validate_config.py scaffold [--output config.yaml] [--force]
-    uv run --with pyyaml python validate_config.py check [config.yaml]
+    uv run --with pyyaml python validate_config.py scaffold [--force]
+    uv run --with pyyaml python validate_config.py check
+    uv run --with pyyaml python validate_config.py render [--verify]
 
 Modes:
-    scaffold  Write a config.yaml skeleton containing every key the template
-              requires, with empty values to be filled from docs/PRODUCT.md
-              or an explicit user decision. Refuses to overwrite an existing
-              file unless --force is given.
-    check     Fail when a required key is missing or empty, when a collection
-              item lacks a required field, or when related values drift
-              (devcontainer.image Python version vs runtime.version).
+    scaffold  Write a config.yaml skeleton with every required key and the
+              PRODUCT.md section each one usually comes from, and append an
+              empty "Configuration Decisions" table to docs/PRODUCT.md.
+    check     Fail on missing or empty keys, missing item fields, keys without
+              a recorded source, recorded values that differ from config.yaml,
+              and drift between related values.
+    render    Run check, then render .sdd/constitution.md. Fails if any
+              placeholder is left. --verify only compares the rendered output
+              with the existing file and fails when it is out of date.
 
-Options:
-    --template PATH   Constitution template to scan
-                      (default: .specify/memory/constitution.md).
+Every mode first requires an approved docs/PRODUCT.md that passes
+skills/tech-use-case-discovery/scripts/validate_discovery.py.
+
+Options (before the mode):
+    --template PATH   default .specify/memory/constitution.md
+    --config PATH     default config.yaml
+    --product PATH    default docs/PRODUCT.md
 """
 
 import argparse
 import os
 import re
+import subprocess
 import sys
 
 DEFAULT_TEMPLATE = os.path.join(".specify", "memory", "constitution.md")
+DEFAULT_OUTPUT = os.path.join(".sdd", "constitution.md")
+DISCOVERY_VALIDATOR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "skills", "tech-use-case-discovery", "scripts", "validate_discovery.py",
+)
+DECISIONS_HEADING = "Configuration Decisions"
+
+COMMENT_PATTERN = re.compile(r"\{\{!--.*?--\}\}\n*", re.DOTALL)
 TOKEN_PATTERN = re.compile(r"\{\{\s*([#/]?)\s*([^{}]*?)\s*\}\}")
 KEY_PATTERN = re.compile(r"^[a-z_][a-z0-9_]*(?:\.[a-z_][a-z0-9_]*)*$")
+SOURCE_PATTERN = re.compile(r"^(?:PRODUCT\.md\s*§\s*\S.*|user,\s*\d{4}-\d{2}-\d{2})$")
 
 SCALAR = "scalar"
 LIST = "list"
 MAP = "map"
 
+# Where the discovery workflow records each top-level decision.
+SOURCE_HINTS = {
+    "project": "Dev Environment Setup / Governance & Workflow",
+    "runtime": "Tech Stack Selection / Dev Environment Setup",
+    "sdd": "Governance & Workflow",
+    "project_structure": "Dev Environment Setup",
+    "naming": "Use Cases / Functional Requirements",
+    "agent": "Governance & Workflow",
+    "commands": "Dev Environment Setup",
+    "quality": "Governance & Workflow",
+    "code_git": "Governance & Workflow",
+    "known_constraints": "Risk Assessment / Architecture Decision Records",
+    "domain_sections": "Use Cases / Functional Requirements / ADRs",
+    "governance": "Governance & Workflow",
+}
 
-def scan_template(template: str):
-    """Return {dotted_key: spec} for every placeholder in the template.
 
-    spec is {"kind": scalar|list|map, "fields": [...]}. A collection is a map
-    when its block uses {{@key}}; "fields" lists the {{this.field}} names its
-    items must define (empty when items are scalars).
+class TemplateError(Exception):
+    pass
+
+
+# ---------------------------------------------------------------------------
+# Template parsing
+# ---------------------------------------------------------------------------
+
+def tokenize(template: str):
+    """Split the template into text and tag tokens.
+
+    A block tag ({{#...}} or {{/...}}) alone on its line consumes the whole
+    line, so blocks do not leave blank lines behind.
     """
-    required = {}
-    stack = []
+    template = COMMENT_PATTERN.sub("", template)
+    tokens = []
+    position = 0
     for match in TOKEN_PATTERN.finditer(template):
+        start, end = match.start(), match.end()
         prefix, body = match.group(1), match.group(2)
-        if prefix == "#":
-            key = body[len("each"):].strip() if body.startswith("each") else ""
-            if KEY_PATTERN.match(key):
-                required.setdefault(key, {"kind": LIST, "fields": []})
-                stack.append(key)
-            else:
-                stack.append(None)
-        elif prefix == "/":
-            if stack:
-                stack.pop()
-        elif body == "@key":
-            if stack and stack[-1]:
-                required[stack[-1]]["kind"] = MAP
-        elif body.startswith("this."):
-            if stack and stack[-1]:
-                field = body[len("this."):]
-                fields = required[stack[-1]]["fields"]
-                if field not in fields:
-                    fields.append(field)
-        elif body != "this" and KEY_PATTERN.match(body):
-            required.setdefault(body, {"kind": SCALAR, "fields": []})
+        if prefix:
+            line_start = template.rfind("\n", 0, start) + 1
+            line_end = template.find("\n", end)
+            line_end = len(template) if line_end == -1 else line_end
+            if (
+                line_start >= position
+                and not template[line_start:start].strip()
+                and not template[end:line_end].strip()
+            ):
+                start, end = line_start, min(line_end + 1, len(template))
+        tokens.append(("text", template[position:start]))
+        tokens.append((prefix or "var", body))
+        position = end
+    tokens.append(("text", template[position:]))
+    return tokens
+
+
+def parse(template: str):
+    """Return a node list: ("text", s) | ("var", name) | (block, name, children)."""
+    root = []
+    stack = [("root", None, root)]
+    for kind, body in tokenize(template):
+        if kind == "text":
+            if body:
+                stack[-1][2].append(("text", body))
+        elif kind == "var":
+            stack[-1][2].append(("var", body))
+        elif kind == "#":
+            block, _, name = body.partition(" ")
+            if block not in ("each", "if") or not name.strip():
+                raise TemplateError(f"Unsupported block: {{{{#{body}}}}}")
+            node = (block, name.strip(), [])
+            stack[-1][2].append(node)
+            stack.append(node)
+        else:
+            if len(stack) == 1 or stack[-1][0] != body:
+                raise TemplateError(f"Unexpected closing tag: {{{{/{body}}}}}")
+            stack.pop()
+    if len(stack) > 1:
+        raise TemplateError(f"Unclosed block: {{{{#{stack[-1][0]} {stack[-1][1]}}}}}")
+    return root
+
+
+def new_spec(kind, optional):
+    return {"kind": kind, "fields": {}, "optional": optional}
+
+
+def scan(nodes, required=None, item=None, optional=False, field_optional=False):
+    """Collect {key: spec} for every root key the template uses.
+
+    item is the spec of the enclosing {{#each}} (its "fields" receive
+    {{this.field}} and {{#each this.field}} names). Keys inside {{#if}} are
+    optional: they may be absent, empty, or false. Item fields are optional
+    only under an {{#if}} inside the item itself.
+    """
+    if required is None:
+        required = {}
+    for node in nodes:
+        kind, name = node[0], node[1]
+        if kind == "text":
+            continue
+        if kind == "var":
+            if name == "@key":
+                if item is not None:
+                    item["kind"] = MAP
+            elif name.startswith("this."):
+                if item is not None:
+                    item["fields"].setdefault(name[len("this."):], new_spec(SCALAR, field_optional))
+            elif name != "this":
+                if not KEY_PATTERN.match(name):
+                    raise TemplateError(f"Invalid placeholder: {{{{{name}}}}}")
+                required.setdefault(name, new_spec(SCALAR, optional))
+            continue
+        if name.startswith("this."):
+            if item is None:
+                raise TemplateError(f"{{{{#{kind} {name}}}}} outside an each block")
+            spec = item["fields"].setdefault(
+                name[len("this."):], new_spec(LIST if kind == "each" else SCALAR, field_optional or kind == "if")
+            )
+        else:
+            if not KEY_PATTERN.match(name):
+                raise TemplateError(f"Invalid block key: {name}")
+            default = LIST if kind == "each" else SCALAR
+            spec = required.setdefault(name, new_spec(default, optional or kind == "if"))
+        if kind == "each":
+            if spec["kind"] == SCALAR:
+                spec["kind"] = LIST
+            scan(node[2], required, spec, optional, False)
+        else:
+            scan(node[2], required, item, True, True)
+    for spec in required.values():
+        if spec["kind"] == SCALAR and spec["fields"]:
+            spec["kind"] = LIST
     return required
 
 
-def build_tree(required):
-    tree = {}
-    for key, spec in required.items():
-        node = tree
-        parts = key.split(".")
-        for part in parts[:-1]:
-            node = node.setdefault(part, {})
-        node[parts[-1]] = spec
-    return tree
+def load_template(path: str):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            text = f.read()
+    except OSError as error:
+        fail(f"cannot read template '{path}': {error}")
+    try:
+        nodes = parse(text)
+        return nodes, scan(nodes)
+    except TemplateError as error:
+        fail(f"{path}: {error}")
 
 
-def is_spec(node) -> bool:
-    return isinstance(node, dict) and "kind" in node and "fields" in node
-
-
-def render_skeleton(tree, indent=0) -> str:
-    lines = []
-    pad = "  " * indent
-    for name, node in tree.items():
-        if is_spec(node):
-            kind, fields = node["kind"], node["fields"]
-            if kind == SCALAR:
-                lines.append(f"{pad}{name}:  # required value")
-            elif kind == LIST:
-                hint = f" items need: {', '.join(fields)}" if fields else " non-empty list"
-                lines.append(f"{pad}{name}: []  #{hint}")
-            else:
-                hint = f" <name>: {{{', '.join(fields)}}}" if fields else " <name>: <value>"
-                lines.append(f"{pad}{name}: {{}}  # map of{hint}")
-        else:
-            lines.append(f"{pad}{name}:")
-            lines.append(render_skeleton(node, indent + 1))
-    return "\n".join(lines)
-
-
-def is_empty(value) -> bool:
-    return value is None or (isinstance(value, (str, list, dict)) and len(value) == 0)
-
+# ---------------------------------------------------------------------------
+# Rendering
+# ---------------------------------------------------------------------------
 
 def lookup(config, key):
     node = config
@@ -120,29 +215,102 @@ def lookup(config, key):
     return True, node
 
 
+def format_value(value, name):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (str, int, float)) and value != "":
+        return str(value)
+    raise TemplateError(f"{{{{{name}}}}} needs a non-empty scalar value, got {value!r}")
+
+
+def resolve(name, config, scope):
+    if name == "this":
+        return scope["item"]
+    if name == "@key":
+        return scope["key"]
+    if name.startswith("this."):
+        item = scope["item"]
+        field = name[len("this."):]
+        if not isinstance(item, dict) or field not in item:
+            raise TemplateError(f"Missing field '{field}' in {scope['path']}")
+        return item[field]
+    found, value = lookup(config, name)
+    if not found:
+        raise TemplateError(f"Missing key: {name}")
+    return value
+
+
+def render_nodes(nodes, config, scope):
+    output = []
+    for node in nodes:
+        kind = node[0]
+        if kind == "text":
+            output.append(node[1])
+        elif kind == "var":
+            output.append(format_value(resolve(node[1], config, scope), node[1]))
+        elif kind == "if":
+            found, value = (True, resolve(node[1], config, scope)) if node[1].startswith("this") \
+                else lookup(config, node[1])
+            if found and value not in (None, False, "", [], {}):
+                output.append(render_nodes(node[2], config, scope))
+        else:
+            collection = resolve(node[1], config, scope)
+            if isinstance(collection, dict):
+                entries = list(collection.items())
+            elif isinstance(collection, list):
+                entries = list(enumerate(collection))
+            else:
+                raise TemplateError(f"{{{{#each {node[1]}}}}} needs a list or mapping")
+            for key, item in entries:
+                child = {"item": item, "key": key, "path": f"{node[1]}[{key}]"}
+                output.append(render_nodes(node[2], config, child))
+    return "".join(output)
+
+
+# ---------------------------------------------------------------------------
+# Checks
+# ---------------------------------------------------------------------------
+
+def is_empty(value) -> bool:
+    return value is None or (isinstance(value, (str, list, dict)) and len(value) == 0)
+
+
+def check_value(key, value, spec, issues):
+    kind = spec["kind"]
+    if kind == LIST and not isinstance(value, list):
+        issues.append(f"Expected a list: {key}")
+        return
+    if kind == MAP and not isinstance(value, dict):
+        issues.append(f"Expected a mapping: {key}")
+        return
+    if kind == SCALAR and isinstance(value, (list, dict)):
+        issues.append(f"Expected a scalar value: {key}")
+        return
+    if not spec["fields"]:
+        return
+    items = value.items() if isinstance(value, dict) else enumerate(value)
+    for item_name, item in items:
+        for field, field_spec in spec["fields"].items():
+            field_key = f"{key}[{item_name}].{field}"
+            if not isinstance(item, dict) or is_empty(item.get(field)):
+                if not field_spec["optional"]:
+                    issues.append(f"Missing field: {field_key}")
+                continue
+            check_value(field_key, item[field], field_spec, issues)
+
+
 def check_required(config, required) -> list:
     issues = []
     for key, spec in sorted(required.items()):
         found, value = lookup(config, key)
+        if spec["optional"] and (not found or is_empty(value) or value is False):
+            continue
         if not found:
             issues.append(f"Missing key: {key}")
-            continue
-        if is_empty(value):
+        elif is_empty(value):
             issues.append(f"Empty value: {key}")
-            continue
-        kind, fields = spec["kind"], spec["fields"]
-        if kind == LIST and not isinstance(value, list):
-            issues.append(f"Expected a list: {key}")
-        elif kind == MAP and not isinstance(value, dict):
-            issues.append(f"Expected a mapping: {key}")
-        elif kind == SCALAR and isinstance(value, (list, dict)):
-            issues.append(f"Expected a scalar value: {key}")
-        elif fields:
-            items = value.items() if isinstance(value, dict) else enumerate(value)
-            for item_name, item in items:
-                for field in fields:
-                    if not isinstance(item, dict) or is_empty(item.get(field)):
-                        issues.append(f"Missing field '{field}' in {key}.{item_name}")
+        else:
+            check_value(key, value, spec, issues)
     return issues
 
 
@@ -189,64 +357,236 @@ def check_python_runtime(config) -> list:
     ]
 
 
-def read_template(path: str) -> str:
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read()
-    except OSError as error:
-        print(f"Error: cannot read template '{path}': {error}")
-        sys.exit(1)
+# ---------------------------------------------------------------------------
+# PRODUCT.md: discovery gate and Configuration Decisions table
+# ---------------------------------------------------------------------------
 
-
-def scaffold(args):
-    if os.path.exists(args.output) and not args.force:
-        print(f"Error: '{args.output}' already exists. Use --force to overwrite it.")
-        sys.exit(1)
-    required = scan_template(read_template(args.template))
-    header = (
-        f"# Generated from {args.template} by validate_config.py scaffold.\n"
-        "# Fill every value from docs/PRODUCT.md or an explicit user decision,\n"
-        "# then run: uv run --with pyyaml python validate_config.py check\n"
+def require_approved_product(product_path: str):
+    if not os.path.isfile(product_path):
+        fail(f"'{product_path}' not found. Complete WI-001 (discovery) before configuring the project.")
+    result = subprocess.run(
+        [sys.executable, "-I", DISCOVERY_VALIDATOR, product_path],
+        capture_output=True, text=True,
     )
-    with open(args.output, "w", encoding="utf-8") as f:
-        f.write(header + render_skeleton(build_tree(required)) + "\n")
-    print(f"[PASS] Wrote {len(required)} required key(s) to {args.output}.")
+    if result.returncode != 0:
+        failures = [line.strip() for line in result.stdout.splitlines() if "[FAIL]" in line]
+        detail = "\n  ".join(failures) or result.stdout.strip() or result.stderr.strip()
+        fail(f"'{product_path}' is not an approved discovery package (WI-001):\n  {detail}")
+    with open(product_path, "r", encoding="utf-8") as f:
+        return f.read()
 
 
-def check(args):
+def decisions_section(product: str):
+    match = re.search(
+        rf"^##\s+{DECISIONS_HEADING}\s*$(.*?)(?=^##\s|\Z)", product, re.MULTILINE | re.DOTALL
+    )
+    return match.group(1) if match else None
+
+
+def parse_decisions(product: str):
+    section = decisions_section(product)
+    if section is None:
+        return None
+    rows = {}
+    for line in section.splitlines():
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) != 3 or not line.strip().startswith("|"):
+            continue
+        key = cells[0].strip("`")
+        if not KEY_PATTERN.match(key):
+            continue
+        rows[key] = (cells[1].strip("`"), cells[2])
+    return rows
+
+
+def check_decisions(config, required, product) -> list:
+    rows = parse_decisions(product)
+    if rows is None:
+        return [f"docs/PRODUCT.md has no '## {DECISIONS_HEADING}' table. Run scaffold."]
+    issues = []
+    for key, spec in sorted(required.items()):
+        if key not in rows:
+            issues.append(f"No {DECISIONS_HEADING} row for: {key}")
+            continue
+        recorded, source = rows[key]
+        if not SOURCE_PATTERN.match(source):
+            issues.append(
+                f"Invalid source for {key}: {source!r} "
+                "(use 'PRODUCT.md § <section>' or 'user, YYYY-MM-DD')"
+            )
+        found, value = lookup(config, key)
+        if spec["kind"] == SCALAR and found and not isinstance(value, (list, dict)) and value is not None:
+            if recorded != format_value_safe(value):
+                issues.append(f"Recorded value for {key} ({recorded!r}) differs from config.yaml ({value!r})")
+    return issues
+
+
+def format_value_safe(value):
+    try:
+        return format_value(value, "")
+    except TemplateError:
+        return repr(value)
+
+
+# ---------------------------------------------------------------------------
+# Modes
+# ---------------------------------------------------------------------------
+
+def build_tree(required):
+    tree = {}
+    for key, spec in required.items():
+        node = tree
+        parts = key.split(".")
+        for part in parts[:-1]:
+            node = node.setdefault(part, {})
+        node[parts[-1]] = spec
+    return tree
+
+
+def is_spec(node) -> bool:
+    return isinstance(node, dict) and "kind" in node and "optional" in node
+
+
+def describe(spec) -> str:
+    optional = " (optional)" if spec["optional"] else ""
+    if spec["kind"] == SCALAR:
+        return f"value{optional}"
+    fields = ", ".join(spec["fields"])
+    if spec["kind"] == LIST:
+        return f"list{optional}" + (f" of {{{fields}}}" if fields else "")
+    return f"map{optional} of <name>: " + (f"{{{fields}}}" if fields else "<value>")
+
+
+def render_skeleton(tree, indent=0) -> str:
+    lines = []
+    pad = "  " * indent
+    for name, node in tree.items():
+        hint = SOURCE_HINTS.get(name) if indent == 0 else None
+        if is_spec(node):
+            empty = {SCALAR: "", LIST: " []", MAP: " {}"}[node["kind"]]
+            source = f"; PRODUCT.md: {hint}" if hint else ""
+            lines.append(f"{pad}{name}:{empty}  # {describe(node)}{source}")
+        else:
+            lines.append(f"{pad}{name}:" + (f"  # PRODUCT.md: {hint}" if hint else ""))
+            lines.append(render_skeleton(node, indent + 1))
+    return "\n".join(lines)
+
+
+def load_config(path: str):
     try:
         import yaml
     except ImportError:
-        print("Error: PyYAML is required. Run with `uv run --with pyyaml python ...`.")
-        sys.exit(1)
+        fail("PyYAML is required. Run with `uv run --with pyyaml python validate_config.py ...`.")
     try:
-        with open(args.config, "r", encoding="utf-8") as f:
-            config = yaml.safe_load(f) or {}
+        with open(path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
     except OSError as error:
-        print(f"Error: cannot read '{args.config}': {error}")
-        sys.exit(1)
+        fail(f"cannot read '{path}': {error}")
+    except yaml.YAMLError as error:
+        fail(f"'{path}' is not valid YAML: {error}")
 
-    required = scan_template(read_template(args.template))
-    issues = check_required(config, required) + check_python_runtime(config)
+
+def scaffold(args):
+    product = require_approved_product(args.product)
+    _, required = load_template(args.template)
+    if os.path.exists(args.config) and not args.force:
+        fail(f"'{args.config}' already exists. Use --force to overwrite it.")
+    header = (
+        f"# Generated from {args.template} by validate_config.py scaffold.\n"
+        f"# Fill each value from {args.product} and record its source in the\n"
+        f"# '{DECISIONS_HEADING}' table there; ask the user for anything it does\n"
+        "# not state. Then run: uv run --with pyyaml python validate_config.py check\n"
+    )
+    with open(args.config, "w", encoding="utf-8") as f:
+        f.write(header + render_skeleton(build_tree(required)) + "\n")
+    print(f"[PASS] Wrote {len(required)} required key(s) to {args.config}.")
+
+    if decisions_section(product) is None:
+        rows = "\n".join(f"| `{key}` |  |  |" for key in sorted(required))
+        with open(args.product, "a", encoding="utf-8") as f:
+            f.write(
+                f"\n## {DECISIONS_HEADING}\n\n"
+                "Source is `PRODUCT.md § <section>` for values this document states, or\n"
+                "`user, YYYY-MM-DD` for values the user decided or confirmed.\n\n"
+                "| Key | Value | Source |\n| :--- | :--- | :--- |\n" + rows + "\n"
+            )
+        print(f"[PASS] Appended an empty '{DECISIONS_HEADING}' table to {args.product}.")
+
+
+def run_check(args):
+    product = require_approved_product(args.product)
+    _, required = load_template(args.template)
+    config = load_config(args.config)
+    issues = (
+        check_required(config, required)
+        + check_decisions(config, required, product)
+        + check_python_runtime(config)
+    )
+    return config, required, issues
+
+
+def check(args):
+    _, required, issues = run_check(args)
+    report(issues, args.config)
+    print(f"[PASS] {args.config} defines all {len(required)} template key(s) with recorded sources.")
+
+
+def render(args):
+    _, required, issues = run_check(args)
+    report(issues, args.config)
+    nodes, _ = load_template(args.template)
+    config = load_config(args.config)
+    try:
+        rendered = render_nodes(nodes, config, {"item": None, "key": None, "path": ""})
+    except TemplateError as error:
+        fail(f"render failed: {error}")
+    leftover = sorted(set(re.findall(r"\{\{[^}]*\}\}", rendered)))
+    if leftover:
+        fail(f"rendered output still contains placeholders: {', '.join(leftover)}")
+
+    if args.verify:
+        try:
+            with open(args.output, "r", encoding="utf-8") as f:
+                current = f.read()
+        except OSError:
+            fail(f"'{args.output}' does not exist. Run render.")
+        if current != rendered:
+            fail(f"'{args.output}' is out of date with {args.config}. Run render.")
+        print(f"[PASS] {args.output} is up to date.")
+        return
+    os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
+    with open(args.output, "w", encoding="utf-8") as f:
+        f.write(rendered)
+    print(f"[PASS] Rendered {args.output} from {args.config}.")
+
+
+def report(issues, config_path):
     for issue in issues:
         print(f"[FAIL] {issue}")
     if issues:
-        print(f"\n{len(issues)} pending key(s) or inconsistencies in {args.config}.")
+        print(f"\n{len(issues)} pending key(s) or inconsistencies in {config_path}.")
         sys.exit(1)
-    print(f"[PASS] {args.config} defines all {len(required)} template key(s) consistently.")
+
+
+def fail(message: str):
+    print(f"Error: {message}")
+    sys.exit(1)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build and validate the root config.yaml.")
+    parser = argparse.ArgumentParser(description="Build, validate, and render the project configuration.")
     parser.add_argument("--template", default=DEFAULT_TEMPLATE)
+    parser.add_argument("--config", default="config.yaml")
+    parser.add_argument("--product", default=os.path.join("docs", "PRODUCT.md"))
     modes = parser.add_subparsers(dest="mode", required=True)
     scaffold_parser = modes.add_parser("scaffold")
-    scaffold_parser.add_argument("--output", default="config.yaml")
     scaffold_parser.add_argument("--force", action="store_true")
-    check_parser = modes.add_parser("check")
-    check_parser.add_argument("config", nargs="?", default="config.yaml")
+    modes.add_parser("check")
+    render_parser = modes.add_parser("render")
+    render_parser.add_argument("--output", default=DEFAULT_OUTPUT)
+    render_parser.add_argument("--verify", action="store_true")
     args = parser.parse_args()
-    scaffold(args) if args.mode == "scaffold" else check(args)
+    {"scaffold": scaffold, "check": check, "render": render}[args.mode](args)
 
 
 if __name__ == "__main__":

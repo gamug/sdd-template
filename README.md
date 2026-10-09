@@ -38,7 +38,7 @@ The template is based on these principles:
 
 ```text
 .
-├── validate_config.py              # Builds and checks root config.yaml
+├── validate_config.py              # Builds, checks, and renders config.yaml
 ├── .specify/
 │   └── memory/
 │       ├── constitution.md         # Immutable constitution template
@@ -52,9 +52,10 @@ The template is based on these principles:
 └── README.md
 ```
 
-The constitution template uses `{{ ... }}` placeholders for scalar values and
-`{{#each ...}}` blocks for collections. Rendering must fail when a required
-value is missing.
+The constitution template uses `{{ key }}` placeholders for scalar values,
+`{{#each key}}` blocks for collections, `{{#if key}}` blocks for optional
+content, and `{{!-- --}}` comments. `validate_config.py render` implements this
+subset and fails when a required value is missing.
 
 The files under [`.specify/memory/`](./.specify/memory/) are immutable template
 inputs. After discovery, root `config.yaml` becomes the authoritative
@@ -83,57 +84,81 @@ Complete the tasks in dependency order.
 
 ### WI-001: discover the use case
 
-Run [`skills/tech-use-case-discovery/SKILL.md`](./skills/tech-use-case-discovery/SKILL.md)
+Discovery always runs first. Run
+[`skills/tech-use-case-discovery/SKILL.md`](./skills/tech-use-case-discovery/SKILL.md)
 through all six phases. The skill guides the user through:
 
 - use-case definition and stakeholders;
 - requirements and user stories;
 - technology-stack evaluation;
 - architecture decision records;
-- development-environment decisions; and
+- development-environment, governance, and workflow decisions; and
 - risks, validation, and roadmap.
 
 The output is `docs/PRODUCT.md`. The skill must ask focused questions and must
-not invent missing product, technical, or operational decisions.
+not invent missing product, technical, or operational decisions. Open
+decisions are marked `UNRESOLVED:` and must all be resolved with the user,
+who then approves the document in its `## Approval` section:
+
+```bash
+python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
+```
+
+`validate_config.py` refuses to run until this passes.
 
 ### WI-002: create the configuration
 
-Generate the authoritative root configuration from the keys required by the
-constitution template:
+The constitution template is generic. Every placeholder it contains is a
+decision the project must make. Generate the root configuration skeleton:
 
 ```bash
-python validate_config.py scaffold
+uv run --with pyyaml python validate_config.py scaffold
 ```
 
-Fill every value from `docs/PRODUCT.md` wherever it states or directly implies
-the decision, including the instruction file and init command of the selected
-coding-agent framework (for example `CLAUDE.md`, `AGENTS.md`, or
-`.github/copilot-instructions.md`). Ask the user about every value it does not
-determine. Then validate it:
+This writes `config.yaml`, with the PRODUCT.md section each key usually comes
+from, and appends a `Configuration Decisions` table (key, value, source) to
+`docs/PRODUCT.md`. Then:
+
+1. Fill the values `docs/PRODUCT.md` states, with source
+   `PRODUCT.md § <section>`.
+2. Define the project's domain sections (`domain_sections`: a `title` and
+   `rules` each), such as models, services, storage, or evaluation, from the
+   use cases, requirements, and ADRs, and confirm them with the user.
+3. Ask the user for every other value, including the coding-agent instruction
+   file (for example `CLAUDE.md`, `AGENTS.md`, or
+   `.github/copilot-instructions.md`). Values PRODUCT.md only implies are
+   proposed and confirmed, never written silently. Record answers with source
+   `user, YYYY-MM-DD`.
 
 ```bash
 uv run --with pyyaml python validate_config.py check
 ```
 
-The check fails on missing or empty keys and on drift between related values,
-such as `runtime.version` and the devcontainer image.
+The check fails on missing or empty keys, keys without a valid recorded
+source, recorded values that differ from `config.yaml`, and drift between
+related values such as `runtime.version` and the devcontainer image.
 
-### WI-003: create the canonical SDD objects
+### WI-003: render the constitution and create the SDD objects
 
-Re-run `uv run --with pyyaml python validate_config.py check` to find any pending template key and resolve it with the
-user. Then use root `config.yaml` and the immutable template constitution to
-create:
+```bash
+uv run --with pyyaml python validate_config.py render
+```
+
+`render` re-runs `check`, then writes `.sdd/constitution.md` and fails on any
+leftover placeholder. Never edit the rendered file by hand. After any
+`config.yaml` change, update its `Configuration Decisions` row and render
+again; `render --verify` fails when the file is out of date.
+
+Then create the remaining canonical objects from `docs/PRODUCT.md`:
 
 ```text
-.sdd/constitution.md
 .sdd/SPEC.md
 .sdd/PLAN.md
 .sdd/TASKS.md
 .sdd/CHANGELOG.md
 ```
 
-Synchronize the objects with `docs/PRODUCT.md`. Preserve the `FR > WI > Task`
-hierarchy, acceptance-criteria traceability, and explicit unresolved decisions.
+Preserve the `FR > WI > Task` hierarchy and acceptance-criteria traceability.
 Do not modify the template inputs in `.specify/memory/`.
 
 ### WI-004 through WI-006: prepare and reproduce the environment
@@ -169,11 +194,16 @@ Before starting the agent, prepare:
    command execution, and human approval for consequential actions.
 5. Access to the user who will answer discovery questions. The agent must not
    invent answers when the project has not yet defined its use case.
+6. Python 3.8 or later and [`uv`](https://docs.astral.sh/uv/) on the host.
+   The initialization tooling (`validate_discovery.py` and
+   `validate_config.py`, which needs PyYAML through `uv run --with pyyaml`)
+   runs in WI-001 to WI-003, before the project's own environment exists.
 
 Do not create `config.yaml` or application source code manually before the
-agent starts. The initial tasks define when those files are created. The
-runtime, package manager, container tooling, and other project prerequisites
-are discovered and configured by WI-001 through WI-006.
+agent starts. The initial tasks define when those files are created. Apart
+from the initialization tooling above, the project's runtime, package manager,
+container tooling, and other prerequisites are discovered and configured by
+WI-001 through WI-006.
 
 ### Start the initialization agent
 
@@ -219,10 +249,11 @@ The agent must:
    [`skills/tech-use-case-discovery/SKILL.md`](./skills/tech-use-case-discovery/SKILL.md)
    to create `docs/PRODUCT.md`.
 2. Execute WI-002 to build root `config.yaml` with
-   [`validate_config.py`](./validate_config.py), using only values from
-   `docs/PRODUCT.md` or explicit user decisions.
-3. Execute WI-003 to create `.sdd/constitution.md`, `.sdd/SPEC.md`,
-   `.sdd/PLAN.md`, `.sdd/TASKS.md`, and `.sdd/CHANGELOG.md`.
+   [`validate_config.py`](./validate_config.py), recording the source of every
+   value (`docs/PRODUCT.md` or an explicit user decision).
+3. Execute WI-003 to render `.sdd/constitution.md` with
+   `validate_config.py render` and create `.sdd/SPEC.md`, `.sdd/PLAN.md`,
+   `.sdd/TASKS.md`, and `.sdd/CHANGELOG.md`.
 4. Execute WI-004 through WI-006 to create the approved project structure,
    configure the environment, and automate its reproduction.
 5. Validate each result, preserve task traceability, and leave a clear
@@ -250,7 +281,7 @@ Every production code commit must use Conventional Commits and include the
 traceability suffix required by the constitution:
 
 ```text
-type(scope): imperative summary [FR-001][WI-002][TASK-004]
+type(scope): imperative summary [FR-001][WI-002][TASK-005]
 ```
 
 ## Working agreement for contributors and coding agents

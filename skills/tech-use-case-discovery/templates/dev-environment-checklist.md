@@ -46,3 +46,25 @@
 - [ ] Local services started: `docker compose up -d`
 - [ ] Database migration and health check validated: `GET /health` returns success.
 - [ ] Test suite verified: local tests pass without errors.
+
+---
+
+## 6. Governance & Workflow
+
+These answers feed the project constitution through root `config.yaml`.
+
+- [ ] **Version control**: integration branch, whether direct commits to it are
+  allowed, and the policy for unrelated work on an in-flight pull request.
+- [ ] **Commits**: commit convention (e.g. Conventional Commits) and the hook
+  that enforces it.
+- [ ] **CI**: workflow file and the ordered quality gates it runs.
+- [ ] **Tool configuration**: the canonical configuration file per tool and the
+  test layout / fixture policy.
+- [ ] **Coding agent**: framework, instruction file (e.g. `CLAUDE.md`,
+  `AGENTS.md`, `.github/copilot-instructions.md`), its init command, whether it
+  is tracked in Git, and the files it must reference.
+- [ ] **Agent limits**: changes that require approval before scope expansion,
+  and the destructive-history boundary.
+- [ ] **Naming**: established terms that must not be renamed.
+- [ ] **Governance**: initial constitution version, ratification date, and
+  amendment log location.

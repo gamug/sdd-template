@@ -8,7 +8,11 @@ Checks for mandatory sections, requirement IDs, EARS syntax, ADR completeness,
 and MoSCoW prioritization.
 
 Usage:
-    python validate_discovery.py <path_to_markdown_file_or_directory>
+    python validate_discovery.py [--draft] <path_to_markdown_file_or_directory>
+
+Without --draft the document must also be approved: an "Approval" section
+with "Approved by:" and "Approved on: YYYY-MM-DD", and no "UNRESOLVED:"
+markers. Use --draft while PRODUCT.md is still being written (TASK-003).
 
 Directory mode requires exactly one file named PRODUCT.md somewhere below the
 provided directory and validates that file only.
@@ -33,6 +37,7 @@ EARS_PATTERNS = [
     re.compile(r"\b(?:when|while|where|if)\b.*\bshall\b", re.IGNORECASE),
 ]
 MOSCOW_KEYWORDS = ["must have", "should have", "could have", "won't have"]
+UNRESOLVED_MARKER = "UNRESOLVED:"
 
 
 def get_sections(content: str):
@@ -60,7 +65,30 @@ def most_specific(sections):
     ]
 
 
-def analyze_content(content: str, filename: str):
+def check_approval(content: str, sections):
+    issues = []
+    unresolved = [
+        line.strip() for line in content.splitlines() if UNRESOLVED_MARKER in line
+    ]
+    if unresolved:
+        issues.append(f"{len(unresolved)} unresolved decision(s) remain ({UNRESOLVED_MARKER})")
+    approval = [
+        section_content
+        for heading, section_content, _, _ in sections
+        if re.match(r"^(?:\d+\.\s*)?approval\s*$", heading, re.IGNORECASE)
+    ]
+    approved_by = approval and re.search(
+        r"approved by\W*:?\**\s*(\S.*)$", approval[0], re.IGNORECASE | re.MULTILINE
+    )
+    approved_on = approval and re.search(
+        r"approved on\W*:?\**\s*(\d{4}-\d{2}-\d{2})\b", approval[0], re.IGNORECASE
+    )
+    if not (approved_by and approved_on):
+        issues.append("Missing Approval section with 'Approved by:' and 'Approved on: YYYY-MM-DD'")
+    return issues
+
+
+def analyze_content(content: str, filename: str, draft: bool = False):
     print(f"\n==========================================")
     print(f" Validating Discovery Spec: {filename}")
     print(f"==========================================\n")
@@ -176,6 +204,20 @@ def analyze_content(content: str, filename: str):
         print(f"  [FAIL] Missing MoSCoW priorities: {', '.join(missing_moscow)}")
         issues.append("Incomplete MoSCoW priorities")
 
+    # 5. Check user approval
+    print("\n--- 5. User Approval Check ---")
+    if draft:
+        print("  [SKIP] Draft mode: approval not required yet.")
+    else:
+        approval_issues = check_approval(content, sections)
+        for issue in approval_issues:
+            print(f"  [FAIL] {issue}")
+        if approval_issues:
+            issues.extend(approval_issues)
+        else:
+            print("  [PASS] Approved by the user with no unresolved decisions.")
+            passes.append("User approval recorded")
+
     # Summary
     print("\n==========================================")
     print(" Validation Summary")
@@ -196,11 +238,13 @@ def analyze_content(content: str, filename: str):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python validate_discovery.py <path_to_markdown_file_or_directory>")
+    args = [arg for arg in sys.argv[1:] if arg != "--draft"]
+    draft = len(args) != len(sys.argv) - 1
+    if len(args) != 1:
+        print("Usage: python validate_discovery.py [--draft] <path_to_markdown_file_or_directory>")
         sys.exit(1)
 
-    target_path = sys.argv[1]
+    target_path = args[0]
 
     if not os.path.exists(target_path):
         print(f"Error: Path '{target_path}' does not exist.")
@@ -211,7 +255,7 @@ def main():
     if os.path.isfile(target_path):
         with open(target_path, "r", encoding="utf-8") as f:
             content = f.read()
-        success = analyze_content(content, os.path.basename(target_path))
+        success = analyze_content(content, os.path.basename(target_path), draft)
         if not success:
             all_success = False
     else:
@@ -238,7 +282,7 @@ def main():
         with open(product_file, "r", encoding="utf-8") as f:
             content = f.read()
 
-        success = analyze_content(content, product_file)
+        success = analyze_content(content, product_file, draft)
         if not success:
             all_success = False
 

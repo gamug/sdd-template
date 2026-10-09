@@ -1,8 +1,10 @@
 ## Project Constitution
 
-> Project-specific values are supplied by the root `config.yaml`.
-> `{{ ... }}` represents a required scalar; `{{#each ...}}` iterates a collection.
-> Rendering must fail when a required value is missing.
+{{!--
+Template input. Values come from the root config.yaml and are rendered with
+`validate_config.py render`; rendering fails when a required value is missing.
+Syntax: {{key}} scalar, {{#each key}} collection, {{#if key}} optional block.
+--}}
 
 Governing principles for **{{project.name}}** under a specification-driven development workflow. Specifications and plans precede implementation and may not silently contradict this constitution.
 
@@ -36,20 +38,6 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - Core business logic remains independent from web frameworks, UI libraries,
   and ORMs. Dependencies point inward toward stable domain abstractions rather
   than outward toward volatile concrete tools.
-- **ML/NLP framework**: {{ml_nlp.framework}} {{ml_nlp.torch_version}}. All model stages must work under `{{ml_nlp.device_policy}}`.
-- **Pinned models**:
-{{#each ml_nlp.models}}
-  - {{@key}}: `{{this.checkpoint}}` (optional: {{this.optional}})
-{{/each}}
-- Model selection is `{{ml_nlp.model_selection}}`; replacement requires every item below:
-{{#each ml_nlp.model_change_requires}}
-  - {{this}}
-{{/each}}
-- Model checkpoints, context-window limits, tokenizers, and external AI
-  endpoints must be explicitly pinned; floating production model or endpoint
-  versions are prohibited.
-- **Service layer**: {{service.framework}} {{service.framework_version}} with {{service.server}}, application `{{service.application}}`, default port {{service.default_port}}.
-- **Storage**: {{storage.engine}} with the configured SOURCE/RESULTS topology, accessed through `{{storage.access_library}}` pinned to {{storage.access_library_version}}.
 - Optional heavy dependency groups must remain isolated from normal package imports.
 - New libraries, frameworks, model checkpoints, storage engines, or platform dependencies require a reviewed rationale and a constitution amendment when they alter these guarantees.
 - Public API contracts, storage schemas, security boundaries, and architectural
@@ -65,8 +53,6 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 ### Project structure
 
 - Source: `{{project.source_dir}}/`; tests: `{{project.tests_dir}}/`; docs: `{{project.docs_dir}}/`; SDD artifacts: `{{project.sdd_dir}}/`.
-- Source layout: {{architecture.source_layout}}. The configured local package is `{{architecture.local_package}}`.
-- Entrypoints are organized by kind under `{{project.apps_dir}}/`, `{{project.cli_dir}}/`, and `{{project.scripts_dir}}/`, using `{{architecture.entrypoints.bootstrap}}`.
 - Tests follow this layout and hermetic fixture policy:
 {{#each project_structure.tests}}
   - {{@key}}: {{this}}
@@ -75,7 +61,6 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 {{#each project_structure.config}}
   - {{@key}}: {{this}}
 {{/each}}
-- `.env` loading occurs only at `{{environment.load_location}}`; `{{environment.example_file}}` stays synchronized with configured variables.
 - Application settings must be injected through validated environment
   variables or the configured equivalent; secrets must never be hardcoded or
   committed to Git history.
@@ -103,18 +88,21 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - Every production code commit must reference its Task ID, WI, and FR.
 - Commit subjects must use Conventional Commits syntax and include the full
   FR/WI/Task traceability suffix:
-  `type(scope): imperative summary [FR-001][WI-002][TASK-004]`.
+  `type(scope): imperative summary [FR-001][WI-002][TASK-005]`.
 - Acceptance criteria use stable identifiers such as `AC-FR001-01`; every task
   must reference the acceptance-criteria IDs it implements.
 - Work Item status and task status must remain synchronized.
-- Project-specific decisions are collected in `docs/PRODUCT.md`, transformed
-  into the approved `.sdd/SPEC.md`, and normalized into root `config.yaml`.
-  The resulting configuration renders `.sdd/constitution.md`. Before WI-003,
-  the corresponding files under `.specify/memory/` are template inputs only.
-- `docs/PRODUCT.md` and `.sdd/SPEC.md` are the decision sources; `config.yaml`
-  is the authoritative normalized configuration. Direct edits to
-  `config.yaml` must be synchronized back to the affected decision and SDD
-  artifacts.
+- Project-specific decisions are collected and approved in `docs/PRODUCT.md`
+  (WI-001), normalized into root `config.yaml` with the source of every value
+  recorded in the `Configuration Decisions` table of `docs/PRODUCT.md`
+  (WI-002), and rendered into `.sdd/constitution.md` by
+  `validate_config.py render` (WI-003). `.sdd/SPEC.md`, `.sdd/PLAN.md`, and
+  `.sdd/TASKS.md` are then derived from `docs/PRODUCT.md` (WI-003). Before
+  WI-003, the files under `.specify/memory/` are template inputs only.
+- `docs/PRODUCT.md` is the decision source; `config.yaml` is the
+  authoritative normalized configuration. Any edit to `config.yaml` must
+  update its `Configuration Decisions` row, be synchronized to the affected
+  SDD artifacts, and be followed by `validate_config.py render`.
 - Missing or ambiguous inputs must be presented as explicit, context-rich
   questions that identify the decision, explain its impact, and provide
   concrete options or an expected answer format. Agents must not guess or
@@ -124,52 +112,7 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - SDD acceptance criteria should use a consistent executable form such as
   GIVEN-WHEN-THEN where applicable.
 
-### AI behavior
-
-- Production model checkpoints, context-window limits, tokenizers, and AI
-  endpoints must be explicitly pinned and must not be selected dynamically.
-  Development-time and coding-agent model choices are unrestricted by this
-  production pinning rule.
-- CPU-capable inference required: {{ml_nlp.cpu_support_required}}. When true, inference must remain CPU-capable.
-- Missing source text follows `{{ai.fail_policy.missing_source_text}}`.
-- Oversized input follows `{{ai.fail_policy.oversized_input}}`; silent truncation is prohibited when configured false.
-- Outputs are {{ai.output_status}} and must not be represented as any of:
-{{#each ai.prohibited_claims}}
-  - {{this}}
-{{/each}}
-- Human overrides are supported by `{{ai.human_corrections_module}}`.
-- Accuracy claims require `{{ai.evaluation.package}}` evidence tracked in {{ai.evaluation.tracker}} against `{{ai.evaluation.baseline_doc}}`.
-- Generated proposals must pass deterministic validation gates such as tests,
-  linters, type checks, and security scans before they are accepted.
-- Agents must not claim work is complete or correct without verifiable
-  evidence, such as passing command output or a recorded analysis result.
-- Human developers retain final approval authority over agent-generated plans,
-  decisions, and implementations.
-
-### Evaluation and reporting
-
-- Every configured classification stage reports the complete metric set.
-- Per-class metrics:
-{{#each metrics.per_class}}
-  - {{this}}
-{{/each}}
-- Offline overall metrics:
-{{#each metrics.overall_offline}}
-  - {{this}}
-{{/each}}
-- Downstream judge evaluation, including weighting, overall measures, and diagnostic-only variants:
-{{#each metrics.downstream_judge}}
-  - {{@key}}: {{this}}
-{{/each}}
-- Candidate comparisons use `{{metrics.comparison_format}}` and the same metric implementation and evaluation path.
-- Historical runs missing newly required metrics are handled by: {{metrics.missing_historical_metrics}}.
-- Reporting policy: {{metrics.reporting_policy}}.
-- Evaluation runs must emit machine-readable reports, such as JSON or JUnit
-  XML, including execution time, metric deltas, and coverage where applicable.
-- CI must compare current results with historical baselines. Degradation in
-  required performance, coverage, or acceptance results blocks integration.
-
-_Coding-agent conduct:_
+### Coding-agent conduct
 
 - Read this constitution and `{{sdd.spec_file}}` before planning or editing.
 - Match existing placement, naming, imports, and bootstrap conventions before introducing structure.
@@ -197,10 +140,9 @@ _Coding-agent conduct:_
 
 - Public contracts define inputs, outputs, errors, versions, compatibility, and ownership.
 - Validate external inputs at trust boundaries.
-- SOURCE remains read-only and RESULTS follows its configured read/write contract.
 - Schema changes are migration-driven and require explicit scope approval.
 - Time, ordering, retries, idempotency, and data provenance are explicit where applicable.
-- Failures are observable and are never silently converted to successful predictions.
+- Failures are observable and are never silently converted to successful results.
 - External calls use bounded timeouts, retries, and resource limits.
 - External network calls, database queries, and system processes must use
   explicit timeouts, circuit breakers, and bounded retries with exponential
@@ -218,13 +160,6 @@ _Coding-agent conduct:_
 
 ```text
 {{commands.dependency_install}}     # base dependencies
-{{commands.eval_install}}           # evaluation dependencies
-{{commands.notebook_install}}       # notebook dependencies
-{{commands.model_setup}}            # pre-download configured models
-{{commands.service_start}}          # service
-{{commands.pipeline_run}}           # batch pipeline
-{{commands.evaluation_run}}         # full evaluation
-{{commands.evaluation_ui}}          # evaluation UI
 {{commands.test}}                   # full test suite
 {{commands.ci_test}}                # CI tests
 {{commands.lint}}                   # lint
@@ -237,7 +172,6 @@ _Coding-agent conduct:_
 {{#each quality.ci_gate_order}}
   - {{this}}
 {{/each}}
-- The separate evaluation workflow is `{{quality.evaluation_workflow.file}}`, blocking: {{quality.evaluation_workflow.blocking}}.
 - Commands must use the configured package manager and locked environment.
 - All canonical validation commands must run in isolated, deterministic CI
   before integration.
@@ -258,6 +192,16 @@ _Coding-agent conduct:_
 - Secrets must not be committed; example environment files contain placeholders only.
 - Leave the working tree on the pushed PR branch when configured, and include the complete PR URL in the final handoff.
 
+{{#if domain_sections}}
+{{#each domain_sections}}
+### {{this.title}}
+
+{{#each this.rules}}
+- {{this}}
+{{/each}}
+
+{{/each}}
+{{/if}}
 ### Project-specific constraints
 
 {{#each known_constraints}}

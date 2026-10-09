@@ -8,12 +8,16 @@ until discovery produces `docs/PRODUCT.md`.
 
 ### Acceptance criteria
 
-- **AC-FR001-01:** `docs/PRODUCT.md` contains the approved discovery package
-  and clearly identifies unresolved decisions.
-- **AC-FR001-02:** Root `config.yaml` contains only approved project values
-  traceable to `docs/PRODUCT.md` or an explicit user decision.
-- **AC-FR001-03:** Canonical `.sdd/` artifacts are created from the approved
-  configuration and synchronized with `docs/PRODUCT.md`.
+- **AC-FR001-01:** `docs/PRODUCT.md` contains the complete discovery package,
+  has no unresolved decisions, and records the user's approval; it passes
+  `validate_discovery.py` without `--draft`.
+- **AC-FR001-02:** Root `config.yaml` defines every key the constitution
+  template requires, and each value's source (`PRODUCT.md § <section>` or
+  `user, YYYY-MM-DD`) is recorded in the `Configuration Decisions` table of
+  `docs/PRODUCT.md`; `uv run --with pyyaml python validate_config.py check` passes.
+- **AC-FR001-03:** `.sdd/constitution.md` is rendered by
+  `uv run --with pyyaml python validate_config.py render` with no placeholders left, and the other canonical `.sdd/`
+  artifacts are synchronized with `docs/PRODUCT.md`.
 - **AC-FR001-04:** The approved project structure and non-programmatic
   dependencies exist without implementing product source code.
 - **AC-FR001-05:** The selected development environment can be created and
@@ -31,34 +35,44 @@ until discovery produces `docs/PRODUCT.md`.
 
 Run [`skills/tech-use-case-discovery/SKILL.md`](../../skills/tech-use-case-discovery/SKILL.md)
 through all six phases. Collect the user's problem definition, actors,
-workflows, requirements, user stories, stack evaluation, ADRs, environment
-decisions, risks, and roadmap in `docs/PRODUCT.md`.
+workflows, requirements, user stories, stack evaluation, ADRs, environment and
+governance decisions, risks, and roadmap in `docs/PRODUCT.md`. Discovery runs
+first: no other FR-001 work starts before it, and `validate_config.py` refuses
+to run until `docs/PRODUCT.md` is approved.
 
 The skill must ask focused questions interactively. It must not guess missing
 inputs. When an answer is required, the question must state what decision is
 needed, why it affects the project, and what concrete options or examples the
 user should consider.
 
-**Exit criteria:** `docs/PRODUCT.md` exists, contains the complete discovery
-package, and unresolved decisions are clearly marked for user approval.
+**Exit criteria:** Every `UNRESOLVED:` decision has been resolved with the
+user, `docs/PRODUCT.md` records the user's approval in its `## Approval`
+section, and `validate_discovery.py docs/PRODUCT.md` passes without `--draft`.
 
 ### WI-002 — Create config.yaml
 
 **Parent:** FR-001  
-**Depends on:** WI-001
+**Depends on:** WI-001 (approved `docs/PRODUCT.md`)
 **Acceptance criteria:** AC-FR001-02
 
-Build root `config.yaml` from scratch with `python validate_config.py scaffold`,
-which lists every key required by the `.specify/memory/constitution.md`
-template. Fill each value from `docs/PRODUCT.md` wherever it states or directly
-implies the decision, including the instruction file and init command of the
-selected coding-agent framework. For every value it does not determine, ask a
-clear, context-rich question before writing the field; never guess.
-`uv run --with pyyaml python validate_config.py check` must pass.
+Build root `config.yaml` from scratch with `uv run --with pyyaml python validate_config.py scaffold`, which lists
+every key required by the generic `.specify/memory/constitution.md` template
+and the PRODUCT.md section each one usually comes from.
 
-**Exit criteria:** `config.yaml` contains approved project values and
-each non-obvious value can be traced to `docs/PRODUCT.md` or an explicit user
-decision.
+1. Fill values that `docs/PRODUCT.md` states explicitly, with source
+   `PRODUCT.md § <section>`.
+2. Define the project's domain sections (`domain_sections`) from the use
+   cases, requirements, ADRs, and risks, and confirm them with the user. The
+   template carries no domain rules of its own.
+3. Ask the user for every other value. A value PRODUCT.md only implies is
+   proposed and confirmed, never written silently. Record answers with source
+   `user, YYYY-MM-DD`.
+
+Every value and its source is recorded in the `Configuration Decisions` table
+of `docs/PRODUCT.md`. `uv run --with pyyaml python validate_config.py check` must pass.
+
+**Exit criteria:** `check` passes: every key is defined and has a recorded
+source matching its value.
 
 ### WI-003 — Render constitution.md and synchronize SDD objects
 
@@ -66,21 +80,19 @@ decision.
 **Depends on:** WI-002
 **Acceptance criteria:** AC-FR001-03
 
-First re-run `uv run --with pyyaml python validate_config.py check` to find
-any pending template key and resolve each one with the user. Then use root
-`config.yaml` and the approved `docs/PRODUCT.md` decisions to create
-`.sdd/constitution.md` from the immutable `.specify/memory/constitution.md`
-template. Any pending input must be presented as a
-clear question with the decision context, impact, and acceptable answer
-format; it must never be guessed.
+Render `.sdd/constitution.md` from root `config.yaml` and the immutable
+`.specify/memory/constitution.md` template with `uv run --with pyyaml python validate_config.py render`. Rendering
+re-runs `check` and fails on any missing value or leftover placeholder; no
+questions are asked in this WI. The rendered file is never edited by hand:
+any later `config.yaml` change updates its `Configuration Decisions` row and
+re-runs `render`.
 
 Then create or update all SDD objects under `.sdd/`—`SPEC.md`, `PLAN.md`,
-`TASKS.md`, `CHANGELOG.md`, and the constitution—to match the approved `docs/PRODUCT.md` definition while
-preserving the `FR > WI > Task` hierarchy and traceability.
+`TASKS.md`, and `CHANGELOG.md`—to match the approved `docs/PRODUCT.md`
+definition while preserving the `FR > WI > Task` hierarchy and traceability.
 
-**Exit criteria:** The constitution and all SDD objects agree with
-`docs/PRODUCT.md`, contain no unresolved placeholders, and record any
-remaining user decisions explicitly.
+**Exit criteria:** `uv run --with pyyaml python validate_config.py render --verify` passes, and all SDD objects agree
+with `docs/PRODUCT.md`.
 
 ### WI-004 — Create folders and non-programmatic dependencies
 

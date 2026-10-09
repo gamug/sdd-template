@@ -19,12 +19,16 @@ then applied by the remaining Work Items.
 
 ## Acceptance criteria
 
-- **AC-FR001-01:** `docs/PRODUCT.md` contains the approved discovery package
-  and clearly identifies unresolved decisions.
-- **AC-FR001-02:** Root `config.yaml` contains only approved project values
-  traceable to `docs/PRODUCT.md` or an explicit user decision.
-- **AC-FR001-03:** Canonical `.sdd/` artifacts are created from the approved
-  configuration and synchronized with `docs/PRODUCT.md`.
+- **AC-FR001-01:** `docs/PRODUCT.md` contains the complete discovery package,
+  has no unresolved decisions, and records the user's approval; it passes
+  `validate_discovery.py` without `--draft`.
+- **AC-FR001-02:** Root `config.yaml` defines every key the constitution
+  template requires, and each value's source (`PRODUCT.md § <section>` or
+  `user, YYYY-MM-DD`) is recorded in the `Configuration Decisions` table of
+  `docs/PRODUCT.md`; `uv run --with pyyaml python validate_config.py check` passes.
+- **AC-FR001-03:** `.sdd/constitution.md` is rendered by
+  `uv run --with pyyaml python validate_config.py render` with no placeholders left, and the other canonical `.sdd/`
+  artifacts are synchronized with `docs/PRODUCT.md`.
 - **AC-FR001-04:** The approved project structure and non-programmatic
   dependencies exist without implementing product source code.
 - **AC-FR001-05:** The selected development environment can be created and

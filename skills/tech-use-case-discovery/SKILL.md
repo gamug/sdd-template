@@ -90,14 +90,23 @@ The discovery process is executed in six sequential phases. For each phase, cons
 ### Phase 5: Development Environment Setup
 1. Define local and team developer environment standards: IDE setup, version control, language runtimes, version managers, package managers, and container isolation (e.g., Docker).
 2. Set up linters, formatters, environment variable configurations (`.env.example`), and CI/CD pipelines.
-3. **Output format**: Use `templates/dev-environment-checklist.md`.
+3. Record the repository governance and workflow decisions the project
+   constitution needs: integration branch and commit policy, commit convention
+   and hook, CI file and gate order, canonical tool configuration, the coding-agent
+   framework and its instruction file, scope-expansion approvals, and the initial
+   governance version.
+4. **Output format**: Use `templates/dev-environment-checklist.md`.
 
 ### Phase 6: Feasibility, Risk Assessment & MVP Roadmap
 1. Assess technical, delivery, and organizational risks; define explicit mitigation strategies.
 2. Define the Minimum Viable Product (MVP) boundary and establish a phased project roadmap.
-3. **Output format**: Consolidate all approved discovery decisions into
-   `docs/PRODUCT.md`. Keep unresolved decisions clearly marked for user
-   approval.
+3. **Output format**: Consolidate all discovery decisions into
+   `docs/PRODUCT.md`. Mark every open decision with a line containing
+   `UNRESOLVED:` and the question to ask.
+4. **Approval**: Resolve every `UNRESOLVED:` item with the user, then end
+   `docs/PRODUCT.md` with an `## Approval` section containing
+   `Approved by: <name or role>` and `Approved on: YYYY-MM-DD`. Configuration
+   (WI-002) cannot start until this validates.
 
 ---
 
@@ -106,6 +115,9 @@ The discovery process is executed in six sequential phases. For each phase, cons
 To ensure all discovery deliverables meet quality standards and completeness rules, run the bundled validation script:
 
 ```bash
+# While writing PRODUCT.md (approval not required yet)
+python skills/tech-use-case-discovery/scripts/validate_discovery.py --draft docs/PRODUCT.md
+# After user approval (required before WI-002)
 python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
 ```
 
@@ -115,6 +127,8 @@ The script verifies:
 - EARS syntax syntax compliance and unique Requirement IDs.
 - ADR completeness (Context, Decision, Trade-offs, Consequences).
 - MoSCoW priority distribution for the MVP.
+- User approval: an `Approval` section with approver and date, and no
+  remaining `UNRESOLVED:` markers (skipped with `--draft`).
 
 When validating from a directory, pass the project root or a directory that
 contains exactly one generated `PRODUCT.md`; bundled templates, references,
