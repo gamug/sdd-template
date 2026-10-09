@@ -9,15 +9,21 @@ and MoSCoW prioritization.
 
 Usage:
     python validate_discovery.py [--draft] <path_to_markdown_file_or_directory>
+    python validate_discovery.py --hash <path_to_PRODUCT.md>
 
 Without --draft the document must also be approved: an "Approval" section
-with "Approved by:" and "Approved on: YYYY-MM-DD", and no "UNRESOLVED:"
-markers. Use --draft while PRODUCT.md is still being written (TASK-003).
+with "Approved by:", "Approved on: YYYY-MM-DD", and
+"Approved content: sha256:<hash>", and no "UNRESOLVED:" markers. The hash
+binds the approval to the content the user saw: it covers the whole document
+except the Approval and "Configuration Decisions" sections, so any later edit
+fails validation until the user approves again. --hash prints the value to
+record. Use --draft while PRODUCT.md is still being written (TASK-003).
 
 Directory mode requires exactly one file named PRODUCT.md somewhere below the
 provided directory and validates that file only.
 """
 
+import hashlib
 import sys
 import os
 import re
@@ -39,6 +45,9 @@ EARS_PATTERNS = [
 ]
 MOSCOW_KEYWORDS = ["must have", "should have", "could have", "won't have"]
 UNRESOLVED_MARKER = "UNRESOLVED:"
+APPROVAL_HEADING = re.compile(r"^(?:\d+\.\s*)?approval\s*$", re.IGNORECASE)
+# Appended by validate_config.py scaffold (WI-002), after approval.
+DECISIONS_HEADING = re.compile(r"^configuration decisions\s*$", re.IGNORECASE)
 
 
 def get_sections(content: str):
@@ -66,6 +75,24 @@ def most_specific(sections):
     ]
 
 
+def content_hash(content: str) -> str:
+    """sha256 of the approved content: everything but Approval and Configuration Decisions."""
+    content = content.replace("\r\n", "\n")
+    excluded = [
+        (start, end)
+        for heading, _, start, end in get_sections(content)
+        if APPROVAL_HEADING.match(heading) or DECISIONS_HEADING.match(heading)
+    ]
+    kept, position = [], 0
+    for start, end in sorted(excluded):
+        if start >= position:
+            kept.append(content[position:start])
+            position = end
+    kept.append(content[position:])
+    normalized = "\n".join(line.rstrip() for line in "".join(kept).split("\n")).strip()
+    return "sha256:" + hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
 def check_approval(content: str, sections):
     issues = []
     unresolved = [
@@ -76,7 +103,7 @@ def check_approval(content: str, sections):
     approval = [
         section_content
         for heading, section_content, _, _ in sections
-        if re.match(r"^(?:\d+\.\s*)?approval\s*$", heading, re.IGNORECASE)
+        if APPROVAL_HEADING.match(heading)
     ]
     approved_by = approval and re.search(
         r"approved by\W*:?\**\s*(\S.*)$", approval[0], re.IGNORECASE | re.MULTILINE
@@ -84,8 +111,19 @@ def check_approval(content: str, sections):
     approved_on = approval and re.search(
         r"approved on\W*:?\**\s*(\d{4}-\d{2}-\d{2})\b", approval[0], re.IGNORECASE
     )
-    if not (approved_by and approved_on):
-        issues.append("Missing Approval section with 'Approved by:' and 'Approved on: YYYY-MM-DD'")
+    approved_content = approval and re.search(
+        r"approved content\W*:?\**\s*`?(sha256:[0-9a-f]{64})\b", approval[0], re.IGNORECASE
+    )
+    if not (approved_by and approved_on and approved_content):
+        issues.append(
+            "Missing Approval section with 'Approved by:', 'Approved on: YYYY-MM-DD', "
+            "and 'Approved content: sha256:<hash>' (print it with --hash)"
+        )
+    elif approved_content.group(1).lower() != content_hash(content):
+        issues.append(
+            "PRODUCT.md changed after approval (content hash mismatch). Show the changes "
+            "to the user, and record a new approval and --hash only after they approve"
+        )
     return issues
 
 
@@ -239,10 +277,12 @@ def analyze_content(content: str, filename: str, draft: bool = False):
 
 
 def main():
-    args = [arg for arg in sys.argv[1:] if arg != "--draft"]
-    draft = len(args) != len(sys.argv) - 1
-    if len(args) != 1:
+    flags = [arg for arg in sys.argv[1:] if arg in ("--draft", "--hash")]
+    args = [arg for arg in sys.argv[1:] if arg not in flags]
+    draft = "--draft" in flags
+    if len(args) != 1 or len(flags) > 1:
         print("Usage: python validate_discovery.py [--draft] <path_to_markdown_file_or_directory>")
+        print("       python validate_discovery.py --hash <path_to_PRODUCT.md>")
         sys.exit(1)
 
     target_path = args[0]
@@ -250,6 +290,14 @@ def main():
     if not os.path.exists(target_path):
         print(f"Error: Path '{target_path}' does not exist.")
         sys.exit(1)
+
+    if "--hash" in flags:
+        if not os.path.isfile(target_path):
+            print("Error: --hash needs the PRODUCT.md file.")
+            sys.exit(1)
+        with open(target_path, "r", encoding="utf-8") as f:
+            print(content_hash(f.read()))
+        sys.exit(0)
 
     all_success = True
 

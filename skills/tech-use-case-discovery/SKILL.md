@@ -106,7 +106,11 @@ The discovery process is executed in six sequential phases. For each phase, cons
    `UNRESOLVED:` and the question to ask.
 4. **Approval**: Resolve every `UNRESOLVED:` item with the user, then end
    `docs/PRODUCT.md` with an `## Approval` section containing
-   `Approved by: <name or role>` and `Approved on: YYYY-MM-DD`. Configuration
+   `Approved by: <name or role>`, `Approved on: YYYY-MM-DD`, and
+   `Approved content: <hash>`, where `<hash>` is the output of
+   `validate_discovery.py --hash docs/PRODUCT.md` for the version the user
+   approved. Any later edit outside the Approval and Configuration Decisions
+   sections fails validation until the user approves again. Configuration
    (WI-002) cannot start until this validates.
 
 ---
@@ -118,7 +122,9 @@ To ensure all discovery deliverables meet quality standards and completeness rul
 ```bash
 # While writing PRODUCT.md (approval not required yet)
 python skills/tech-use-case-discovery/scripts/validate_discovery.py --draft docs/PRODUCT.md
-# After user approval (required before WI-002)
+# After user approval: print the hash to record as "Approved content"
+python skills/tech-use-case-discovery/scripts/validate_discovery.py --hash docs/PRODUCT.md
+# Then validate the approved document (required before WI-002)
 python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
 ```
 
@@ -129,8 +135,9 @@ The script verifies:
 - EARS syntax syntax compliance and unique Requirement IDs.
 - ADR completeness (Context, Decision, Trade-offs, Consequences).
 - MoSCoW priority distribution for the MVP.
-- User approval: an `Approval` section with approver and date, and no
-  remaining `UNRESOLVED:` markers (skipped with `--draft`).
+- User approval: an `Approval` section with approver, date, and a content
+  hash that matches the current document, and no remaining `UNRESOLVED:`
+  markers (skipped with `--draft`).
 
 When validating from a directory, pass the project root or a directory that
 contains exactly one generated `PRODUCT.md`; bundled templates, references,
