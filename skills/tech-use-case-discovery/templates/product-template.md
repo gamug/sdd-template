@@ -109,7 +109,7 @@ SCENARIO: [Scenario name]
 > Fragment: [`dev-environment-checklist.md`](./dev-environment-checklist.md), "Development Environment Setup".
 
 - **Target platforms**: [e.g., Linux, macOS, Windows (WSL2)]
-- **Version control**: [Git hosting and access, e.g., SSH keys]
+- **Source hosting**: [Git hosting and access, e.g., SSH keys]
 - **Runtimes and version managers**: [Language runtimes and how their versions are pinned]
 - **Environment isolation**: [Devcontainer, Docker, host-only, or no-container, and why]
 - **Local services**: [Services the project needs locally and the command that starts them, or none]

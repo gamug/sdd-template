@@ -109,7 +109,7 @@ Evaluating Backend API Framework Options:
 ## 6. Development Environment Setup
 
 - **Target platforms**: Linux and macOS.
-- **Version control**: Git hosted on GitHub; contributors authenticate over SSH.
+- **Source hosting**: Git hosted on GitHub; contributors authenticate over SSH.
 - **Runtimes and version managers**: `pyenv` (Python 3.12.2), `nvm` (Node 20 LTS for frontend tools).
 - **Environment isolation**: Docker Compose running the local FastAPI server and a PostgreSQL test instance.
 - **Local services**: PostgreSQL test instance, started with `docker compose up -d`.
@@ -164,4 +164,4 @@ A score of 6 or more requires a mitigation plan.
 - **Approved by**: Product Owner (example)
 - **First approved on**: 2026-01-15
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:08397c613cdb4dea57339c81479259e2b2e30522f4812f6671eec1a5d543b1fa`
+- **Approved content**: `sha256:abc157d06209de99d66a323492e07f2b22f56801b486a47a025e027445730892`

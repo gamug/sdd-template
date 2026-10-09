@@ -7,7 +7,7 @@
 ## Development Environment Setup
 
 - **Target platforms**: [e.g., Linux, macOS, Windows (WSL2)]
-- **Version control**: [Git hosting and access, e.g., SSH keys]
+- **Source hosting**: [Git hosting and access, e.g., SSH keys]
 - **Runtimes and version managers**: [Language runtimes, their versions, and how
   they are pinned]
 - **Environment isolation**: [Devcontainer, Docker, host-only, or
