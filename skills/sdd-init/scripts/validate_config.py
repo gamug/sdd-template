@@ -2,16 +2,16 @@
 """
 Configuration Builder, Validator, and Constitution Renderer
 
-The constitution template (.specify/memory/constitution.md) is the contract for
+The constitution template (memory/constitution.md in the skill) is the contract for
 the root config.yaml: every {{key}}, {{#each key}}, and {{#if key}} placeholder
 is a key the project must decide. Decisions come from the approved
 docs/PRODUCT.md; the source of every value is recorded in its
 "Configuration Decisions" table.
 
 Usage (from the repository root):
-    uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py scaffold [--force]
-    uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check
-    uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render [--verify]
+    uv run --with-requirements skills/sdd-init/scripts/requirements.txt python skills/sdd-init/scripts/validate_config.py scaffold [--force]
+    uv run --with-requirements skills/sdd-init/scripts/requirements.txt python skills/sdd-init/scripts/validate_config.py check
+    uv run --with-requirements skills/sdd-init/scripts/requirements.txt python skills/sdd-init/scripts/validate_config.py render [--verify]
 
 Modes:
     scaffold  Write a config.yaml skeleton with every required key and the
@@ -28,7 +28,7 @@ Every mode first requires an approved docs/PRODUCT.md that passes
 validate_discovery.py, which also provides the PRODUCT.md section parser.
 
 Options (before the mode):
-    --template PATH   default .specify/memory/constitution.md
+    --template PATH   default: memory/constitution.md next to the scripts
     --config PATH     default config.yaml
     --product PATH    default docs/PRODUCT.md
 """
@@ -42,7 +42,9 @@ import sys
 
 import validate_discovery
 
-DEFAULT_TEMPLATE = os.path.join(".specify", "memory", "constitution.md")
+DEFAULT_TEMPLATE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), os.pardir, "memory", "constitution.md"
+)
 DEFAULT_OUTPUT = os.path.join(".sdd", "constitution.md")
 DECISIONS_HEADING = validate_discovery.DECISIONS_HEADING
 
@@ -572,7 +574,7 @@ def load_config(path: str):
     try:
         import yaml
     except ImportError:
-        fail("PyYAML is required. Run with `uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py ...`.")
+        fail("PyYAML is required. Run with `uv run --with-requirements skills/sdd-init/scripts/requirements.txt python skills/sdd-init/scripts/validate_config.py ...`.")
     try:
         with open(path, "r", encoding="utf-8") as f:
             # BaseLoader keeps every scalar as written: dates stay ISO text and
@@ -593,7 +595,7 @@ def scaffold(args):
         f"# Generated from {args.template} by validate_config.py scaffold.\n"
         f"# Fill each value from {args.product} and record its source in the\n"
         f"# '{DECISIONS_HEADING}' table there; ask the user for anything it does\n"
-        "# not state. Then run: uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check\n"
+        "# not state. Then run: uv run --with-requirements skills/sdd-init/scripts/requirements.txt python skills/sdd-init/scripts/validate_config.py check\n"
     )
     with open(args.config, "w", encoding="utf-8") as f:
         f.write(header + render_skeleton(build_tree(required)) + "\n")
