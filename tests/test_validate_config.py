@@ -73,6 +73,20 @@ class CheckTest(unittest.TestCase):
         project.set("project.name", "x-project-name", "PRODUCT.md § Deployment Strategy")
         self.assertCheckFails(project, "cites a section PRODUCT.md does not have")
 
+    def test_document_title_is_not_evidence(self):
+        # Reviewer's repro: the H1 spans the decisions table, so the row
+        # vouched for itself.
+        project = Project(self)
+        project.set("project.name", "zzz-invented-name", "PRODUCT.md § Technical Discovery")
+        self.assertCheckFails(
+            project, "cites a section with subsections: 'PRODUCT.md § Technical Discovery'"
+        )
+
+    def test_decisions_table_is_not_citable(self):
+        project = Project(self)
+        project.set("project.name", "x-project-name", "PRODUCT.md § Configuration Decisions")
+        self.assertCheckFails(project, "cites a section PRODUCT.md does not have")
+
     def test_collection_drift(self):
         project = Project(self)
         project.recorded["domain_sections"] = '[{"title":"Models","rules":["Pin checkpoints."]}]'

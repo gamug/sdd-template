@@ -15,12 +15,12 @@ import sys
 import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, ROOT)
-sys.path.insert(0, os.path.join(ROOT, "skills", "tech-use-case-discovery", "scripts"))
+SCRIPTS = os.path.join(ROOT, "skills", "tech-use-case-discovery", "scripts")
+sys.path.insert(0, SCRIPTS)
 
 import validate_config  # noqa: E402
 
-CONFIG_SCRIPT = os.path.join(ROOT, "validate_config.py")
+CONFIG_SCRIPT = os.path.join(SCRIPTS, "validate_config.py")
 DISCOVERY_SCRIPT = validate_config.DISCOVERY_VALIDATOR
 TEMPLATE = os.path.join(ROOT, validate_config.DEFAULT_TEMPLATE)
 SAMPLE = os.path.join(ROOT, "skills", "tech-use-case-discovery", "examples", "sample-discovery-output.md")
@@ -41,7 +41,8 @@ def write(path, text):
 
 def run(script, *args, cwd=None):
     return subprocess.run(
-        [sys.executable, script, *args], capture_output=True, text=True, cwd=cwd
+        [sys.executable, script, *args],
+        capture_output=True, text=True, encoding="utf-8", cwd=cwd,
     )
 
 

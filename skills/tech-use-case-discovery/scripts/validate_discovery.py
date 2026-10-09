@@ -15,7 +15,7 @@ Without --draft the document must also be approved: an "Approval" section
 with "Approved by:", "Approved on: YYYY-MM-DD", and
 "Approved content: sha256:<hash>", and no "UNRESOLVED:" markers. The hash
 binds the approval to the content the user saw: it covers the whole document
-except the Approval and "Configuration Decisions" sections, so any later edit
+except the Approval and "## Configuration Decisions" sections, so any later edit
 fails validation until the user approves again. --hash prints the value to
 record. Use --draft while PRODUCT.md is still being written (TASK-003).
 
@@ -46,8 +46,10 @@ EARS_PATTERNS = [
 MOSCOW_KEYWORDS = ["must have", "should have", "could have", "won't have"]
 UNRESOLVED_MARKER = "UNRESOLVED:"
 APPROVAL_HEADING = re.compile(r"^(?:\d+\.\s*)?approval\s*$", re.IGNORECASE)
-# Appended by validate_config.py scaffold (WI-002), after approval.
-DECISIONS_HEADING = re.compile(r"^configuration decisions\s*$", re.IGNORECASE)
+# Appended by validate_config.py scaffold (WI-002), after approval. Only this
+# exact H2 is the decisions table; any other spelling is ordinary content.
+DECISIONS_HEADING = "Configuration Decisions"
+TRADE_OFF_PATTERN = re.compile(r"trade[- ]?offs?", re.IGNORECASE)
 
 
 def get_sections(content: str):
@@ -75,13 +77,21 @@ def most_specific(sections):
     ]
 
 
-def content_hash(content: str) -> str:
-    """sha256 of the approved content: everything but Approval and Configuration Decisions."""
+def is_decisions_section(content: str, heading: str, start: int) -> bool:
+    return heading == DECISIONS_HEADING and content.startswith("## ", start)
+
+
+def strip_unapproved(content: str) -> str:
+    """The approved content: content without the Approval and Configuration Decisions sections.
+
+    Shared with validate_config.py, so neither section can be approved content
+    or cited as evidence for a configuration value.
+    """
     content = content.replace("\r\n", "\n")
     excluded = [
         (start, end)
         for heading, _, start, end in get_sections(content)
-        if APPROVAL_HEADING.match(heading) or DECISIONS_HEADING.match(heading)
+        if APPROVAL_HEADING.match(heading) or is_decisions_section(content, heading, start)
     ]
     kept, position = [], 0
     for start, end in sorted(excluded):
@@ -89,8 +99,19 @@ def content_hash(content: str) -> str:
             kept.append(content[position:start])
             position = end
     kept.append(content[position:])
-    normalized = "\n".join(line.rstrip() for line in "".join(kept).split("\n")).strip()
+    return "".join(kept)
+
+
+def content_hash(content: str) -> str:
+    """sha256 of the approved content: everything but Approval and Configuration Decisions."""
+    normalized = "\n".join(line.rstrip() for line in strip_unapproved(content).split("\n")).strip()
     return "sha256:" + hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def use_utf8_output():
+    """Print '§' and other non-ASCII text as UTF-8, also when output is piped on Windows."""
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
 
 
 def check_approval(content: str, sections):
@@ -213,7 +234,7 @@ def analyze_content(content: str, filename: str, draft: bool = False):
             if "context" not in section_content.lower()
             or "decision" not in section_content.lower()
             or "consequences" not in section_content.lower()
-            or "trade-off" not in section_content.lower()
+            or not TRADE_OFF_PATTERN.search(section_content)
         ]
         if not incomplete_adrs:
             print("  [PASS] ADR structural elements complete (Context, Decision, Consequences/Trade-offs).")
@@ -277,7 +298,8 @@ def analyze_content(content: str, filename: str, draft: bool = False):
 
 
 def main():
-    flags = [arg for arg in sys.argv[1:] if arg in ("--draft", "--hash")]
+    use_utf8_output()
+    flags =[arg for arg in sys.argv[1:] if arg in ("--draft", "--hash")]
     args = [arg for arg in sys.argv[1:] if arg not in flags]
     draft = "--draft" in flags
     if len(args) != 1 or len(flags) > 1:

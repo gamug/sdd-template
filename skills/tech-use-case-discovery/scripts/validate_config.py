@@ -8,25 +8,24 @@ is a key the project must decide. Decisions come from the approved
 docs/PRODUCT.md; the source of every value is recorded in its
 "Configuration Decisions" table.
 
-Usage:
-    uv run --with pyyaml python validate_config.py scaffold [--force]
-    uv run --with pyyaml python validate_config.py check
-    uv run --with pyyaml python validate_config.py render [--verify]
+Usage (from the repository root):
+    uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py scaffold [--force]
+    uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check
+    uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render [--verify]
 
 Modes:
     scaffold  Write a config.yaml skeleton with every required key and the
               PRODUCT.md section each one usually comes from, and append an
-              empty "Configuration Decisions" table to docs/PRODUCT.md.
+              empty "## Configuration Decisions" table to docs/PRODUCT.md.
     check     Fail on missing or empty keys, missing item fields, keys without
-              a verifiable recorded source, recorded values that differ from
-              config.yaml (collections as compact JSON), and drift between
-              related values.
+              a verifiable recorded source, and recorded values that differ
+              from config.yaml (collections as compact JSON).
     render    Run check, then render .sdd/constitution.md. Fails if any
               placeholder is left. --verify only compares the rendered output
               with the existing file and fails when it is out of date.
 
 Every mode first requires an approved docs/PRODUCT.md that passes
-skills/tech-use-case-discovery/scripts/validate_discovery.py.
+validate_discovery.py, which also provides the PRODUCT.md section parser.
 
 Options (before the mode):
     --template PATH   default .specify/memory/constitution.md
@@ -41,13 +40,12 @@ import re
 import subprocess
 import sys
 
+import validate_discovery
+
 DEFAULT_TEMPLATE = os.path.join(".specify", "memory", "constitution.md")
 DEFAULT_OUTPUT = os.path.join(".sdd", "constitution.md")
-DISCOVERY_VALIDATOR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "skills", "tech-use-case-discovery", "scripts", "validate_discovery.py",
-)
-DECISIONS_HEADING = "Configuration Decisions"
+DISCOVERY_VALIDATOR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "validate_discovery.py")
+DECISIONS_HEADING = validate_discovery.DECISIONS_HEADING
 
 COMMENT_PATTERN = re.compile(r"\{\{!--.*?--\}\}\n*", re.DOTALL)
 TOKEN_PATTERN = re.compile(r"\{\{\s*([#/]?)\s*([^{}]*?)\s*\}\}")
@@ -328,49 +326,6 @@ def check_required(config, required) -> list:
     return issues
 
 
-PYTHON_IMAGE_PATTERN = re.compile(r"devcontainers/python:(?:\d+-)?(\d+)\.(\d+)")
-CONSTRAINT_PATTERN = re.compile(r"^\s*(>=|<=|==|>|<)\s*(\d+)(?:\.(\d+))?\s*$")
-
-
-def satisfies(version, constraint: str) -> bool:
-    for clause in constraint.split(","):
-        match = CONSTRAINT_PATTERN.match(clause)
-        if not match:
-            raise ValueError(f"Unsupported version constraint: {clause!r}")
-        operator, major, minor = match.group(1), int(match.group(2)), int(match.group(3) or 0)
-        bound = (major, minor)
-        if not {
-            ">=": version >= bound,
-            "<=": version <= bound,
-            "==": version == bound,
-            ">": version > bound,
-            "<": version < bound,
-        }[operator]:
-            return False
-    return True
-
-
-def check_python_runtime(config) -> list:
-    runtime = config.get("runtime") or {}
-    image = (config.get("devcontainer") or {}).get("image")
-    if str(runtime.get("language", "")).lower() != "python" or not image:
-        return []
-    match = PYTHON_IMAGE_PATTERN.search(str(image))
-    if not match:
-        return []
-    image_version = (int(match.group(1)), int(match.group(2)))
-    constraint = str(runtime.get("version", ""))
-    try:
-        if satisfies(image_version, constraint):
-            return []
-    except ValueError as error:
-        return [str(error)]
-    return [
-        f"devcontainer.image uses Python {image_version[0]}.{image_version[1]}, "
-        f"which does not satisfy runtime.version {constraint!r}."
-    ]
-
-
 # ---------------------------------------------------------------------------
 # PRODUCT.md: discovery gate and Configuration Decisions table
 # ---------------------------------------------------------------------------
@@ -380,7 +335,7 @@ def require_approved_product(product_path: str):
         fail(f"'{product_path}' not found. Complete WI-001 (discovery) before configuring the project.")
     result = subprocess.run(
         [sys.executable, "-I", DISCOVERY_VALIDATOR, product_path],
-        capture_output=True, text=True,
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
     if result.returncode != 0:
         failures = [line.strip() for line in result.stdout.splitlines() if "[FAIL]" in line]
@@ -391,10 +346,11 @@ def require_approved_product(product_path: str):
 
 
 def decisions_section(product: str):
-    match = re.search(
-        rf"^##\s+{DECISIONS_HEADING}\s*$(.*?)(?=^##\s|\Z)", product, re.MULTILINE | re.DOTALL
-    )
-    return match.group(1) if match else None
+    product = product.replace("\r\n", "\n")
+    for heading, text, start, _ in validate_discovery.get_sections(product):
+        if validate_discovery.is_decisions_section(product, heading, start):
+            return text
+    return None
 
 
 def parse_decisions(product: str):
@@ -425,33 +381,38 @@ def strip_code(text: str) -> str:
     return text[1:-1] if len(text) >= 2 and text[0] == text[-1] == "`" else text
 
 
-def product_sections(product: str):
-    """Return [(heading, text)] for every PRODUCT.md section except the decisions table and approval."""
-    headings = list(re.finditer(r"^(#{1,6})\s+(.+?)\s*$", product, re.MULTILINE))
-    sections = []
-    for index, heading in enumerate(headings):
-        level, title = len(heading.group(1)), heading.group(2).strip()
-        if title == DECISIONS_HEADING or re.match(r"^(?:\d+\.\s*)?approval$", title, re.IGNORECASE):
-            continue
-        end = len(product)
-        for following in headings[index + 1:]:
-            if len(following.group(1)) <= level:
-                end = following.start()
-                break
-        sections.append((title, product[heading.start():end]))
-    return sections
+def evidence_sections(product: str):
+    """Return [(heading, text, is_leaf)] for the approved content of PRODUCT.md.
+
+    The Approval and Configuration Decisions sections are removed first, so a
+    citation can never reach the recorded values themselves.
+    """
+    content = validate_discovery.strip_unapproved(product)
+    sections = validate_discovery.get_sections(content)
+    leaves = validate_discovery.most_specific(sections)
+    return [
+        (heading, f"{heading}\n{text}", (heading, text, start, end) in leaves)
+        for heading, text, start, end in sections
+    ]
 
 
 def cited_sections(product: str, reference: str):
-    """Sections whose heading is, starts with the number of, or contains the reference."""
+    """Return (every matching section, the leaf ones) as text.
+
+    A section matches when its heading is, starts with the number of, or
+    contains the reference. Only leaf sections (no subsections) are evidence,
+    so a broad heading such as the document title cannot vouch for a value.
+    """
     wanted = re.sub(r"[`*]", "", reference).strip().lower().rstrip(".")
-    matches = []
-    for title, text in product_sections(product):
+    matches, leaves = [], []
+    for title, text, is_leaf in evidence_sections(product):
         heading = re.sub(r"[`*]", "", title).strip().lower()
         number = re.match(r"^(\d+(?:\.\d+)*)\.?\s", heading)
         if heading == wanted or (number and number.group(1) == wanted) or (len(wanted) >= 3 and wanted in heading):
             matches.append(text)
-    return matches
+            if is_leaf:
+                leaves.append(text)
+    return matches, leaves
 
 
 def appears_in(value: str, text: str) -> bool:
@@ -512,9 +473,14 @@ def check_decisions(config, required, product) -> list:
             )
         elif source.startswith("PRODUCT.md"):
             reference = source.split("§", 1)[1]
-            sections = cited_sections(product, reference)
-            if not sections:
+            matches, sections = cited_sections(product, reference)
+            if not matches:
                 issues.append(f"Source for {key} cites a section PRODUCT.md does not have: {source!r}")
+            elif not sections:
+                issues.append(
+                    f"Source for {key} cites a section with subsections: {source!r}. "
+                    "Cite the specific subsection that states the value"
+                )
             elif found:
                 unsupported = [
                     item for item in scalar_items(value)
@@ -589,7 +555,7 @@ def load_config(path: str):
     try:
         import yaml
     except ImportError:
-        fail("PyYAML is required. Run with `uv run --with pyyaml python validate_config.py ...`.")
+        fail("PyYAML is required. Run with `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py ...`.")
     try:
         with open(path, "r", encoding="utf-8") as f:
             # BaseLoader keeps every scalar as written: dates stay ISO text and
@@ -610,7 +576,7 @@ def scaffold(args):
         f"# Generated from {args.template} by validate_config.py scaffold.\n"
         f"# Fill each value from {args.product} and record its source in the\n"
         f"# '{DECISIONS_HEADING}' table there; ask the user for anything it does\n"
-        "# not state. Then run: uv run --with pyyaml python validate_config.py check\n"
+        "# not state. Then run: uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check\n"
     )
     with open(args.config, "w", encoding="utf-8") as f:
         f.write(header + render_skeleton(build_tree(required)) + "\n")
@@ -621,37 +587,31 @@ def scaffold(args):
         with open(args.product, "a", encoding="utf-8") as f:
             f.write(
                 f"\n## {DECISIONS_HEADING}\n\n"
-                "Source is `PRODUCT.md § <section>` (an existing heading or its number whose\n"
-                "text contains the value) or `user, YYYY-MM-DD` for values the user decided\n"
-                "or confirmed. Lists and maps are recorded as compact JSON; escape `|` as `\\|`.\n\n"
+                "Source is `PRODUCT.md § <section>` (an existing heading, or its number, with no\n"
+                "subsections and whose text contains the value) or `user, YYYY-MM-DD` for\n"
+                "values the user decided or confirmed. Lists and maps are recorded as compact JSON; escape `|` as `\\|`.\n\n"
                 "| Key | Value | Source |\n| :--- | :--- | :--- |\n" + rows + "\n"
             )
         print(f"[PASS] Appended an empty '{DECISIONS_HEADING}' table to {args.product}.")
 
 
 def run_check(args):
+    """Load the inputs once and check them; render reuses the loaded template and config."""
     product = require_approved_product(args.product)
-    _, required = load_template(args.template)
+    nodes, required = load_template(args.template)
     config = load_config(args.config)
-    issues = (
-        check_required(config, required)
-        + check_decisions(config, required, product)
-        + check_python_runtime(config)
-    )
-    return config, required, issues
+    issues = check_required(config, required) + check_decisions(config, required, product)
+    report(issues, args.config)
+    return nodes, config, required
 
 
 def check(args):
-    _, required, issues = run_check(args)
-    report(issues, args.config)
+    _, _, required = run_check(args)
     print(f"[PASS] {args.config} defines all {len(required)} template key(s) with recorded sources.")
 
 
 def render(args):
-    _, required, issues = run_check(args)
-    report(issues, args.config)
-    nodes, _ = load_template(args.template)
-    config = load_config(args.config)
+    nodes, config, _ = run_check(args)
     try:
         rendered = render_nodes(nodes, config, {"item": None, "key": None, "path": ""})
     except TemplateError as error:
@@ -690,6 +650,7 @@ def fail(message: str):
 
 
 def main():
+    validate_discovery.use_utf8_output()
     parser = argparse.ArgumentParser(description="Build, validate, and render the project configuration.")
     parser.add_argument("--template", default=DEFAULT_TEMPLATE)
     parser.add_argument("--config", default="config.yaml")

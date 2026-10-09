@@ -48,6 +48,22 @@ class DiscoveryTest(unittest.TestCase):
         self.assertEqual(validate_discovery.content_hash(reapproved), expected)
         self.assertEqual(self.validate(with_decisions).returncode, 0)
 
+    def test_only_exact_decisions_heading_is_excluded_from_hash(self):
+        expected = validate_discovery.content_hash(self.sample)
+        for heading in ("### Configuration Decisions", "## configuration decisions"):
+            # Inserted before the Approval section so it isn't a subsection of it.
+            product = self.sample.replace(
+                "## 9. Approval", f"{heading}\n\nAdded after approval.\n\n## 9. Approval"
+            )
+            self.assertNotEqual(validate_discovery.content_hash(product), expected, heading)
+
+    def test_adr_trade_off_spellings(self):
+        for spelling in ("Tradeoffs", "Trade offs", "trade-off"):
+            product = self.sample.replace("Trade-offs", spelling)
+            self.assertEqual(self.validate(product, "--draft").returncode, 0, spelling)
+        product = self.sample.replace("Trade-offs", "Compromises")
+        self.assertFails(self.validate(product, "--draft"), "One or more ADRs are missing")
+
     def test_hash_flag_prints_recorded_hash(self):
         path = os.path.join(self.dir, "PRODUCT.md")
         write(path, self.sample)
