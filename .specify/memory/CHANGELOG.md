@@ -1,3 +1,5 @@
+# Changelog
+
 ## Usage
 
 Record completed Work Items and their associated tasks here after verification.

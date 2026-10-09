@@ -5,6 +5,9 @@ on:
   push:
     branches: [master]
 
+# Forks keep these steps and add their initialization checks (TASK-015):
+# validate_discovery.py docs/PRODUCT.md, validate_config.py check, and
+# validate_config.py render --verify.
 jobs:
   test:
     # 22.04 still provides Python 3.8, the oldest supported version.
@@ -16,10 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+        id: python
         with:
           python-version: ${{ matrix.python-version }}
-      - run: python -m pip install pyyaml
+      - uses: astral-sh/setup-uv@v6
+      # Run the documented commands with the matrix interpreter.
+      - run: echo "UV_PYTHON=${{ steps.python.outputs.python-path }}" >> "$GITHUB_ENV"
       - name: Validate the bundled discovery sample
         run: python skills/tech-use-case-discovery/scripts/validate_discovery.py skills/tech-use-case-discovery/examples/sample-discovery-output.md
       - name: Run validator regression tests
-        run: python -m unittest discover -s tests -v
+        run: uv run --no-project --with pyyaml==6.0.2 python -m unittest discover -s tests -v

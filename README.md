@@ -38,7 +38,6 @@ The template is based on these principles:
 
 ```text
 .
-├── validate_config.py              # Builds, checks, and renders config.yaml
 ├── .specify/
 │   └── memory/
 │       ├── constitution.md         # Immutable constitution template
@@ -48,6 +47,7 @@ The template is based on these principles:
 │       └── CHANGELOG.md            # Changelog usage placeholder
 ├── skills/
 │   └── tech-use-case-discovery/    # Required discovery workflow
+│       └── scripts/                # validate_discovery.py and validate_config.py
 ├── tests/                          # Regression tests for the validators
 ├── .github/workflows/validators.yml  # Runs the tests on pull requests
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
@@ -118,7 +118,7 @@ The constitution template is generic. Every placeholder it contains is a
 decision the project must make. Generate the root configuration skeleton:
 
 ```bash
-uv run --with pyyaml python validate_config.py scaffold
+uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py scaffold
 ```
 
 This writes `config.yaml`, with the PRODUCT.md section each key usually comes
@@ -140,20 +140,21 @@ from, and appends a `Configuration Decisions` table (key, value, source) to
    `user, YYYY-MM-DD`.
 
 ```bash
-uv run --with pyyaml python validate_config.py check
+uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check
 ```
 
 The check fails on missing or empty keys, sources that are malformed or cite
 a section that doesn't contain the value, recorded values (including
-collections) that differ from `config.yaml`, malformed table rows, and drift
-between related values such as `runtime.version` and the devcontainer image.
+collections) that differ from `config.yaml`, and malformed table rows. A cited
+section must have no subsections, and the Approval and Configuration Decisions
+sections are never evidence.
 Values are read as written, so dates and versions such as `1.10` render
 unchanged.
 
 ### WI-003: render the constitution and create the SDD objects
 
 ```bash
-uv run --with pyyaml python validate_config.py render
+uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render
 ```
 
 `render` re-runs `check`, then writes `.sdd/constitution.md` and fails on any
@@ -210,7 +211,7 @@ Before starting the agent, prepare:
    invent answers when the project has not yet defined its use case.
 6. Python 3.8 or later and [`uv`](https://docs.astral.sh/uv/) on the host.
    The initialization tooling (`validate_discovery.py` and
-   `validate_config.py`, which needs PyYAML through `uv run --with pyyaml`)
+   `validate_config.py`, which needs PyYAML through `uv run --with pyyaml==6.0.2`)
    runs in WI-001 to WI-003, before the project's own environment exists.
 
 Do not create `config.yaml` or application source code manually before the
@@ -263,7 +264,7 @@ The agent must:
    [`skills/tech-use-case-discovery/SKILL.md`](./skills/tech-use-case-discovery/SKILL.md)
    to create `docs/PRODUCT.md`.
 2. Execute WI-002 to build root `config.yaml` with
-   [`validate_config.py`](./validate_config.py), recording the source of every
+   [`validate_config.py`](./skills/tech-use-case-discovery/scripts/validate_config.py), recording the source of every
    value (`docs/PRODUCT.md` or an explicit user decision).
 3. Execute WI-003 to render `.sdd/constitution.md` with
    `validate_config.py render` and create `.sdd/SPEC.md`, `.sdd/PLAN.md`,
@@ -294,13 +295,14 @@ After initialization, every product change follows this cycle:
    content of `docs/PRODUCT.md` needs the user's re-approval.
 7. Move completed work to `.sdd/CHANGELOG.md`.
 
-The pre-commit hook and CI added in WI-006 run the initialization checks on
-every change, so these artifacts cannot drift silently:
+The pre-commit hook and the steps WI-006 adds to
+`.github/workflows/validators.yml` run the initialization checks on every
+change, so these artifacts cannot drift silently:
 
 ```bash
 python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
-uv run --with pyyaml python validate_config.py check
-uv run --with pyyaml python validate_config.py render --verify
+uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check
+uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify
 ```
 
 Every production code commit must use Conventional Commits and include the
@@ -325,6 +327,11 @@ Before changing a fork:
 - Never weaken a check, fabricate repository state, commit secrets, or hide a
   failure to make a change pass.
 
+Commits that maintain this template itself (validators, skill, docs, tests)
+use plain Conventional Commits, `type(scope): summary`, without the
+`[FR][WI][TASK]` suffix. That suffix traces a fork's FR-001 initialization
+and product work, and template maintenance is not part of it.
+
 ## Commands and environment
 
 The rendered constitution's configured package manager is the only supported
@@ -344,7 +351,7 @@ which `.github/workflows/validators.yml` runs on Python 3.8 and the latest
 Python for every pull request:
 
 ```bash
-uv run --no-project --with pyyaml python -m unittest discover -s tests
+uv run --no-project --with pyyaml==6.0.2 python -m unittest discover -s tests
 ```
 
 ## License and ownership

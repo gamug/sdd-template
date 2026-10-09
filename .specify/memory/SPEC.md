@@ -25,9 +25,9 @@ then applied by the remaining Work Items.
 - **AC-FR001-02:** Root `config.yaml` defines every key the constitution
   template requires, and each value's source (`PRODUCT.md § <section>` or
   `user, YYYY-MM-DD`) is recorded in the `Configuration Decisions` table of
-  `docs/PRODUCT.md`; `uv run --with pyyaml python validate_config.py check` passes.
+  `docs/PRODUCT.md`; `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check` passes.
 - **AC-FR001-03:** `.sdd/constitution.md` is rendered by
-  `uv run --with pyyaml python validate_config.py render` with no placeholders left, and the other canonical `.sdd/`
+  `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render` with no placeholders left, and the other canonical `.sdd/`
   artifacts are synchronized with `docs/PRODUCT.md`.
 - **AC-FR001-04:** The approved project structure and non-programmatic
   dependencies exist without implementing product source code.

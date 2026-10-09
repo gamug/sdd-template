@@ -8,22 +8,9 @@ until discovery produces `docs/PRODUCT.md`.
 
 ### Acceptance criteria
 
-- **AC-FR001-01:** `docs/PRODUCT.md` contains the complete discovery package,
-  has no unresolved decisions, and records the user's approval; it passes
-  `validate_discovery.py` without `--draft`.
-- **AC-FR001-02:** Root `config.yaml` defines every key the constitution
-  template requires, and each value's source (`PRODUCT.md § <section>` or
-  `user, YYYY-MM-DD`) is recorded in the `Configuration Decisions` table of
-  `docs/PRODUCT.md`; `uv run --with pyyaml python validate_config.py check` passes.
-- **AC-FR001-03:** `.sdd/constitution.md` is rendered by
-  `uv run --with pyyaml python validate_config.py render` with no placeholders left, and the other canonical `.sdd/`
-  artifacts are synchronized with `docs/PRODUCT.md`.
-- **AC-FR001-04:** The approved project structure and non-programmatic
-  dependencies exist without implementing product source code.
-- **AC-FR001-05:** The selected development environment can be created and
-  its documented baseline checks pass without committed secrets.
-- **AC-FR001-06:** Environment initialization can reproduce the documented
-  setup from a clean checkout or reports actionable errors.
+The acceptance criteria `AC-FR001-01` through `AC-FR001-06` are defined in
+[`SPEC.md`](./SPEC.md#acceptance-criteria). Each Work Item below names the
+criterion it satisfies.
 
 ## Work items
 
@@ -56,13 +43,13 @@ approved content in its `## Approval` section, and
 **Depends on:** WI-001 (approved `docs/PRODUCT.md`)
 **Acceptance criteria:** AC-FR001-02
 
-Build root `config.yaml` from scratch with `uv run --with pyyaml python validate_config.py scaffold`, which lists
+Build root `config.yaml` from scratch with `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py scaffold`, which lists
 every key required by the generic `.specify/memory/constitution.md` template
 and the PRODUCT.md section each one usually comes from.
 
 1. Fill values that `docs/PRODUCT.md` states explicitly, with source
-   `PRODUCT.md § <section>`. The cited section must contain each value (every
-   item, for lists and maps) as a whole token.
+   `PRODUCT.md § <section>`. The cited section must have no subsections and
+   contain each value (every item, for lists and maps) as a whole token.
 2. Define the project's domain sections (`domain_sections`) from the use
    cases, requirements, ADRs, and risks, and confirm them with the user. The
    template carries no domain rules of its own. Their source is always
@@ -72,7 +59,7 @@ and the PRODUCT.md section each one usually comes from.
    `user, YYYY-MM-DD`.
 
 Every value and its source is recorded in the `Configuration Decisions` table
-of `docs/PRODUCT.md`. `uv run --with pyyaml python validate_config.py check` must pass.
+of `docs/PRODUCT.md`. `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check` must pass.
 
 **Exit criteria:** `check` passes: every key is defined and has a recorded
 source matching its value.
@@ -84,7 +71,7 @@ source matching its value.
 **Acceptance criteria:** AC-FR001-03
 
 Render `.sdd/constitution.md` from root `config.yaml` and the immutable
-`.specify/memory/constitution.md` template with `uv run --with pyyaml python validate_config.py render`. Rendering
+`.specify/memory/constitution.md` template with `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render`. Rendering
 re-runs `check` and fails on any missing value or leftover placeholder; no
 questions are asked in this WI. The rendered file is never edited by hand:
 any later `config.yaml` change updates its `Configuration Decisions` row and
@@ -94,7 +81,7 @@ Then create or update all SDD objects under `.sdd/`—`SPEC.md`, `PLAN.md`,
 `TASKS.md`, and `CHANGELOG.md`—to match the approved `docs/PRODUCT.md`
 definition while preserving the `FR > WI > Task` hierarchy and traceability.
 
-**Exit criteria:** `uv run --with pyyaml python validate_config.py render --verify` passes, and all SDD objects agree
+**Exit criteria:** `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify` passes, and all SDD objects agree
 with `docs/PRODUCT.md`.
 
 ### WI-004 — Create folders and non-programmatic dependencies
@@ -136,7 +123,8 @@ checkout. Prefer `scripts/init.sh` when compatible with the approved
 environment; otherwise use the project-appropriate equivalent and document why.
 Add the initialization checks (`validate_discovery.py`, `validate_config.py
 check`, and `validate_config.py render --verify`) to the fork's pre-commit
-hook and CI so the rendered constitution stays in sync after WI-003.
+hook and as steps in `.github/workflows/validators.yml`, so the rendered
+constitution stays in sync after WI-003.
 
 **Exit criteria:** Re-running the initialization automation produces the
 documented environment or reports actionable errors, the procedure is

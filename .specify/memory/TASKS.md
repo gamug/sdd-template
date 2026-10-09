@@ -59,13 +59,14 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Status:** pending
 - **Depends on:** TASK-004
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** Run `uv run --with pyyaml python validate_config.py scaffold`. It writes the `config.yaml` skeleton,
+- **Action:** Run `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py scaffold`. It writes the `config.yaml` skeleton,
   with the PRODUCT.md section each key usually comes from, and appends the
   `Configuration Decisions` table to `docs/PRODUCT.md`. Fill only values that
   `docs/PRODUCT.md` states explicitly, and record each one in the table with
-  source `PRODUCT.md § <section>`; `check` verifies that the section exists and
-  contains the value (every item, for lists and maps) as a whole token, so
-  `3.1` is not evidence for "3.12.2". Record lists and maps as compact JSON
+  source `PRODUCT.md § <section>`; `check` verifies that the section exists,
+  has no subsections, and contains the value (every item, for lists and maps)
+  as a whole token, so `3.1` is not evidence for "3.12.2". The Approval and
+  Configuration Decisions sections are never evidence. Record lists and maps as compact JSON
   and escape `|` in values as `\|`.
 
 ### TASK-006 — Define domain sections
@@ -101,10 +102,9 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Status:** pending
 - **Depends on:** TASK-007
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** Run `uv run --with pyyaml python validate_config.py check`. It fails on missing or empty keys, keys
-  without a valid recorded source, recorded values that differ from
-  `config.yaml`, and drift between related values. Return to TASK-007 for
-  every reported key.
+- **Action:** Run `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check`. It fails on missing or empty keys, keys
+  without a valid recorded source, and recorded values that differ from
+  `config.yaml`. Return to TASK-007 for every reported key.
 
 ## WI-003 — Render constitution.md and synchronize SDD objects
 
@@ -114,7 +114,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Status:** pending
 - **Depends on:** TASK-008
 - **Acceptance criteria:** AC-FR001-03
-- **Action:** Run `uv run --with pyyaml python validate_config.py render` to create `.sdd/constitution.md` from root
+- **Action:** Run `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render` to create `.sdd/constitution.md` from root
   `config.yaml` and the immutable `.specify/memory/constitution.md`. Rendering
   re-runs `check` and fails on any missing value or leftover placeholder. Do
   not edit the rendered file by hand; re-run `render` after any
@@ -128,7 +128,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Acceptance criteria:** AC-FR001-03
 - **Action:** Create or update `.sdd/SPEC.md`, `.sdd/PLAN.md`, `.sdd/TASKS.md`,
   and `.sdd/CHANGELOG.md` to match the approved `docs/PRODUCT.md` and preserve
-  traceability. Finish with `uv run --with pyyaml python validate_config.py render --verify`.
+  traceability. Finish with `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`.
 
 ## WI-004 — Create folders and non-programmatic dependencies
 
@@ -180,12 +180,13 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Acceptance criteria:** AC-FR001-06
 - **Action:** Create `scripts/init.sh` or the approved equivalent to reproduce
   the environment from a clean checkout. Wire these checks into the fork's
-  pre-commit hook and CI (the configured `quality.commit_hook` and
-  `quality.ci_file`), so `docs/PRODUCT.md`, `config.yaml`, and
+  pre-commit hook (the configured `quality.commit_hook`) and add them as
+  steps to the inherited `.github/workflows/validators.yml`, keeping its
+  template sample and test steps, so `docs/PRODUCT.md`, `config.yaml`, and
   `.sdd/constitution.md` cannot drift after initialization:
   - `python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md`
-  - `uv run --with pyyaml python validate_config.py check`
-  - `uv run --with pyyaml python validate_config.py render --verify`
+  - `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check`
+  - `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`
 
   Show that a hand edit to `.sdd/constitution.md` fails the hook.
 

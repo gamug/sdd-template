@@ -132,7 +132,7 @@ The script verifies:
 - Presence of required sections in `docs/PRODUCT.md` (Use Cases, Functional
   Requirements, Tech Stack, ADRs, Dev Environment, Risks, Governance &
   Workflow).
-- EARS syntax syntax compliance and unique Requirement IDs.
+- EARS syntax compliance and unique Requirement IDs.
 - ADR completeness (Context, Decision, Trade-offs, Consequences).
 - MoSCoW priority distribution for the MVP.
 - User approval: an `Approval` section with approver, date, and a content
