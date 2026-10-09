@@ -4,11 +4,10 @@ A reusable starting point for repositories built with
 **Specification-Driven Development (SDD)**.
 
 This repository is designed to be forked. It provides a constitution template,
-a configuration example, a discovery skill, and the SDD artifacts that keep
+a configuration builder, a discovery skill, and the SDD artifacts that keep
 requirements, design, implementation, and verification aligned. It is not a
-finished application. The values in
-[`constitution.yaml.example`](./constitution.yaml.example) are examples and
-must be replaced during project initialization.
+finished application. The project configuration is built from scratch during
+initialization from the keys the constitution template requires.
 
 ## Repository philosophy
 
@@ -39,10 +38,8 @@ The template is based on these principles:
 
 ```text
 .
-├── constitution.yaml.example       # Starting point for root config.yaml
+├── validate_config.py              # Builds and checks root config.yaml
 ├── .specify/
-│   ├── scripts/
-│   │   └── validate_config.py      # Config consistency checks
 │   └── memory/
 │       ├── constitution.md         # Immutable constitution template
 │       ├── SPEC.md                 # Initial specification template
@@ -51,7 +48,7 @@ The template is based on these principles:
 │       └── CHANGELOG.md            # Changelog usage placeholder
 ├── skills/
 │   └── tech-use-case-discovery/    # Required discovery workflow
-├── docs/                           # Product discovery output location
+├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
 └── README.md
 ```
 
@@ -101,25 +98,31 @@ not invent missing product, technical, or operational decisions.
 
 ### WI-002: create the configuration
 
-Copy the example to the authoritative root configuration:
-
-```powershell
-Copy-Item constitution.yaml.example config.yaml
-```
-
-Replace every example value with an approved decision from
-`docs/PRODUCT.md`. Validate every required field and ask the user about
-missing or ambiguous values before writing them.
-
-Check that related values have not drifted apart:
+Generate the authoritative root configuration from the keys required by the
+constitution template:
 
 ```bash
-uv run --with pyyaml python .specify/scripts/validate_config.py config.yaml
+python validate_config.py scaffold
 ```
+
+Fill every value from `docs/PRODUCT.md` wherever it states or directly implies
+the decision, including the instruction file and init command of the selected
+coding-agent framework (for example `CLAUDE.md`, `AGENTS.md`, or
+`.github/copilot-instructions.md`). Ask the user about every value it does not
+determine. Then validate it:
+
+```bash
+uv run --with pyyaml python validate_config.py check
+```
+
+The check fails on missing or empty keys and on drift between related values,
+such as `runtime.version` and the devcontainer image.
 
 ### WI-003: create the canonical SDD objects
 
-Use root `config.yaml` and the immutable template constitution to create:
+Re-run `uv run --with pyyaml python validate_config.py check` to find any pending template key and resolve it with the
+user. Then use root `config.yaml` and the immutable template constitution to
+create:
 
 ```text
 .sdd/constitution.md
@@ -215,9 +218,9 @@ The agent must:
 1. Execute WI-001 and use
    [`skills/tech-use-case-discovery/SKILL.md`](./skills/tech-use-case-discovery/SKILL.md)
    to create `docs/PRODUCT.md`.
-2. Execute WI-002 to create root `config.yaml` from
-   [`constitution.yaml.example`](./constitution.yaml.example), replacing
-   example values only with approved decisions.
+2. Execute WI-002 to build root `config.yaml` with
+   [`validate_config.py`](./validate_config.py), using only values from
+   `docs/PRODUCT.md` or explicit user decisions.
 3. Execute WI-003 to create `.sdd/constitution.md`, `.sdd/SPEC.md`,
    `.sdd/PLAN.md`, `.sdd/TASKS.md`, and `.sdd/CHANGELOG.md`.
 4. Execute WI-004 through WI-006 to create the approved project structure,
@@ -269,8 +272,7 @@ Before changing a fork:
 
 The rendered constitution's configured package manager is the only supported
 way to run dependency, test, lint, formatting, type-checking, and operational
-commands. The concrete commands belong to the fork's `config.yaml`; do not
-copy example commands without reviewing them.
+commands. The concrete commands belong to the fork's `config.yaml`.
 
 Keep real environment files out of Git:
 

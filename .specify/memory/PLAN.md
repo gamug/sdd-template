@@ -48,10 +48,13 @@ package, and unresolved decisions are clearly marked for user approval.
 **Depends on:** WI-001
 **Acceptance criteria:** AC-FR001-02
 
-Create root `config.yaml` from `constitution.yaml.example` using only the
-approved decisions in `docs/PRODUCT.md`. For every missing value, ask a clear,
-context-rich question before writing the field. Do not infer or silently retain
-an example value.
+Build root `config.yaml` from scratch with `python validate_config.py scaffold`,
+which lists every key required by the `.specify/memory/constitution.md`
+template. Fill each value from `docs/PRODUCT.md` wherever it states or directly
+implies the decision, including the instruction file and init command of the
+selected coding-agent framework. For every value it does not determine, ask a
+clear, context-rich question before writing the field; never guess.
+`uv run --with pyyaml python validate_config.py check` must pass.
 
 **Exit criteria:** `config.yaml` contains approved project values and
 each non-obvious value can be traced to `docs/PRODUCT.md` or an explicit user
@@ -63,14 +66,16 @@ decision.
 **Depends on:** WI-002
 **Acceptance criteria:** AC-FR001-03
 
-Use root `config.yaml` and the approved `docs/PRODUCT.md` decisions to create
+First re-run `uv run --with pyyaml python validate_config.py check` to find
+any pending template key and resolve each one with the user. Then use root
+`config.yaml` and the approved `docs/PRODUCT.md` decisions to create
 `.sdd/constitution.md` from the immutable `.specify/memory/constitution.md`
 template. Any pending input must be presented as a
 clear question with the decision context, impact, and acceptable answer
 format; it must never be guessed.
 
 Then create or update all SDD objects under `.sdd/`—`SPEC.md`, `PLAN.md`,
-`TASKS.md`, and the constitution—to match the approved `docs/PRODUCT.md` definition while
+`TASKS.md`, `CHANGELOG.md`, and the constitution—to match the approved `docs/PRODUCT.md` definition while
 preserving the `FR > WI > Task` hierarchy and traceability.
 
 **Exit criteria:** The constitution and all SDD objects agree with

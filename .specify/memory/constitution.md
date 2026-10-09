@@ -29,7 +29,10 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - The configured runtime, language version, and package manager are locked.
   Lockfiles must be versioned and enforced by CI for every dependency
   installation or build.
-- **Service type**: {{project.kind}}. Project exclusions are declared in `project.excluded_components`.
+- **Service type**: {{project.kind}}. Excluded components:
+{{#each project.excluded_components}}
+  - {{this}}
+{{/each}}
 - Core business logic remains independent from web frameworks, UI libraries,
   and ORMs. Dependencies point inward toward stable domain abstractions rather
   than outward toward volatile concrete tools.
@@ -38,7 +41,10 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 {{#each ml_nlp.models}}
   - {{@key}}: `{{this.checkpoint}}` (optional: {{this.optional}})
 {{/each}}
-- Model selection is `{{ml_nlp.model_selection}}`; replacement requires every item under `ml_nlp.model_change_requires`.
+- Model selection is `{{ml_nlp.model_selection}}`; replacement requires every item below:
+{{#each ml_nlp.model_change_requires}}
+  - {{this}}
+{{/each}}
 - Model checkpoints, context-window limits, tokenizers, and external AI
   endpoints must be explicitly pinned; floating production model or endpoint
   versions are prohibited.
@@ -61,13 +67,22 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - Source: `{{project.source_dir}}/`; tests: `{{project.tests_dir}}/`; docs: `{{project.docs_dir}}/`; SDD artifacts: `{{project.sdd_dir}}/`.
 - Source layout: {{architecture.source_layout}}. The configured local package is `{{architecture.local_package}}`.
 - Entrypoints are organized by kind under `{{project.apps_dir}}/`, `{{project.cli_dir}}/`, and `{{project.scripts_dir}}/`, using `{{architecture.entrypoints.bootstrap}}`.
-- Tests follow the configured mirrored layout and hermetic fixture policy under `project_structure.tests`.
-- Each tool has one canonical configuration, as declared in `project_structure.config`.
+- Tests follow this layout and hermetic fixture policy:
+{{#each project_structure.tests}}
+  - {{@key}}: {{this}}
+{{/each}}
+- Each tool has one canonical configuration:
+{{#each project_structure.config}}
+  - {{@key}}: {{this}}
+{{/each}}
 - `.env` loading occurs only at `{{environment.load_location}}`; `{{environment.example_file}}` stays synchronized with configured variables.
 - Application settings must be injected through validated environment
   variables or the configured equivalent; secrets must never be hardcoded or
   committed to Git history.
-- Naming follows `naming.mappings`; do not create a new term for an established stage or storage concept.
+- Naming follows these mappings; do not create a new term for an established stage or storage concept:
+{{#each naming.mappings}}
+  - {{@key}}: {{this}}
+{{/each}}
 
 ### Specification-driven development
 
@@ -115,10 +130,13 @@ Governing principles for **{{project.name}}** under a specification-driven devel
   endpoints must be explicitly pinned and must not be selected dynamically.
   Development-time and coding-agent model choices are unrestricted by this
   production pinning rule.
-- Inference must remain CPU-capable when `ml_nlp.cpu_support_required` is true.
+- CPU-capable inference required: {{ml_nlp.cpu_support_required}}. When true, inference must remain CPU-capable.
 - Missing source text follows `{{ai.fail_policy.missing_source_text}}`.
 - Oversized input follows `{{ai.fail_policy.oversized_input}}`; silent truncation is prohibited when configured false.
-- Outputs are {{ai.output_status}} and must not be represented as any item under `ai.prohibited_claims`.
+- Outputs are {{ai.output_status}} and must not be represented as any of:
+{{#each ai.prohibited_claims}}
+  - {{this}}
+{{/each}}
 - Human overrides are supported by `{{ai.human_corrections_module}}`.
 - Accuracy claims require `{{ai.evaluation.package}}` evidence tracked in {{ai.evaluation.tracker}} against `{{ai.evaluation.baseline_doc}}`.
 - Generated proposals must pass deterministic validation gates such as tests,
@@ -139,7 +157,10 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 {{#each metrics.overall_offline}}
   - {{this}}
 {{/each}}
-- Downstream judge evaluation follows `metrics.downstream_judge`, including configured weighting, overall measures, and diagnostic-only variants.
+- Downstream judge evaluation, including weighting, overall measures, and diagnostic-only variants:
+{{#each metrics.downstream_judge}}
+  - {{@key}}: {{this}}
+{{/each}}
 - Candidate comparisons use `{{metrics.comparison_format}}` and the same metric implementation and evaluation path.
 - Historical runs missing newly required metrics are handled by: {{metrics.missing_historical_metrics}}.
 - Reporting policy: {{metrics.reporting_policy}}.
@@ -153,12 +174,21 @@ _Coding-agent conduct:_
 - Read this constitution and `{{sdd.spec_file}}` before planning or editing.
 - Match existing placement, naming, imports, and bootstrap conventions before introducing structure.
 - Prefer the smallest complete change; avoid unrelated refactors and abstractions.
-- `{{agent.instruction_file}}` must satisfy the existence, tracking, and reference rules configured under `agent` but cannot override version-controlled SDD artifacts.
-- Respect `agent.destructive_history_boundary` before checkout or reset operations.
-- Obtain approval for every item under `agent.scope_expansion_requires_approval`.
+- `{{agent.instruction_file}}` cannot override version-controlled SDD artifacts. Must exist: {{agent.must_exist}}; tracked in Git: {{agent.tracked}}; created with `{{agent.init_command_if_missing}}` when missing. It must reference:
+{{#each agent.must_reference}}
+  - `{{this}}`
+{{/each}}
+- Respect this destructive-history boundary before checkout or reset operations:
+{{#each agent.destructive_history_boundary}}
+  - {{@key}}: {{this}}
+{{/each}}
+- Obtain approval for every item below:
+{{#each agent.scope_expansion_requires_approval}}
+  - {{this}}
+{{/each}}
 - Update all affected product, SDD, configuration, constitution, template,
   automation, CI, and contributor artifacts when implementation changes their
-  documented state; never rename an artifact when `rename_allowed` is false.
+  documented state.
 - Never fabricate repository state or weaken checks to make a change pass.
 - Agents must not weaken, disable, or delete tests, static-analysis rules, or
   SDD artifacts to obtain a passing result.
@@ -203,7 +233,10 @@ _Coding-agent conduct:_
 {{commands.pre_commit}}             # all local gates
 ```
 
-- CI configuration: `{{quality.ci_file}}`; ordered gates come from `quality.ci_gate_order`.
+- CI configuration: `{{quality.ci_file}}`; ordered gates:
+{{#each quality.ci_gate_order}}
+  - {{this}}
+{{/each}}
 - The separate evaluation workflow is `{{quality.evaluation_workflow.file}}`, blocking: {{quality.evaluation_workflow.blocking}}.
 - Commands must use the configured package manager and locked environment.
 - All canonical validation commands must run in isolated, deterministic CI
@@ -214,11 +247,11 @@ _Coding-agent conduct:_
 - Commit convention: `{{quality.commit_convention}}`, enforced by {{quality.commit_hook}}.
 - Commit subjects use imperative Conventional Commit syntax and include the
   full FR/WI/Task traceability suffix required above.
-- Integration branch: `{{project.integration_branch}}`; direct commits are governed by `code_git.direct_commits_to_integration_branch`.
+- Integration branch: `{{project.integration_branch}}`; direct commits allowed: {{code_git.direct_commits_to_integration_branch}}.
 - Verify branch freshness before editing.
 - Feature branches are short-lived and pull requests contain isolated,
   self-contained functional changes.
-- Do not place unrelated development on an in-flight PR without following `code_git.unrelated_work_on_inflight_pr`.
+- Unrelated development on an in-flight PR: {{code_git.unrelated_work_on_inflight_pr}}.
 - Required hooks and CI checks must pass before merge.
 - Pre-commit and pre-push hooks must run the configured fast quality checks,
   including secret scanning where configured. CI must reject detected secrets.

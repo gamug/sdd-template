@@ -69,7 +69,6 @@ def analyze_content(content: str, filename: str):
     warnings = []
     passes = []
 
-    content_lower = content.lower()
     sections = get_sections(content)
 
     # 1. Check Mandatory Sections
@@ -161,7 +160,14 @@ def analyze_content(content: str, filename: str):
 
     # 4. Check MoSCoW Prioritization
     print("\n--- 4. MoSCoW MVP Scoping Check ---")
-    moscow_found = [kw for kw in MOSCOW_KEYWORDS if kw in content_lower]
+    # Priorities count only inside requirement and user-story sections, with
+    # typographic apostrophes normalized ("Won’t Have" == "Won't Have").
+    prioritized_content = "\n".join(
+        section_content
+        for heading, section_content, _, _ in sections
+        if re.match(r"^#{1,6}\s+.*(?:functional requirement|user stor)", f"# {heading}", re.IGNORECASE)
+    ).lower().replace("\u2019", "'")
+    moscow_found = [kw for kw in MOSCOW_KEYWORDS if kw in prioritized_content]
     missing_moscow = [kw for kw in MOSCOW_KEYWORDS if kw not in moscow_found]
     if not missing_moscow:
         print(f"  [PASS] All MoSCoW priorities identified: {', '.join(moscow_found)}")
