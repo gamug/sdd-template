@@ -108,8 +108,8 @@ from then on.
   question. A value the document only implies is proposed to the user and
   confirmed, never written silently. Record each answer in the table with
   source `user, YYYY-MM-DD`. Propose `.github/workflows/validators.yml` as
-  `quality.ci_file`: the project's quality gates are added to that inherited
-  workflow, so it stays the single CI file.
+  `quality.ci_file`: the project's quality gates replace the template's
+  maintenance steps in that workflow, so it stays the single CI file.
 
 ### TASK-008 — Validate config.yaml
 
@@ -198,17 +198,11 @@ from then on.
 - **Depends on:** TASK-014
 - **Acceptance criteria:** AC-FR001-06
 - **Action:** Create `scripts/init.sh` or the approved equivalent to reproduce
-  the environment from a clean checkout. Wire these checks into the fork's
-  pre-commit hook (the configured `quality.commit_hook`, which also enforces
-  the commit convention) and add them as steps to the inherited
-  `.github/workflows/validators.yml`, keeping its template sample and test
-  steps, so `docs/PRODUCT.md`, `config.yaml`, and `.sdd/constitution.md`
-  cannot drift after initialization:
-  - `python "$SKILL_DIR/scripts/validate_discovery.py" docs/PRODUCT.md`
-  - `validate_config.py check`
-  - `validate_config.py render --verify`
-
-  Show that a hand edit to `.sdd/constitution.md` fails the hook.
+  the environment from a clean checkout. Configure the project's pre-commit
+  hook (the configured `quality.commit_hook`, which also enforces the commit
+  convention) and its CI workflow with the project's own quality gates. The
+  discovery and configuration validators serve initialization only; they are
+  run during WI-001 to WI-003 and are not part of the project's hook or CI.
 
 ### TASK-016 — Verify reproducibility and document recovery
 
