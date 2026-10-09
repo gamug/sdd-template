@@ -70,6 +70,23 @@ class ScaffoldTest(unittest.TestCase):
             result = project.run(*mode)
             self.assertEqual(result.returncode, 0, f"{mode}: {result.stdout}")
 
+    def test_scaffold_header_does_not_embed_the_install_path(self):
+        # config.yaml is committed, so it must not carry this machine's paths.
+        project = Project(self)
+        write(project.product_path, project.product)
+        result = run(
+            CONFIG_SCRIPT,
+            "--config", project.config_path,
+            "--product", project.product_path,
+            "scaffold",
+            cwd=project.dir,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout)
+        text = read(project.config_path)
+        self.assertIn("# Generated from $SKILL_DIR/memory/constitution.md", text)
+        self.assertNotIn(os.path.dirname(os.path.dirname(CONFIG_SCRIPT)), text)
+        self.assertNotIn("skills/sdd-init", text)
+
 
 class CheckTest(unittest.TestCase):
     def assertCheckFails(self, project, message):

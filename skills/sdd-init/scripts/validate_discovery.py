@@ -452,9 +452,9 @@ def check_adrs(sections):
         or not TRADE_OFF_PATTERN.search(section_content)
     ]
     if incomplete_adrs:
-        results.append((FAIL, "One or more ADRs are missing Context, Decision, or Consequences/Trade-offs."))
+        results.append((FAIL, "One or more ADRs are missing Context, Decision, Consequences, or Trade-offs."))
     else:
-        results.append((PASS, "ADR structural elements complete (Context, Decision, Consequences/Trade-offs)."))
+        results.append((PASS, "ADR structural elements complete (Context, Decision, Consequences, Trade-offs)."))
     return results
 
 
