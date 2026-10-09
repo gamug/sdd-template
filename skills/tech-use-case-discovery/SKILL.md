@@ -101,7 +101,8 @@ The discovery process is executed in six sequential phases. For each phase, cons
 1. Assess technical, delivery, and organizational risks; define explicit mitigation strategies.
 2. Define the Minimum Viable Product (MVP) boundary and establish a phased project roadmap.
 3. **Output format**: Consolidate all discovery decisions into
-   `docs/PRODUCT.md`. Mark every open decision with a line containing
+   `docs/PRODUCT.md`, including a `## Governance & Workflow` section from the
+   Phase 5 checklist. Mark every open decision with a line containing
    `UNRESOLVED:` and the question to ask.
 4. **Approval**: Resolve every `UNRESOLVED:` item with the user, then end
    `docs/PRODUCT.md` with an `## Approval` section containing
@@ -123,7 +124,8 @@ python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT
 
 The script verifies:
 - Presence of required sections in `docs/PRODUCT.md` (Use Cases, Functional
-  Requirements, Tech Stack, ADRs, Dev Environment, Risks).
+  Requirements, Tech Stack, ADRs, Dev Environment, Risks, Governance &
+  Workflow).
 - EARS syntax syntax compliance and unique Requirement IDs.
 - ADR completeness (Context, Decision, Trade-offs, Consequences).
 - MoSCoW priority distribution for the MVP.

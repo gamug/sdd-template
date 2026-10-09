@@ -130,7 +130,20 @@ Evaluating Backend API Framework Options:
 
 ---
 
-## 8. Approval
+## 8. Governance & Workflow
+
+- **Version control**: integration branch `main`; no direct commits to it. Unrelated work on an in-flight pull request goes to a new branch after asking the user.
+- **Commits**: Conventional Commits, enforced by `commitizen`.
+- **CI**: `.github/workflows/ci.yml` runs `ruff check`, `ruff format --check`, `mypy`, and `pytest -q`, in that order.
+- **Tool configuration**: `pyproject.toml` is the single configuration for `ruff`, `mypy`, and `pytest`; tests mirror `src/` under `tests/` and stay hermetic.
+- **Coding agent**: Claude Code, instruction file `CLAUDE.md` (created with `/init`, tracked in Git), which must reference `.sdd/constitution.md` and `.sdd/SPEC.md`.
+- **Agent limits**: new external services, new heavy dependencies, and storage schema changes require approval; never rewrite history already pushed to `main`.
+- **Naming**: "spectrum" for an uploaded FITS observation; "classification" for a model prediction.
+- **Governance**: constitution version `1.0.0`, ratified on approval; amendments are logged in `.sdd/CHANGELOG.md`.
+
+---
+
+## 9. Approval
 
 - **Approved by**: Product Owner (example)
 - **Approved on**: 2026-01-15

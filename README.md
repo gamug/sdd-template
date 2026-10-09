@@ -120,7 +120,9 @@ from, and appends a `Configuration Decisions` table (key, value, source) to
 `docs/PRODUCT.md`. Then:
 
 1. Fill the values `docs/PRODUCT.md` states, with source
-   `PRODUCT.md § <section>`.
+   `PRODUCT.md § <section>`. The cited section must exist and contain the
+   value. Lists and maps are recorded as compact JSON, and `|` in a value is
+   escaped as `\|`.
 2. Define the project's domain sections (`domain_sections`: a `title` and
    `rules` each), such as models, services, storage, or evaluation, from the
    use cases, requirements, and ADRs, and confirm them with the user.
@@ -134,9 +136,12 @@ from, and appends a `Configuration Decisions` table (key, value, source) to
 uv run --with pyyaml python validate_config.py check
 ```
 
-The check fails on missing or empty keys, keys without a valid recorded
-source, recorded values that differ from `config.yaml`, and drift between
-related values such as `runtime.version` and the devcontainer image.
+The check fails on missing or empty keys, sources that are malformed or cite
+a section that doesn't contain the value, recorded values (including
+collections) that differ from `config.yaml`, malformed table rows, and drift
+between related values such as `runtime.version` and the devcontainer image.
+Values are read as written, so dates and versions such as `1.10` render
+unchanged.
 
 ### WI-003: render the constitution and create the SDD objects
 

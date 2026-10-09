@@ -52,7 +52,7 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 
 ### Project structure
 
-- Source: `{{project.source_dir}}/`; tests: `{{project.tests_dir}}/`; docs: `{{project.docs_dir}}/`; SDD artifacts: `{{project.sdd_dir}}/`.
+- Source: `{{project.source_dir}}/`; tests: `{{project.tests_dir}}/`; docs: `docs/`; SDD artifacts: `.sdd/` (fixed template conventions).
 - Tests follow this layout and hermetic fixture policy:
 {{#each project_structure.tests}}
   - {{@key}}: {{this}}
@@ -71,13 +71,13 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 
 ### Specification-driven development
 
-- `{{sdd.spec_file}}` defines required behavior.
-- `{{sdd.plan_file}}` translates requirements into architecture, risks, verification, rollout, and rollback.
-- `{{sdd.tasks_file}}` contains active, traceable work with stable identifiers.
+- `.sdd/SPEC.md` defines required behavior.
+- `.sdd/PLAN.md` translates requirements into architecture, risks, verification, rollout, and rollback.
+- `.sdd/TASKS.md` contains active, traceable work with stable identifiers.
 - The planning hierarchy is strict: functional requirements contain Work Items
   (WI), and each WI contains implementation tasks.
-- Every Work Item in `{{sdd.plan_file}}` must reference its parent functional
-  requirement, and every task in `{{sdd.tasks_file}}` must reference exactly
+- Every Work Item in `.sdd/PLAN.md` must reference its parent functional
+  requirement, and every task in `.sdd/TASKS.md` must reference exactly
   one parent WI. Missing links are invalid and must not be started.
 - Product functional requirements define business intent and testable
   acceptance criteria without technical implementation details. Repository
@@ -107,14 +107,14 @@ Governing principles for **{{project.name}}** under a specification-driven devel
   questions that identify the decision, explain its impact, and provide
   concrete options or an expected answer format. Agents must not guess or
   silently preserve example values.
-- Completed work moves to `{{sdd.changelog_file}}`, and status references are updated in the same change.
+- Completed work moves to `.sdd/CHANGELOG.md`, and status references are updated in the same change.
 - Material ambiguity and scope changes are resolved in the SDD artifacts before implementation relies on them.
 - SDD acceptance criteria should use a consistent executable form such as
   GIVEN-WHEN-THEN where applicable.
 
 ### Coding-agent conduct
 
-- Read this constitution and `{{sdd.spec_file}}` before planning or editing.
+- Read this constitution and `.sdd/SPEC.md` before planning or editing.
 - Match existing placement, naming, imports, and bootstrap conventions before introducing structure.
 - Prefer the smallest complete change; avoid unrelated refactors and abstractions.
 - `{{agent.instruction_file}}` cannot override version-controlled SDD artifacts. Must exist: {{agent.must_exist}}; tracked in Git: {{agent.tracked}}; created with `{{agent.init_command_if_missing}}` when missing. It must reference:
@@ -223,8 +223,8 @@ This constitution supersedes ad-hoc convention when the two conflict.
 - Update affected templates, SDD artifacts, architecture records, automation,
   CI workflows, and contributor documentation together.
 - When an amendment is approved, update every affected artifact, including
-  `docs/PRODUCT.md`, `{{sdd.spec_file}}`, `{{sdd.plan_file}}`,
-  `{{sdd.tasks_file}}`, root `config.yaml`, `.sdd/constitution.md`, templates,
+  `docs/PRODUCT.md`, `.sdd/SPEC.md`, `.sdd/PLAN.md`,
+  `.sdd/TASKS.md`, root `config.yaml`, `.sdd/constitution.md`, templates,
   automation, CI workflows, and contributor documentation.
 - Reviewers cite the conflicting section when rejecting non-compliant work.
 - The rendered constitution records its version, effective date, and governance

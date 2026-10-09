@@ -29,7 +29,8 @@ REQUIRED_SECTIONS = [
     ("Tech Stack Selection", r"^#{1,6}\s+.*(?:tech stack|technology stack|mcdm)", None),
     ("Architecture Decision Records", r"^#{1,6}\s+.*architecture decision", r"\bADR-\d+\b"),
     ("Dev Environment Setup", r"^#{1,6}\s+.*(?:dev environment|development environment)", None),
-    ("Risk Assessment & Roadmap", r"^#{1,6}\s+.*(?:risk|roadmap)", r"\b(?:RSK-\d+|MVP)\b")
+    ("Risk Assessment & Roadmap", r"^#{1,6}\s+.*(?:risk|roadmap)", r"\b(?:RSK-\d+|MVP)\b"),
+    ("Governance & Workflow", r"^#{1,6}\s+.*governance", None),
 ]
 
 EARS_PATTERNS = [

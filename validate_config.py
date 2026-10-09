@@ -18,8 +18,9 @@ Modes:
               PRODUCT.md section each one usually comes from, and append an
               empty "Configuration Decisions" table to docs/PRODUCT.md.
     check     Fail on missing or empty keys, missing item fields, keys without
-              a recorded source, recorded values that differ from config.yaml,
-              and drift between related values.
+              a verifiable recorded source, recorded values that differ from
+              config.yaml (collections as compact JSON), and drift between
+              related values.
     render    Run check, then render .sdd/constitution.md. Fails if any
               placeholder is left. --verify only compares the rendered output
               with the existing file and fails when it is out of date.
@@ -34,6 +35,7 @@ Options (before the mode):
 """
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -52,6 +54,9 @@ TOKEN_PATTERN = re.compile(r"\{\{\s*([#/]?)\s*([^{}]*?)\s*\}\}")
 KEY_PATTERN = re.compile(r"^[a-z_][a-z0-9_]*(?:\.[a-z_][a-z0-9_]*)*$")
 SOURCE_PATTERN = re.compile(r"^(?:PRODUCT\.md\s*§\s*\S.*|user,\s*\d{4}-\d{2}-\d{2})$")
 
+NULL_VALUES = ("", "null", "~")
+ROW_SPLIT = re.compile(r"(?<!\\)\|")
+
 SCALAR = "scalar"
 LIST = "list"
 MAP = "map"
@@ -60,7 +65,6 @@ MAP = "map"
 SOURCE_HINTS = {
     "project": "Dev Environment Setup / Governance & Workflow",
     "runtime": "Tech Stack Selection / Dev Environment Setup",
-    "sdd": "Governance & Workflow",
     "project_structure": "Dev Environment Setup",
     "naming": "Use Cases / Functional Requirements",
     "agent": "Governance & Workflow",
@@ -251,7 +255,7 @@ def render_nodes(nodes, config, scope):
         elif kind == "if":
             found, value = (True, resolve(node[1], config, scope)) if node[1].startswith("this") \
                 else lookup(config, node[1])
-            if found and value not in (None, False, "", [], {}):
+            if found and not is_absent(value):
                 output.append(render_nodes(node[2], config, scope))
         else:
             collection = resolve(node[1], config, scope)
@@ -272,7 +276,14 @@ def render_nodes(nodes, config, scope):
 # ---------------------------------------------------------------------------
 
 def is_empty(value) -> bool:
-    return value is None or (isinstance(value, (str, list, dict)) and len(value) == 0)
+    if isinstance(value, str):
+        return value.strip() in NULL_VALUES
+    return value is None or (isinstance(value, (list, dict)) and len(value) == 0)
+
+
+def is_absent(value) -> bool:
+    """An optional ({{#if}}) value that turns its block off."""
+    return is_empty(value) or value is False or (isinstance(value, str) and value.strip() == "false")
 
 
 def check_value(key, value, spec, issues):
@@ -303,7 +314,7 @@ def check_required(config, required) -> list:
     issues = []
     for key, spec in sorted(required.items()):
         found, value = lookup(config, key)
-        if spec["optional"] and (not found or is_empty(value) or value is False):
+        if spec["optional"] and (not found or is_absent(value)):
             continue
         if not found:
             issues.append(f"Missing key: {key}")
@@ -384,48 +395,119 @@ def decisions_section(product: str):
 
 
 def parse_decisions(product: str):
+    """Return ({key: (value, source)}, [malformed-row issues]) or (None, [])."""
     section = decisions_section(product)
     if section is None:
-        return None
-    rows = {}
-    for line in section.splitlines():
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        if len(cells) != 3 or not line.strip().startswith("|"):
+        return None, []
+    rows, issues = {}, []
+    for number, line in enumerate(section.splitlines(), 1):
+        stripped = line.strip()
+        if not stripped.startswith("|") or re.match(r"^\|[\s:|-]+\|?$", stripped):
             continue
+        cells = [cell.strip().replace("\\|", "|") for cell in ROW_SPLIT.split(stripped.strip("|"))]
         key = cells[0].strip("`")
-        if not KEY_PATTERN.match(key):
+        if key.lower() == "key":
             continue
-        rows[key] = (cells[1].strip("`"), cells[2])
-    return rows
+        if len(cells) != 3 or not KEY_PATTERN.match(key):
+            issues.append(
+                f"Malformed {DECISIONS_HEADING} row {number}: {stripped!r} "
+                "(expected | key | value | source |; escape '|' in values as '\\|')"
+            )
+            continue
+        rows[key] = (strip_code(cells[1]), cells[2])
+    return rows, issues
+
+
+def strip_code(text: str) -> str:
+    return text[1:-1] if len(text) >= 2 and text[0] == text[-1] == "`" else text
+
+
+def product_sections(product: str):
+    """Return [(heading, text)] for every PRODUCT.md section except the decisions table."""
+    headings = list(re.finditer(r"^(#{1,6})\s+(.+?)\s*$", product, re.MULTILINE))
+    sections = []
+    for index, heading in enumerate(headings):
+        level, title = len(heading.group(1)), heading.group(2).strip()
+        if title == DECISIONS_HEADING:
+            continue
+        end = len(product)
+        for following in headings[index + 1:]:
+            if len(following.group(1)) <= level:
+                end = following.start()
+                break
+        sections.append((title, product[heading.start():end]))
+    return sections
+
+
+def cited_sections(product: str, reference: str):
+    """Sections whose heading is, starts with the number of, or contains the reference."""
+    wanted = re.sub(r"[`*]", "", reference).strip().lower().rstrip(".")
+    matches = []
+    for title, text in product_sections(product):
+        heading = re.sub(r"[`*]", "", title).strip().lower()
+        number = re.match(r"^(\d+(?:\.\d+)*)\.?\s", heading)
+        if heading == wanted or (number and number.group(1) == wanted) or (len(wanted) >= 3 and wanted in heading):
+            matches.append(text)
+    return matches
+
+
+def collection_text(value) -> str:
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+
+def normalize_collection(value):
+    """Make recorded JSON comparable with BaseLoader output (all scalars text)."""
+    if isinstance(value, dict):
+        return {str(k): normalize_collection(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [normalize_collection(v) for v in value]
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return "" if value is None else str(value)
 
 
 def check_decisions(config, required, product) -> list:
-    rows = parse_decisions(product)
+    rows, issues = parse_decisions(product)
     if rows is None:
         return [f"docs/PRODUCT.md has no '## {DECISIONS_HEADING}' table. Run scaffold."]
-    issues = []
     for key, spec in sorted(required.items()):
         if key not in rows:
             issues.append(f"No {DECISIONS_HEADING} row for: {key}")
             continue
         recorded, source = rows[key]
+        found, value = lookup(config, key)
         if not SOURCE_PATTERN.match(source):
             issues.append(
                 f"Invalid source for {key}: {source!r} "
                 "(use 'PRODUCT.md § <section>' or 'user, YYYY-MM-DD')"
             )
-        found, value = lookup(config, key)
-        if spec["kind"] == SCALAR and found and not isinstance(value, (list, dict)) and value is not None:
-            if recorded != format_value_safe(value):
-                issues.append(f"Recorded value for {key} ({recorded!r}) differs from config.yaml ({value!r})")
+        elif source.startswith("PRODUCT.md"):
+            reference = source.split("§", 1)[1]
+            sections = cited_sections(product, reference)
+            if not sections:
+                issues.append(f"Source for {key} cites a section PRODUCT.md does not have: {source!r}")
+            elif (
+                found and isinstance(value, str) and not is_empty(value)
+                and not any(value.lower() in text.lower() for text in sections)
+            ):
+                issues.append(
+                    f"Value of {key} ({value!r}) does not appear in the cited section {source!r}; "
+                    "if the user decided it, use 'user, YYYY-MM-DD'"
+                )
+        if not found or is_empty(value):
+            continue
+        if isinstance(value, (list, dict)):
+            try:
+                matches = normalize_collection(json.loads(recorded)) == value
+            except ValueError:
+                matches = False
+            if not matches:
+                issues.append(
+                    f"Recorded value for {key} must be the compact JSON of config.yaml: {collection_text(value)}"
+                )
+        elif recorded != str(value):
+            issues.append(f"Recorded value for {key} ({recorded!r}) differs from config.yaml ({value!r})")
     return issues
-
-
-def format_value_safe(value):
-    try:
-        return format_value(value, "")
-    except TemplateError:
-        return repr(value)
 
 
 # ---------------------------------------------------------------------------
@@ -479,7 +561,9 @@ def load_config(path: str):
         fail("PyYAML is required. Run with `uv run --with pyyaml python validate_config.py ...`.")
     try:
         with open(path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
+            # BaseLoader keeps every scalar as written: dates stay ISO text and
+            # versions such as 1.10 are not turned into floats.
+            return yaml.load(f, Loader=yaml.BaseLoader) or {}
     except OSError as error:
         fail(f"cannot read '{path}': {error}")
     except yaml.YAMLError as error:
@@ -506,8 +590,9 @@ def scaffold(args):
         with open(args.product, "a", encoding="utf-8") as f:
             f.write(
                 f"\n## {DECISIONS_HEADING}\n\n"
-                "Source is `PRODUCT.md § <section>` for values this document states, or\n"
-                "`user, YYYY-MM-DD` for values the user decided or confirmed.\n\n"
+                "Source is `PRODUCT.md § <section>` (an existing heading or its number whose\n"
+                "text contains the value) or `user, YYYY-MM-DD` for values the user decided\n"
+                "or confirmed. Lists and maps are recorded as compact JSON; escape `|` as `\\|`.\n\n"
                 "| Key | Value | Source |\n| :--- | :--- | :--- |\n" + rows + "\n"
             )
         print(f"[PASS] Appended an empty '{DECISIONS_HEADING}' table to {args.product}.")

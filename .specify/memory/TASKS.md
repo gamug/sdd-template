@@ -59,7 +59,9 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
   with the PRODUCT.md section each key usually comes from, and appends the
   `Configuration Decisions` table to `docs/PRODUCT.md`. Fill only values that
   `docs/PRODUCT.md` states explicitly, and record each one in the table with
-  source `PRODUCT.md § <section>`.
+  source `PRODUCT.md § <section>`; `check` verifies that the section exists and
+  contains the value. Record lists and maps as compact JSON and escape `|` in
+  values as `\|`.
 
 ### TASK-006 — Define domain sections
 
@@ -71,7 +73,8 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
   `docs/PRODUCT.md`, propose the domain-specific constitution sections (for
   example models, services, storage, AI behavior, evaluation) as
   `domain_sections` entries with a `title` and `rules`. Confirm them with the
-  user, write them to `config.yaml`, and record the `domain_sections` row. An
+  user, write them to `config.yaml`, and record the `domain_sections` row as
+  compact JSON so `check` detects any later change. An
   empty list is valid only when the user confirms the project needs none.
 
 ### TASK-007 — Ask the user for every remaining value
