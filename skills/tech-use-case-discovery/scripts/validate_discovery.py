@@ -47,7 +47,6 @@ EARS_PATTERNS = [
     re.compile(r"\b(?:the|a|an)\s+[a-z][\w -]*?\s+shall\b", re.IGNORECASE),
     re.compile(r"\b(?:when|while|where|if)\b.*\bshall\b", re.IGNORECASE),
 ]
-MOSCOW_KEYWORDS = ["must have", "should have", "could have", "won't have"]
 UNRESOLVED_MARKER = "UNRESOLVED:"
 APPROVAL_HEADING = re.compile(r"^(?:\d+\.\s*)?approval\s*$", re.IGNORECASE)
 # Appended by validate_config.py scaffold (WI-002), after approval. Only this
@@ -62,6 +61,14 @@ HEADING_ID_PATTERN = re.compile(r"\b(?:UC|US|ADR)-\d+\b(?!-)", re.IGNORECASE)
 ID_PATTERN = re.compile(r"\b(?:FR|UC|US|ADR|RSK)-(\d+)\b", re.IGNORECASE)
 RISK_COLUMNS = "| Risk ID | Description | Impact | Probability | Score | Mitigation Plan |"
 MITIGATION_THRESHOLD = 6
+# "> " blockquote lines are template guidance, not document content.
+GUIDANCE_LINE = re.compile(r"^\s*>")
+# "[...]" left from a template; Markdown links "[text](url)" / "[text][ref]"
+# and task boxes "[ ]" / "[x]" are not placeholders.
+PLACEHOLDER_PATTERN = re.compile(r"\[(?![ xX]\])[^\]\n]+\](?![(\[])")
+TABLE_SEPARATOR = re.compile(r"^\s*\|[\s:|-]+\|?\s*$")
+EARS_FORMS = ("ubiquitous", "event-driven", "state-driven", "optional", "unwanted")
+MOSCOW_VALUES = ("must have", "should have", "could have", "won't have")
 
 
 def get_sections(content: str):
@@ -147,7 +154,9 @@ def approval_date(content: str):
 def check_approval(content: str, sections):
     issues = []
     unresolved = [
-        line.strip() for line in content.splitlines() if UNRESOLVED_MARKER in line
+        line.strip()
+        for line in content.splitlines()
+        if UNRESOLVED_MARKER in line and not GUIDANCE_LINE.match(line)
     ]
     if unresolved:
         issues.append(f"{len(unresolved)} unresolved decision(s) remain ({UNRESOLVED_MARKER})")
@@ -258,6 +267,47 @@ def check_risks(content: str):
     return [(PASS, f"{len(rows)} risk(s) scored as Impact x Probability, with mitigation where required")]
 
 
+def ears_form(statement: str) -> str:
+    """The EARS form a requirement statement is written in."""
+    text = statement.strip(" *_`").lower()
+    if re.match(r"when\b", text):
+        return "event-driven"
+    if re.match(r"while\b", text):
+        return "state-driven"
+    if re.match(r"where\b", text):
+        return "optional"
+    if re.match(r"if\b", text) and re.search(r"\bthen\b", text):
+        return "unwanted"
+    return "ubiquitous"
+
+
+def ears_column_issues(content: str):
+    """FR table rows whose EARS pattern column disagrees with their statement."""
+    issues, header = [], None
+    lines = content.splitlines()
+    for index, line in enumerate(lines):
+        if line.strip().startswith("|") and index + 1 < len(lines) and TABLE_SEPARATOR.match(lines[index + 1]):
+            header = [name.lower() for name in table_cells(line)]
+            continue
+        match = re.match(r"^\s*\|\s*`?(FR-\d+)`?\s*\|", line, re.IGNORECASE)
+        if not match or not header:
+            continue
+        pattern_column = next((k for k, name in enumerate(header) if "pattern" in name or "rule" in name), None)
+        statement_column = next((k for k, name in enumerate(header) if "statement" in name), None)
+        cells = table_cells(line)
+        if pattern_column is None or pattern_column >= len(cells):
+            continue
+        declared_text = cells[pattern_column].strip("*_` ")
+        declared = re.split(r"[\s/]+", declared_text.lower())[0]
+        statement = cells[statement_column] if statement_column is not None and statement_column < len(cells) else line
+        fr_id = match.group(1).upper()
+        if declared not in EARS_FORMS:
+            issues.append(f"{fr_id}: unknown EARS pattern {declared_text!r} (use {', '.join(EARS_FORMS)})")
+        elif declared != ears_form(statement):
+            issues.append(f"{fr_id}: declared {declared_text}, but the statement is {ears_form(statement)}")
+    return issues
+
+
 def check_requirements(content: str):
     results = []
     fr_ids = sorted({fr_id.upper() for fr_id in re.findall(r"FR-\d+", content, re.IGNORECASE)})
@@ -273,12 +323,14 @@ def check_requirements(content: str):
             f"{RESERVED_FR} is reserved for initialization; number product requirements from FR-002",
         ))
     invalid = [line for _, line in rows if not any(pattern.search(line) for pattern in EARS_PATTERNS)]
-    if rows and not invalid:
+    mismatched = ears_column_issues(content)
+    if rows and not invalid and not mismatched:
         results.append((PASS, f"EARS syntax validated for {len(rows)} requirement line(s)"))
     elif invalid:
         results.append((FAIL, "One or more functional requirements do not use a valid EARS form."))
-    else:
+    elif not rows:
         results.append((FAIL, "No functional requirement lines found to validate."))
+    results.extend((FAIL, issue) for issue in mismatched)
     return results
 
 
@@ -306,10 +358,18 @@ def check_unique_ids(content: str, sections):
             for outer, _, outer_start, outer_end in sections
         ):
             definitions.append(own)
+    results = []
     duplicates = sorted({item for item in definitions if definitions.count(item) > 1})
     if duplicates:
-        return [(FAIL, f"Duplicate ID definition(s): {', '.join(duplicates)}")]
-    return [(PASS, f"{len(definitions)} FR, UC, US, ADR, and RSK ID(s) are each defined once")]
+        results.append((FAIL, f"Duplicate ID definition(s): {', '.join(duplicates)}"))
+    # Every mention must resolve; a sub-item such as UC-001-EX1 resolves through UC-001.
+    referenced = {match.group(0).upper() for match in ID_PATTERN.finditer(content)}
+    undefined = sorted(referenced - set(definitions) - {RESERVED_FR})
+    if undefined:
+        results.append((FAIL, f"Reference(s) to undefined ID(s): {', '.join(undefined)}"))
+    return results or [
+        (PASS, f"{len(definitions)} FR, UC, US, ADR, and RSK ID(s) are each defined once and every reference resolves")
+    ]
 
 
 def check_adrs(sections):
@@ -341,18 +401,67 @@ def check_adrs(sections):
     return results
 
 
-def check_moscow(sections):
-    # Priorities count only inside requirement and user-story sections, with
-    # typographic apostrophes normalized ("Won’t Have" == "Won't Have").
+def normalize_priority(text: str) -> str:
+    # Typographic apostrophes count: "Won’t Have" == "Won't Have".
+    return re.sub(r"\s+", " ", text.strip(" *_`").lower().replace("’", "'"))
+
+
+def check_moscow(content: str, sections):
+    """Every FR and user story has exactly one valid priority, at least one is
+    Must Have, and Won't Have is stated (as a priority or a "Won't Have:" line)."""
+    issues, priorities = [], []
+    for fr_id, line in requirement_rows(content):
+        if line.strip().startswith("|"):
+            found = {normalize_priority(cell) for cell in table_cells(line)} & set(MOSCOW_VALUES)
+        else:
+            found = {value for value in MOSCOW_VALUES if value in normalize_priority(line)}
+        if len(found) != 1:
+            issues.append(f"{fr_id}: needs exactly one MoSCoW priority")
+        priorities.extend(found)
+    for heading, text, start, _ in sections:
+        story = heading_id(heading)
+        if not story or not story.startswith("US-") or any(
+            outer_start < start < outer_end and heading_id(outer) == story
+            for outer, _, outer_start, outer_end in sections
+        ):
+            continue
+        match = re.search(r"^\s*[-*]?\s*\**priority\**[^\w\n]*(.+)$", text, re.IGNORECASE | re.MULTILINE)
+        value = normalize_priority(match.group(1)) if match else ""
+        if value not in MOSCOW_VALUES:
+            issues.append(f"{story}: Priority must be one of Must Have, Should Have, Could Have, Won't Have")
+        else:
+            priorities.append(value)
+    if "must have" not in priorities:
+        issues.append("No requirement or user story is Must Have")
     prioritized_content = "\n".join(
         section_content
         for heading, section_content, _, _ in sections
         if re.match(r"^#{1,6}\s+.*(?:functional requirement|user stor)", f"# {heading}", re.IGNORECASE)
-    ).lower().replace("’", "'")
-    missing = [kw for kw in MOSCOW_KEYWORDS if kw not in prioritized_content]
-    if missing:
-        return [(FAIL, f"Missing MoSCoW priorities: {', '.join(missing)}")]
-    return [(PASS, f"All MoSCoW priorities identified: {', '.join(MOSCOW_KEYWORDS)}")]
+    )
+    wont_line = re.search(r"won't have[*_ ]*:[*_ ]*\S", normalize_priority(prioritized_content))
+    if "won't have" not in priorities and not wont_line:
+        issues.append("Won't Have is not stated: give an FR or story that priority, or add a 'Won't Have:' line")
+    if issues:
+        return [(FAIL, issue) for issue in issues]
+    return [(PASS, f"{len(priorities)} prioritized item(s), with Must Have and Won't Have stated")]
+
+
+def check_placeholders(content: str, draft: bool):
+    """Template "[...]" placeholders left in the approved content, outside code
+    and guidance notes. The Configuration Decisions table (compact JSON lists)
+    and the Approval section (checked on its own) are not template content."""
+    found, fenced = [], False
+    for line in strip_unapproved(content).splitlines():
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced or GUIDANCE_LINE.match(line):
+            continue
+        found.extend(PLACEHOLDER_PATTERN.findall(re.sub(r"`[^`]*`", "", line)))
+    if not found:
+        return [(PASS, "No template placeholders left")]
+    message = f"{len(found)} template placeholder(s) left, e.g. {', '.join(found[:3])}"
+    return [(WARN if draft else FAIL, message)]
 
 
 def check_user_approval(content: str, sections, draft: bool):
@@ -373,7 +482,8 @@ def validate(content: str, draft: bool = False):
         ("Unique Identifiers", check_unique_ids(content, sections)),
         ("Risk Matrix Check", check_risks(content)),
         ("Architecture Decision Records (ADR) Check", check_adrs(sections)),
-        ("MoSCoW MVP Scoping Check", check_moscow(sections)),
+        ("MoSCoW MVP Scoping Check", check_moscow(content, sections)),
+        ("Template Placeholders", check_placeholders(content, draft)),
         ("User Approval Check", check_user_approval(content, sections, draft)),
     ]
 

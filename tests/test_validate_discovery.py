@@ -20,6 +20,12 @@ class DiscoveryTest(unittest.TestCase):
         write(path, content)
         return run(DISCOVERY_SCRIPT, *flags, path)
 
+    def approved(self, product):
+        """Re-record the approval hash, as if the user approved this content."""
+        return product.replace(
+            validate_discovery.content_hash(self.sample), validate_discovery.content_hash(product)
+        )
+
     def assertFails(self, result, message):
         self.assertEqual(result.returncode, 1, result.stdout)
         self.assertIn(message, result.stdout)
@@ -148,7 +154,71 @@ class DiscoveryTest(unittest.TestCase):
     def test_moscow_outside_requirement_sections_fails(self):
         product = self.sample.replace("**MVP Won't Have**", "**MVP Out of scope**")
         product = product.replace("## 7. Risk Assessment", "Won't have: batch uploads.\n\n## 7. Risk Assessment")
-        self.assertFails(self.validate(product, "--draft"), "Missing MoSCoW priorities: won't have")
+        self.assertFails(self.validate(product, "--draft"), "Won't Have is not stated")
+
+    def test_moscow_needs_real_priorities(self):
+        # Reviewer's repro: all Must Have plus the fragment's placeholder priority passed.
+        product = self.sample.replace("| Should Have |", "| Must Have |").replace("| Could Have |", "| Must Have |")
+        product = product.replace("- **MVP Won't Have**: Batch processing of multiple FITS files in one request.\n", "")
+        product = product.replace(
+            "- **Priority**: Must Have", "- **Priority**: [Must Have / Should Have / Could Have / Won't Have]"
+        )
+        result = self.validate(product, "--draft")
+        self.assertFails(result, "US-001: Priority must be one of")
+        self.assertIn("Won't Have is not stated", result.stdout)
+        product = self.sample.replace("| Must Have |", "| Should Have |").replace(
+            "- **Priority**: Must Have", "- **Priority**: Should Have"
+        )
+        self.assertFails(self.validate(product, "--draft"), "No requirement or user story is Must Have")
+        product = self.sample.replace("| Could Have |", "| Could Have | Must Have |")
+        self.assertFails(self.validate(product, "--draft"), "FR-005: needs exactly one MoSCoW priority")
+
+    def test_ears_pattern_column_matches_statement(self):
+        # Reviewer's repro: a WHEN statement labelled State-Driven passed.
+        product = self.sample.replace("| `FR-002` | Event-Driven |", "| `FR-002` | State-Driven |")
+        self.assertFails(
+            self.validate(product, "--draft"), "FR-002: declared State-Driven, but the statement is event-driven"
+        )
+        product = self.sample.replace("| `FR-003` | Ubiquitous |", "| `FR-003` | Complex |")
+        self.assertFails(self.validate(product, "--draft"), "FR-003: unknown EARS pattern 'Complex'")
+
+    def test_references_must_resolve(self):
+        # Reviewer's repro: a trace to a use case that doesn't exist passed.
+        product = self.sample.replace("| Must Have | `UC-001` |", "| Must Have | `UC-009` |", 1)
+        self.assertFails(self.validate(product, "--draft"), "Reference(s) to undefined ID(s): UC-009")
+        product = self.sample.replace("(`UC-001-EX1`)", "(`UC-002-EX1`)")
+        self.assertFails(self.validate(product, "--draft"), "Reference(s) to undefined ID(s): UC-002")
+
+    def test_placeholders_fail_approval_and_warn_in_draft(self):
+        # Reviewer's repro: an approved document full of template placeholders passed.
+        product = self.approved(self.sample.replace("- **Naming**:", "- **Owner**: [Team name]\n- **Naming**:"))
+        draft = self.validate(product, "--draft")
+        self.assertEqual(draft.returncode, 0, draft.stdout)
+        self.assertIn("[WARN] 1 template placeholder(s) left, e.g. [Team name]", draft.stdout)
+        self.assertFails(self.validate(product), "[FAIL] 1 template placeholder(s) left")
+
+    def test_links_task_boxes_and_code_are_not_placeholders(self):
+        addition = "- **Docs**: [Astropy](https://www.astropy.org), `config[key]`, [ ] and [x] boxes.\n"
+        product = self.approved(self.sample.replace("- **Naming**:", addition + "- **Naming**:"))
+        result = self.validate(product)
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_guidance_notes_do_not_block_approval(self):
+        # The product template's note mentions UNRESOLVED: and placeholders.
+        note = "> Mark every open decision with `UNRESOLVED:` and replace each [placeholder].\n\n"
+        product = self.approved(self.sample.replace("## 1. Executive Summary", note + "## 1. Executive Summary"))
+        result = self.validate(product)
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_filled_approval_on_unfilled_template_fails(self):
+        template = read(PRODUCT_TEMPLATE).replace("\r\n", "\n")
+        template = template.replace("- **Approved by**: [Name or role]", "- **Approved by**: Product Owner")
+        template = template.replace("- **Approved on**: [YYYY-MM-DD]", "- **Approved on**: 2026-10-01")
+        template = template.replace(
+            "- **Approved content**: [Output of `validate_discovery.py --hash docs/PRODUCT.md` for the approved version]",
+            f"- **Approved content**: `{validate_discovery.content_hash(template)}`",
+        )
+        self.assertFails(self.validate(template), "template placeholder(s) left")
 
     def test_enclosing_heading_does_not_satisfy_empty_sections(self):
         product = (

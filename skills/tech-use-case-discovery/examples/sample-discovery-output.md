@@ -3,15 +3,16 @@
 
 - **Project Name**: SDSS Spectra Classifier
 - **Document Version**: `1.0.0`
-- **Date**: 2026-10-08
 - **Author**: Technical Discovery Lead
-- **Status**: Approved for Build
 
 ---
 
 ## 1. Executive Summary & Vision
 
-The SDSS Spectra Classifier is an AI-driven web application designed for astronomical researchers and data analysts to upload scientific FITS (Flexible Image Transport System) dataset files, parse spectral data, execute deep learning model inference (ResNet1D), and visualize interactive spectral flux curves with classification probabilities.
+- **Problem Statement**: Astronomical researchers and data analysts need to classify stellar spectra from SDSS FITS (Flexible Image Transport System) files and confirm the result against the spectrum itself.
+- **Vision**: An AI-driven web application where users upload FITS files, the system parses the spectral data, runs deep learning inference (ResNet1D), and shows an interactive spectral flux curve with classification probabilities.
+- **Success Metrics**: Flux and wavelength data extracted within 1.5 seconds of an upload (`FR-002`); every classification returned as structured JSON with category and confidence scores (`FR-003`).
+- **Personas**: Astronomical Researcher and Data Analyst: upload FITS files, review classifications, and confirm spectral features visually.
 
 ---
 
@@ -20,7 +21,8 @@ The SDSS Spectra Classifier is an AI-driven web application designed for astrono
 ### Use Case `UC-001`: Upload and Classify Spectral FITS File
 
 - **Primary Actor**: Astronomical Researcher
-- **Secondary Actor**: FastAPI Backend API, PyTorch ResNet1D Model Engine
+- **Secondary Actors**: FastAPI Backend API, PyTorch ResNet1D Model Engine
+- **Brief Description**: The researcher uploads a FITS spectrum and receives its star class with confidence scores next to an interactive chart of the spectrum.
 - **Preconditions**: User is logged in and on the web classification dashboard.
 - **Triggers**: User selects a `.fits` file and clicks "Analyze Spectrum".
 
@@ -36,6 +38,10 @@ The SDSS Spectra Classifier is an AI-driven web application designed for astrono
 2. System displays error toast: *"Invalid file type. Please upload a compliant SDSS .fits file."*
 3. Upload process terminates safely without backend processing.
 
+#### Postconditions
+- **Success**: The spectrum's class probabilities and interactive chart are shown to the user.
+- **Failure**: No backend processing runs, and the user sees the validation error (`UC-001-EX1`).
+
 ---
 
 ## 3. Functional Requirements & User Stories
@@ -50,15 +56,13 @@ The SDSS Spectra Classifier is an AI-driven web application designed for astrono
 | `FR-005` | Optional | WHERE GPU acceleration is present, the inference service shall utilize CUDA tensor processing. | Could Have | `UC-001` |
 | `FR-006` | Unwanted / Error | IF the file payload exceeds 50MB, THEN the system shall return an HTTP 413 error message. | Must Have | `UC-001` |
 
-**MVP Won't Have**: Batch processing of multiple FITS files in one request.
-
----
+- **MVP Won't Have**: Batch processing of multiple FITS files in one request.
 
 ### User Story `US-001`: Interactive Spectral Visualization
-- **As an**: Astronomical Researcher
-- **I want to**: View an interactive chart of wavelength vs. flux for my uploaded dataset
-- **So that**: I can visually confirm spectral line features alongside model classification results
+
+- **Card**: As an astronomical researcher, I want to view an interactive chart of wavelength vs. flux for my uploaded dataset, so that I can visually confirm spectral line features alongside model classification results.
 - **Priority**: Must Have
+- **Traceability**: `FR-002`, `FR-003`, `UC-001`
 
 #### Acceptance Criteria (Given-When-Then)
 ```gherkin
@@ -98,15 +102,17 @@ Evaluating Backend API Framework Options:
 - **Decision**: Adopt FastAPI (Python 3.12) as the unified backend framework, running model inference and data preprocessing in the same Python process.
 - **Consequences (Positive)**: Zero IPC serialization overhead, unified data structures (`NumPy` arrays to `PyTorch` Tensors), rapid development cycle.
 - **Consequences (Trade-offs)**: Python GIL requires process-based worker scaling (`Uvicorn` worker processes) for high-concurrency CPU tasks.
+- **Traceability**: `FR-002`, `FR-003`, `UC-001`
 
 ---
 
 ## 6. Development Environment Setup
 
-- **Version Managers**: `pyenv` (Python 3.12.2), `nvm` (Node 20 LTS for frontend tools).
-- **Container Isolation**: Docker Compose running local FastAPI server and PostgreSQL test instance.
-- **Code Quality**: `ruff` for linting and formatting, `mypy` for static type enforcement.
-- **Verification Command**:
+- **Runtimes and version managers**: `pyenv` (Python 3.12.2), `nvm` (Node 20 LTS for frontend tools).
+- **Environment isolation**: Docker Compose running the local FastAPI server and a PostgreSQL test instance.
+- **Code quality**: `ruff` for linting and formatting, `mypy` for static type enforcement.
+- **Configuration variables**: `.env.example` lists every required key; local values live in `.env`, which stays out of Git.
+- **Verification command**:
   ```bash
   docker compose up -d
   pytest tests/
@@ -118,15 +124,21 @@ Evaluating Backend API Framework Options:
 
 ### Risk Matrix
 
+Impact and Probability use 1 (Low) to 3 (High); Score = Impact × Probability.
+A score of 6 or more requires a mitigation plan.
+
 | Risk ID | Description | Impact | Probability | Score | Mitigation Plan |
 | :--- | :--- | :---: | :---: | :---: | :--- |
 | `RSK-001` | Non-uniform FITS spectral sequence lengths cause tensor shape errors. | High (3) | High (3) | **9** | Implement SciPy 1D interpolation (`interp1d`) to resample all spectra to a fixed 3,500-point sequence during preprocessing. |
 | `RSK-002` | Large FITS files cause memory spikes during concurrent uploads. | Medium (2) | Medium (2) | **4** | Stream file uploads to disk scratch space and enforce 50MB file size limits. |
 
 ### Phased Roadmap
-- **Sprint 1 (Weeks 1-2)**: Core API routes, Astropy parser, ResNet1D model integration.
-- **Sprint 2 (Weeks 3-4)**: Vanilla JS / Chart.js frontend, interactive curve visualization, end-to-end integration.
-- **Sprint 3 (Weeks 5-6)**: Dockerization, CI pipeline integration, automated benchmark testing.
+
+- **MVP**: the three sprints below.
+  - **Sprint 1 (Weeks 1-2)**: Core API routes, Astropy parser, ResNet1D model integration.
+  - **Sprint 2 (Weeks 3-4)**: Vanilla JS / Chart.js frontend, interactive curve visualization, end-to-end integration.
+  - **Sprint 3 (Weeks 5-6)**: Dockerization, CI pipeline integration, automated benchmark testing.
+- **Next phases**: Batch processing of multiple FITS files (MVP Won't Have).
 
 ---
 
@@ -147,4 +159,4 @@ Evaluating Backend API Framework Options:
 
 - **Approved by**: Product Owner (example)
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:c7397e09bb002d12d65aba4529e8cbea21512ba6b3ee78c914fe77c16e0b74ef`
+- **Approved content**: `sha256:d29db4715a20147a93509efdabcc7e5de4d529b7c9d316694a87301c5250cef8`
