@@ -24,6 +24,12 @@ CONFIG_SCRIPT = os.path.join(SCRIPTS, "validate_config.py")
 DISCOVERY_SCRIPT = os.path.join(SCRIPTS, "validate_discovery.py")
 TEMPLATE = os.path.join(ROOT, validate_config.DEFAULT_TEMPLATE)
 SAMPLE = os.path.join(ROOT, "skills", "tech-use-case-discovery", "examples", "sample-discovery-output.md")
+TEMPLATES = os.path.join(ROOT, "skills", "tech-use-case-discovery", "templates")
+PRODUCT_TEMPLATE = os.path.join(TEMPLATES, "product-template.md")
+FRAGMENTS = (
+    "use-case-template.md", "prd-user-stories-template.md", "tech-stack-evaluation-matrix.md",
+    "adr-template.md", "dev-environment-checklist.md",
+)
 USER_SOURCE = "user, 2026-01-15"
 PLAIN_SCALAR = re.compile(r"^[\w./-]+$")
 

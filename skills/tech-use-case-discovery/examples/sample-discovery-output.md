@@ -17,7 +17,7 @@ The SDSS Spectra Classifier is an AI-driven web application designed for astrono
 
 ## 2. Use Case Specifications
 
-### Use Case `UC-01`: Upload and Classify Spectral FITS File
+### Use Case `UC-001`: Upload and Classify Spectral FITS File
 
 - **Primary Actor**: Astronomical Researcher
 - **Secondary Actor**: FastAPI Backend API, PyTorch ResNet1D Model Engine
@@ -31,7 +31,7 @@ The SDSS Spectra Classifier is an AI-driven web application designed for astrono
 4. ResNet1D model executes inference and generates Softmax class probability distribution (F, G, K star types).
 5. Web interface renders the interactive spectral line chart (Chart.js) alongside classification confidence scores.
 
-#### Exception Flow `UC-01-EX1`: Invalid File Format
+#### Exception Flow `UC-001-EX1`: Invalid File Format
 1. At step 2, if file format is invalid, system logs validation failure.
 2. System displays error toast: *"Invalid file type. Please upload a compliant SDSS .fits file."*
 3. Upload process terminates safely without backend processing.
@@ -44,17 +44,17 @@ The SDSS Spectra Classifier is an AI-driven web application designed for astrono
 
 | Requirement ID | EARS Pattern | Statement | MoSCoW Priority | Traceability |
 | :--- | :--- | :--- | :--- | :--- |
-| `FR-002` | Event-Driven | WHEN a user uploads a `.fits` file, the system shall extract flux and wavelength data within 1.5 seconds. | Must Have | `UC-01` |
-| `FR-003` | Ubiquitous | The backend shall return all classification responses in structured JSON format containing category and confidence scores. | Must Have | `UC-01` |
-| `FR-004` | State-Driven | WHILE deep learning inference is executing, the UI shall display a responsive spinner indicator. | Should Have | `UC-01` |
-| `FR-005` | Optional | WHERE GPU acceleration is present, the inference service shall utilize CUDA tensor processing. | Could Have | `UC-01` |
-| `FR-006` | Unwanted / Error | IF the file payload exceeds 50MB, THEN the system shall return an HTTP 413 error message. | Must Have | `UC-01` |
+| `FR-002` | Event-Driven | WHEN a user uploads a `.fits` file, the system shall extract flux and wavelength data within 1.5 seconds. | Must Have | `UC-001` |
+| `FR-003` | Ubiquitous | The backend shall return all classification responses in structured JSON format containing category and confidence scores. | Must Have | `UC-001` |
+| `FR-004` | State-Driven | WHILE deep learning inference is executing, the UI shall display a responsive spinner indicator. | Should Have | `UC-001` |
+| `FR-005` | Optional | WHERE GPU acceleration is present, the inference service shall utilize CUDA tensor processing. | Could Have | `UC-001` |
+| `FR-006` | Unwanted / Error | IF the file payload exceeds 50MB, THEN the system shall return an HTTP 413 error message. | Must Have | `UC-001` |
 
 **MVP Won't Have**: Batch processing of multiple FITS files in one request.
 
 ---
 
-### User Story `US-01`: Interactive Spectral Visualization
+### User Story `US-001`: Interactive Spectral Visualization
 - **As an**: Astronomical Researcher
 - **I want to**: View an interactive chart of wavelength vs. flux for my uploaded dataset
 - **So that**: I can visually confirm spectral line features alongside model classification results
@@ -120,8 +120,8 @@ Evaluating Backend API Framework Options:
 
 | Risk ID | Description | Impact | Probability | Score | Mitigation Plan |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| `RSK-01` | Non-uniform FITS spectral sequence lengths cause tensor shape errors. | High (3) | High (3) | **9** | Implement SciPy 1D interpolation (`interp1d`) to resample all spectra to a fixed 3,500-point sequence during preprocessing. |
-| `RSK-02` | Large FITS files cause memory spikes during concurrent uploads. | Medium (2) | Medium (2) | **4** | Stream file uploads to disk scratch space and enforce 50MB file size limits. |
+| `RSK-001` | Non-uniform FITS spectral sequence lengths cause tensor shape errors. | High (3) | High (3) | **9** | Implement SciPy 1D interpolation (`interp1d`) to resample all spectra to a fixed 3,500-point sequence during preprocessing. |
+| `RSK-002` | Large FITS files cause memory spikes during concurrent uploads. | Medium (2) | Medium (2) | **4** | Stream file uploads to disk scratch space and enforce 50MB file size limits. |
 
 ### Phased Roadmap
 - **Sprint 1 (Weeks 1-2)**: Core API routes, Astropy parser, ResNet1D model integration.
@@ -147,4 +147,4 @@ Evaluating Backend API Framework Options:
 
 - **Approved by**: Product Owner (example)
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:fed08e36499a19a20a4ba70d017e5b1dbd57a0797d6bcf45d0725be8f26d2618`
+- **Approved content**: `sha256:c7397e09bb002d12d65aba4529e8cbea21512ba6b3ee78c914fe77c16e0b74ef`

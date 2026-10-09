@@ -5,8 +5,9 @@ Software Discovery Package Validator
 This script inspects a discovery specification Markdown file or directory
 to verify compliance with the Tech Use Case Discovery framework.
 Checks for mandatory sections, requirement IDs (FR-001 is reserved for
-initialization), unique FR/UC/US/ADR IDs, EARS syntax, ADR completeness, and
-MoSCoW prioritization. validate() returns the results; validate_config.py
+initialization), three-digit FR/UC/US/ADR/RSK IDs defined once, EARS syntax,
+ADR completeness, the risk matrix (Score = Impact x Probability, and a
+mitigation plan for scores of 6 or more), and MoSCoW prioritization. validate() returns the results; validate_config.py
 uses it in-process as the discovery gate.
 
 Usage:
@@ -25,6 +26,7 @@ Directory mode requires exactly one file named PRODUCT.md somewhere below the
 provided directory and validates that file only.
 """
 
+import datetime
 import hashlib
 import sys
 import os
@@ -37,7 +39,7 @@ REQUIRED_SECTIONS = [
     ("Tech Stack Selection", r"^#{1,6}\s+.*(?:tech stack|technology stack|mcdm)", None),
     ("Architecture Decision Records", r"^#{1,6}\s+.*architecture decision", r"\bADR-\d+\b"),
     ("Dev Environment Setup", r"^#{1,6}\s+.*(?:dev environment|development environment)", None),
-    ("Risk Assessment & Roadmap", r"^#{1,6}\s+.*(?:risk|roadmap)", r"\b(?:RSK-\d+|MVP)\b"),
+    ("Risk Assessment & Roadmap", r"^#{1,6}\s+.*(?:risk|roadmap)", r"\bRSK-\d+\b"),
     ("Governance & Workflow", r"^#{1,6}\s+.*governance", None),
 ]
 
@@ -54,8 +56,12 @@ DECISIONS_HEADING = "Configuration Decisions"
 TRADE_OFF_PATTERN = re.compile(r"trade[- ]?offs?", re.IGNORECASE)
 # FR-001 is the SDD initialization requirement; product requirements start at FR-002.
 RESERVED_FR = "FR-001"
-# An ID followed by "-" is a sub-item (e.g. UC-01-EX1), not a definition.
+# An ID followed by "-" is a sub-item (e.g. UC-001-EX1), not a definition.
 HEADING_ID_PATTERN = re.compile(r"\b(?:UC|US|ADR)-\d+\b(?!-)", re.IGNORECASE)
+# Every ID uses three digits: FR-002, UC-001, US-001, ADR-001, RSK-001.
+ID_PATTERN = re.compile(r"\b(?:FR|UC|US|ADR|RSK)-(\d+)\b", re.IGNORECASE)
+RISK_COLUMNS = "| Risk ID | Description | Impact | Probability | Score | Mitigation Plan |"
+MITIGATION_THRESHOLD = 6
 
 
 def get_sections(content: str):
@@ -120,6 +126,24 @@ def use_utf8_output():
         sys.stdout.reconfigure(encoding="utf-8")
 
 
+def approval_field(label: str, value: str, text: str):
+    """Match "<label>: <value>" with the value on the label's own line."""
+    return re.search(rf"{label}[^\w\n]*{value}", text, re.IGNORECASE)
+
+
+def approval_date(content: str):
+    """The "Approved on" date of PRODUCT.md, or None when absent or invalid."""
+    content = content.replace("\r\n", "\n")
+    for heading, text, _, _ in get_sections(content):
+        if APPROVAL_HEADING.match(heading):
+            match = approval_field("approved on", r"(\d{4}-\d{2}-\d{2})\b", text)
+            try:
+                return datetime.date.fromisoformat(match.group(1)) if match else None
+            except ValueError:
+                return None
+    return None
+
+
 def check_approval(content: str, sections):
     issues = []
     unresolved = [
@@ -132,14 +156,10 @@ def check_approval(content: str, sections):
         for heading, section_content, _, _ in sections
         if APPROVAL_HEADING.match(heading)
     ]
-    approved_by = approval and re.search(
-        r"approved by\W*:?\**\s*(\S.*)$", approval[0], re.IGNORECASE | re.MULTILINE
-    )
-    approved_on = approval and re.search(
-        r"approved on\W*:?\**\s*(\d{4}-\d{2}-\d{2})\b", approval[0], re.IGNORECASE
-    )
-    approved_content = approval and re.search(
-        r"approved content\W*:?\**\s*`?(sha256:[0-9a-f]{64})\b", approval[0], re.IGNORECASE
+    approved_by = approval and approval_field("approved by", r"(\w.*)", approval[0])
+    approved_on = approval and approval_field("approved on", r"(\d{4}-\d{2}-\d{2})\b", approval[0])
+    approved_content = approval and approval_field(
+        "approved content", r"(sha256:[0-9a-f]{64})\b", approval[0]
     )
     if not (approved_by and approved_on and approved_content):
         issues.append(
@@ -196,6 +216,48 @@ def requirement_rows(content: str):
     return rows
 
 
+def table_cells(line: str):
+    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def risk_rows(content: str):
+    """[(RSK id, line)] for every risk table row."""
+    rows = []
+    for line in content.splitlines():
+        match = re.match(r"^\s*\|\s*`?(RSK-\d+)`?\s*\|", line, re.IGNORECASE)
+        if match:
+            rows.append((match.group(1).upper(), line))
+    return rows
+
+
+def check_risks(content: str):
+    """Risk rows use RISK_COLUMNS; Score = Impact x Probability (1-3 each), and
+    a score of MITIGATION_THRESHOLD or more needs a mitigation plan."""
+    rows = risk_rows(content)
+    if not rows:
+        return [(FAIL, f"No RSK-xxx risk rows found (columns: {RISK_COLUMNS})")]
+    issues = []
+    for risk_id, line in rows:
+        cells = table_cells(line)
+        if len(cells) != 6:
+            issues.append(f"{risk_id}: expected the columns {RISK_COLUMNS}")
+            continue
+        numbers = [re.search(r"\d+", cell) for cell in cells[2:5]]
+        if not all(numbers):
+            issues.append(f"{risk_id}: Impact, Probability, and Score must contain numbers")
+            continue
+        impact, probability, score = (int(number.group(0)) for number in numbers)
+        if not (1 <= impact <= 3 and 1 <= probability <= 3):
+            issues.append(f"{risk_id}: Impact and Probability use the 1-3 scale")
+        elif score != impact * probability:
+            issues.append(f"{risk_id}: Score {score} is not Impact x Probability ({impact * probability})")
+        if score >= MITIGATION_THRESHOLD and not cells[5].strip("*_` -"):
+            issues.append(f"{risk_id}: score {score} needs a mitigation plan")
+    if issues:
+        return [(FAIL, issue) for issue in issues]
+    return [(PASS, f"{len(rows)} risk(s) scored as Impact x Probability, with mitigation where required")]
+
+
 def check_requirements(content: str):
     results = []
     fr_ids = sorted({fr_id.upper() for fr_id in re.findall(r"FR-\d+", content, re.IGNORECASE)})
@@ -226,12 +288,17 @@ def heading_id(heading: str):
 
 
 def check_unique_ids(content: str, sections):
-    """FR rows and UC/US/ADR headings each define an ID once.
+    """IDs use three digits, and FR/RSK rows and UC/US/ADR headings each define an ID once.
 
     A heading repeating the ID of a heading that encloses it (e.g. the flows
     of a use case) is part of that definition, not a second one.
     """
-    definitions = [fr_id for fr_id, _ in requirement_rows(content)]
+    malformed = sorted({
+        match.group(0).upper() for match in ID_PATTERN.finditer(content) if len(match.group(1)) != 3
+    })
+    if malformed:
+        return [(FAIL, f"IDs use three digits (e.g. UC-001): {', '.join(malformed)}")]
+    definitions = [row_id for row_id, _ in requirement_rows(content) + risk_rows(content)]
     for heading, _, start, _ in sections:
         own = heading_id(heading)
         if own and not any(
@@ -242,7 +309,7 @@ def check_unique_ids(content: str, sections):
     duplicates = sorted({item for item in definitions if definitions.count(item) > 1})
     if duplicates:
         return [(FAIL, f"Duplicate ID definition(s): {', '.join(duplicates)}")]
-    return [(PASS, f"{len(definitions)} FR, UC, US, and ADR ID(s) are each defined once")]
+    return [(PASS, f"{len(definitions)} FR, UC, US, ADR, and RSK ID(s) are each defined once")]
 
 
 def check_adrs(sections):
@@ -304,6 +371,7 @@ def validate(content: str, draft: bool = False):
         ("Mandatory Section Coverage", check_sections(sections)),
         ("Requirements & EARS Syntax Check", check_requirements(content)),
         ("Unique Identifiers", check_unique_ids(content, sections)),
+        ("Risk Matrix Check", check_risks(content)),
         ("Architecture Decision Records (ADR) Check", check_adrs(sections)),
         ("MoSCoW MVP Scoping Check", check_moscow(sections)),
         ("User Approval Check", check_user_approval(content, sections, draft)),

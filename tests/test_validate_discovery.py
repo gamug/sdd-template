@@ -1,11 +1,11 @@
-"""Regression tests for validate_discovery.py (sections, EARS, MoSCoW, approval)."""
+"""Regression tests for validate_discovery.py (sections, IDs, EARS, risks, MoSCoW, approval, templates)."""
 
 import os
 import shutil
 import tempfile
 import unittest
 
-from fixtures import DISCOVERY_SCRIPT, SAMPLE, read, run, write
+from fixtures import DISCOVERY_SCRIPT, FRAGMENTS, PRODUCT_TEMPLATE, SAMPLE, TEMPLATES, read, run, write
 import validate_discovery
 
 
@@ -79,12 +79,56 @@ class DiscoveryTest(unittest.TestCase):
         self.assertFails(self.validate(product, "--draft"), "Duplicate ID definition(s): ADR-001")
 
     def test_sub_items_of_an_id_are_not_duplicates(self):
-        # The sample's "Exception Flow `UC-01-EX1`" sits under "Use Case `UC-01`".
-        self.assertIn("UC-01-EX1", self.sample)
-        product = self.sample.replace("#### Basic Flow (Happy Path)", "#### Basic Flow of `UC-01`")
+        # The sample's "Exception Flow `UC-001-EX1`" sits under "Use Case `UC-001`".
+        self.assertIn("UC-001-EX1", self.sample)
+        product = self.sample.replace("#### Basic Flow (Happy Path)", "#### Basic Flow of `UC-001`")
         result = self.validate(product, "--draft")
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertIn("are each defined once", result.stdout)
+
+    def test_empty_approver_fails(self):
+        # Reviewer's repro: the next line used to be read as the approver.
+        product = self.sample.replace("- **Approved by**: Product Owner (example)", "- **Approved by**:")
+        self.assertFails(self.validate(product), "Missing Approval section")
+
+    def test_ids_use_three_digits(self):
+        product = self.sample.replace("`US-001`", "`US-01`")
+        self.assertFails(self.validate(product, "--draft"), "IDs use three digits (e.g. UC-001): US-01")
+
+    def test_risk_score_is_impact_times_probability(self):
+        product = self.sample.replace("| Medium (2) | Medium (2) | **4** |", "| Medium (2) | Medium (2) | **5** |")
+        self.assertFails(self.validate(product, "--draft"), "RSK-002: Score 5 is not Impact x Probability (4)")
+
+    def test_high_risk_needs_mitigation(self):
+        lines = self.sample.split("\n")
+        row = next(index for index, line in enumerate(lines) if line.startswith("| `RSK-001` |"))
+        lines[row] = lines[row].rsplit("|", 2)[0] + "|  |"
+        self.assertFails(self.validate("\n".join(lines), "--draft"), "RSK-001: score 9 needs a mitigation plan")
+
+    def test_risk_rows_are_required_and_unique(self):
+        product = "\n".join(line for line in self.sample.split("\n") if "`RSK-00" not in line)
+        result = self.validate(product, "--draft")
+        self.assertFails(result, "Missing required section: Risk Assessment & Roadmap")
+        self.assertIn("No RSK-xxx risk rows found", result.stdout)
+        product = self.sample.replace("| `RSK-002` |", "| `RSK-001` |")
+        self.assertFails(self.validate(product, "--draft"), "Duplicate ID definition(s): RSK-001")
+
+    def test_product_template_passes_draft(self):
+        result = run(DISCOVERY_SCRIPT, "--draft", PRODUCT_TEMPLATE)
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_fragments_fit_the_product_template(self):
+        # Fragments are pasted into PRODUCT.md: no document title of their own,
+        # and every ID uses the three-digit format.
+        for name in FRAGMENTS:
+            text = read(os.path.join(TEMPLATES, name))
+            self.assertFalse(any(line.startswith("# ") for line in text.split("\n")), name)
+            self.assertIn("product-template.md", text, name)
+            malformed = [
+                match.group(0) for match in validate_discovery.ID_PATTERN.finditer(text)
+                if len(match.group(1)) != 3
+            ]
+            self.assertEqual(malformed, [], name)
 
     def test_hash_flag_prints_recorded_hash(self):
         path = os.path.join(self.dir, "PRODUCT.md")
@@ -109,7 +153,7 @@ class DiscoveryTest(unittest.TestCase):
     def test_enclosing_heading_does_not_satisfy_empty_sections(self):
         product = (
             "# Use Case, Functional Requirement, User Story, Tech Stack, Architecture Decision, "
-            "Dev Environment, Risk, Governance Package\n\nUC-01 FR-001 US-01 ADR-001 RSK-01 MVP\n\n"
+            "Dev Environment, Risk, Governance Package\n\nUC-001 FR-001 US-001 ADR-001 RSK-001 MVP\n\n"
             "## Use Cases\n\n## User Stories\n\n## Risks\n"
         )
         result = self.validate(product, "--draft")

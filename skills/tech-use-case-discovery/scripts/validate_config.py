@@ -34,6 +34,7 @@ Options (before the mode):
 """
 
 import argparse
+import datetime
 import json
 import os
 import re
@@ -446,10 +447,28 @@ def normalize_collection(value):
     return "" if value is None else str(value)
 
 
+def check_user_date(key, source, approved_on) -> list:
+    """A user decision is dated with a real date, not in the future and not before approval."""
+    text = source.split(",", 1)[1].strip()
+    try:
+        decided = datetime.date.fromisoformat(text)
+    except ValueError:
+        return [f"Source date for {key} is not a valid date: {text!r}"]
+    if decided > datetime.date.today():
+        return [f"Source date for {key} ({text}) is in the future"]
+    if approved_on and decided < approved_on:
+        return [
+            f"Source date for {key} ({text}) is before PRODUCT.md was approved ({approved_on}); "
+            "configuration decisions follow approval"
+        ]
+    return []
+
+
 def check_decisions(config, required, product) -> list:
     rows, issues = parse_decisions(product)
     if rows is None:
         return [f"docs/PRODUCT.md has no '## {DECISIONS_HEADING}' table. Run scaffold."]
+    approved_on = validate_discovery.approval_date(product)
     for key, spec in sorted(required.items()):
         if key not in rows:
             issues.append(f"No {DECISIONS_HEADING} row for: {key}")
@@ -486,6 +505,8 @@ def check_decisions(config, required, product) -> list:
                         f"Value of {key} ({', '.join(map(repr, unsupported))}) does not appear in "
                         f"the cited section {source!r}; if the user decided it, use 'user, YYYY-MM-DD'"
                     )
+        else:
+            issues.extend(check_user_date(key, source, approved_on))
         if not found or is_empty(value):
             continue
         if isinstance(value, (list, dict)):

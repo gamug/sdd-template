@@ -121,6 +121,23 @@ class CheckTest(unittest.TestCase):
         project.set("project.name", "x-project-name", "PRODUCT.md § Configuration Decisions")
         self.assertCheckFails(project, "cites a section PRODUCT.md does not have")
 
+    def test_user_source_date_is_a_real_date(self):
+        # Reviewer's repro: "user, 2026-13-45" used to pass.
+        project = Project(self)
+        project.set("project.name", "x-project-name", "user, 2026-13-45")
+        self.assertCheckFails(project, "Source date for project.name is not a valid date: '2026-13-45'")
+
+    def test_user_source_date_is_not_in_the_future(self):
+        project = Project(self)
+        project.set("project.name", "x-project-name", "user, 2999-01-01")
+        self.assertCheckFails(project, "Source date for project.name (2999-01-01) is in the future")
+
+    def test_user_source_date_is_not_before_approval(self):
+        # The sample is approved on 2026-01-15.
+        project = Project(self)
+        project.set("project.name", "x-project-name", "user, 2026-01-14")
+        self.assertCheckFails(project, "is before PRODUCT.md was approved (2026-01-15)")
+
     def test_collection_drift(self):
         project = Project(self)
         project.recorded["domain_sections"] = '[{"title":"Models","rules":["Pin checkpoints."]}]'
