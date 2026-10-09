@@ -22,7 +22,7 @@ jobs:
         id: python
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       # Run the documented commands with the matrix interpreter.
       - run: echo "UV_PYTHON=${{ steps.python.outputs.python-path }}" >> "$GITHUB_ENV"
       - name: Validate the bundled discovery sample
