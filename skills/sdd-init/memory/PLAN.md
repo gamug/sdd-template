@@ -126,10 +126,8 @@ checkout. Prefer `scripts/init.sh` when compatible with the approved
 environment; otherwise use the project-appropriate equivalent and document why.
 Add the initialization checks (`validate_discovery.py`, `validate_config.py
 check`, and `validate_config.py render --verify`) to the fork's pre-commit
-hook and as steps in `.github/workflows/validators.yml`, run from a copy of
-the tooling inside the fork rather than from the skill, so the rendered
-constitution stays in sync after WI-003. The template's own `tests/` and
-workflow steps are removed.
+hook and as steps in `.github/workflows/validators.yml`, so the rendered
+constitution stays in sync after WI-003.
 
 **Exit criteria:** Re-running the initialization automation produces the
 documented environment or reports actionable errors, the procedure is

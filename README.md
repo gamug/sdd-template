@@ -51,8 +51,8 @@ The template is based on these principles:
 │       ├── templates/              # product-template.md and per-phase fragments
 │       ├── examples/               # Approved sample discovery package
 │       └── scripts/                # validate_discovery.py, validate_config.py, requirements.txt
-├── tests/                          # Template maintenance: regression tests for the validators
-├── .github/workflows/validators.yml  # Template maintenance, then the fork's CI (actions pinned to SHAs)
+├── tests/                          # Regression tests for the validators
+├── .github/workflows/validators.yml  # Validates the sample, runs the tests (actions pinned to SHAs)
 ├── .github/dependabot.yml          # Proposes updates to the pinned actions and PyYAML
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
 └── README.md
@@ -258,11 +258,10 @@ After initialization, every product change follows this cycle:
 
 The pre-commit hook and the steps WI-006 adds to
 `.github/workflows/validators.yml` run the initialization checks on every
-change, so these artifacts cannot drift silently. They run from a copy of the
-tooling inside the fork, never from the skill:
+change, so these artifacts cannot drift silently:
 
 ```bash
-validate_discovery.py docs/PRODUCT.md
+python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
 validate_config.py check
 validate_config.py render --verify
 ```
@@ -310,11 +309,6 @@ Keep real environment files out of Git:
 
 The tests live outside the skill: the skill ships only what a project needs to
 start, while `tests/` and `.github/workflows/validators.yml` maintain this template.
-
-The tests live outside the skill on purpose: the skill is only the starting point
-of a project, and a fork carries no reference back to it. `tests/` and the
-template steps of `validators.yml` are this repository's maintenance files; WI-006
-removes them from a fork (TASK-015).
 
 The validators carry a stdlib `unittest` regression suite under `tests/`,
 which `.github/workflows/validators.yml` runs on Python 3.10 and the latest
