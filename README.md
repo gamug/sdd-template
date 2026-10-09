@@ -49,7 +49,8 @@ The template is based on these principles:
 │   └── tech-use-case-discovery/    # Required discovery workflow
 │       └── scripts/                # validate_discovery.py and validate_config.py
 ├── tests/                          # Regression tests for the validators
-├── .github/workflows/validators.yml  # Runs the tests on pull requests
+├── .github/workflows/validators.yml  # Runs the tests on pull requests (actions pinned to SHAs)
+├── .github/dependabot.yml          # Proposes updates to the pinned actions
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
 └── README.md
 ```
@@ -97,7 +98,9 @@ through all six phases. The skill guides the user through:
 - development-environment, governance, and workflow decisions; and
 - risks, validation, and roadmap.
 
-The output is `docs/PRODUCT.md`. The skill must ask focused questions and must
+The output is `docs/PRODUCT.md`, built from the skill's
+[`product-template.md`](./skills/tech-use-case-discovery/templates/product-template.md)
+with three-digit IDs (`UC-001`, `FR-002`, …). The skill must ask focused questions and must
 not invent missing product, technical, or operational decisions. Open
 decisions are marked `UNRESOLVED:` and must all be resolved with the user,
 who then approves the document in its `## Approval` section. The approval
@@ -240,11 +243,13 @@ Read README.md, .specify/memory/constitution.md,
 Start the development described in .specify/memory/PLAN.md. Execute the
 tasks in .specify/memory/TASKS.md in dependency order, beginning with TASK-001
 under WI-001. Run the tech-use-case-discovery skill and produce docs/PRODUCT.md
-before proceeding to WI-002. Do not skip tasks, invent unresolved decisions,
+from its product template before proceeding to WI-002. Do not skip tasks, invent unresolved decisions,
 or implement application code before the plan allows it.
 
 After each task:
-- update its status and the parent Work Item status;
+- from WI-003 on, update the task and Work Item status in .sdd/TASKS.md;
+  before that, report progress in your handoff (status is not tracked
+  before WI-003);
 - record decisions and outputs in the required SDD artifact;
 - run the relevant validation;
 - report what changed and what evidence was produced.

@@ -8,7 +8,7 @@ A use case describes how an actor interacts with a system to achieve a specific 
 
 ## Key Components of a Use Case
 
-1. **Title & Unique ID**: Short, verb-noun phrase representing the goal (e.g., `UC-01: Upload and Classify Spectral Data`).
+1. **Title & Unique ID**: Short, verb-noun phrase representing the goal (e.g., `UC-001: Upload and Classify Spectral Data`).
 2. **Primary Actor**: The user role or external system initiating the interaction.
 3. **Secondary Actors**: Supporting systems, databases, or third-party services involved in fulfilling the request.
 4. **Preconditions**: States or system conditions that must be true before the use case can start.

@@ -14,13 +14,19 @@ Risks are categorized into three domains:
 | :--- | :--- | :--- | :--- |
 | **Technical Risk** | Feasibility, legacy integration, or performance bottlenecks. | *Legacy database cannot support concurrent real-time query load.* | *Implement Redis caching layer and read-replicas.* |
 | **Delivery Risk** | Dependencies on third-party APIs, vendor stability, or licensing. | *Third-party AI API has strict rate limits and variable latency.* | *Build async queue worker architecture with local fallback models.* |
-| **Organizational Risk** | Team capacity, skill gaps, or domain compliance requirements. | *Team lacks deep PyTorch/GPU optimization experience.* | *Conduct technical spiked spikes in Sprint 0 and use pre-trained model APIs.* |
+| **Organizational Risk** | Team capacity, skill gaps, or domain compliance requirements. | *Team lacks deep PyTorch/GPU optimization experience.* | *Conduct technical spikes in Sprint 0 and use pre-trained model APIs.* |
 
 ### Risk Matrix Scoring
-For each identified risk, assign:
-- **Probability**: Low (1), Medium (2), High (3)
+Give each risk a three-digit ID (`RSK-001`, `RSK-002`, …) and a row in the
+risk matrix with the columns
+`| Risk ID | Description | Impact | Probability | Score | Mitigation Plan |`:
 - **Impact**: Low (1), Medium (2), High (3)
-- **Risk Score**: $\text{Probability} \times \text{Impact}$ (Scores $\ge 6$ require mandatory mitigation plans before Sprint 1).
+- **Probability**: Low (1), Medium (2), High (3)
+- **Score**: Impact × Probability. A score of 6 or more requires a mitigation
+  plan before Sprint 1.
+
+`validate_discovery.py` enforces the ID format, the score arithmetic, and the
+mitigation plan for scores of 6 or more.
 
 ---
 

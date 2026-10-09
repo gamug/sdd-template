@@ -1,61 +1,37 @@
-# Use Case Specification Template
+> Fragment for `## 2. Use Case Specifications` in
+> [`product-template.md`](./product-template.md). Repeat this `###` block for
+> each use case. The ID stays in the heading and uses three digits; flows
+> extend it (`UC-001-ALT1`, `UC-001-EX1`).
 
-## Document Metadata
-- **Project Name**: [Project Title]
-- **Use Case ID**: `UC-[Number]`
-- **Use Case Title**: [Active Verb + Noun Phrase]
-- **Author**: [Name / Role]
-- **Status**: [Draft / In Review / Approved]
-- **Last Updated**: [YYYY-MM-DD]
+### Use Case `UC-001`: [Active Verb + Noun Phrase]
 
----
-
-## 1. Overview
-- **Primary Actor**: [User Role / External System initiating the action]
+- **Primary Actor**: [User role or external system that starts the use case]
 - **Secondary Actors**: [Supporting systems, databases, third-party APIs]
-- **Brief Description**: [2-3 sentences explaining the user goal and expected outcome]
-
----
-
-## 2. Conditions & Triggers
+- **Brief Description**: [2-3 sentences on the user goal and expected outcome]
 - **Preconditions**:
-  - [Precondition 1: e.g., User must be authenticated with valid role]
-  - [Precondition 2: e.g., System has active database connection]
+  - [e.g., User is authenticated with a valid role]
 - **Triggers**:
-  - [Event initiating the use case: e.g., User clicks 'Upload Dataset']
+  - [e.g., User clicks "Upload Dataset"]
 
----
+#### Basic Flow (Happy Path)
+1. The [Primary Actor] initiates [action].
+2. The system validates [inputs or preconditions].
+3. The system processes [data or logic].
+4. The system displays [output or confirmation].
 
-## 3. Flow of Events
+#### Alternate Flow `UC-001-ALT1`: [Descriptive Title]
+1. At step [X] of the basic flow, if [condition], the system [alternative step].
+2. The flow rejoins the basic flow at step [Y].
 
-### Basic Flow (Happy Path)
-1. The [Primary Actor] initiates [Action].
-2. The System validates [Inputs/Preconditions].
-3. The System processes [Data/Logic].
-4. The System displays [Output/Confirmation].
-5. The Primary Actor confirms [Completion].
+#### Exception Flow `UC-001-EX1`: [Error Condition Title]
+1. At step [X] of the basic flow, if [error occurs], the system logs [error details].
+2. The system displays "[user-friendly error]".
+3. The use case ends in a failed state without data corruption.
 
-### Alternate Flows
-- **Alt-1: [Descriptive Title]**
-  - At step [X] of Basic Flow, if [Condition]:
-  - 1. The System executes [Alternative Step].
-  - 2. Rejoins Basic Flow at step [Y].
+#### Postconditions
+- **Success**: [Guaranteed system state after successful completion]
+- **Failure**: [Guaranteed system state if execution fails]
 
-### Exception Flows
-- **Ex-1: [Error Condition Title]**
-  - At step [X] of Basic Flow, if [Error occurs]:
-  - 1. The System logs [Error Details].
-  - 2. The System displays error message: "[User-friendly error]".
-  - 3. Use case ends in failed state without data corruption.
-
----
-
-## 4. Postconditions
-- **Success Postconditions**: [Guaranteed system state upon successful completion]
-- **Failure Postconditions**: [Guaranteed system state if execution fails]
-
----
-
-## 5. Non-Functional Constraints
-- **Performance**: [e.g., Execution must complete within 2.0 seconds]
-- **Security**: [e.g., Data in transit must be TLS 1.3 encrypted]
+#### Non-Functional Constraints
+- **Performance**: [e.g., completes within 2.0 seconds]
+- **Security**: [e.g., data in transit is encrypted]

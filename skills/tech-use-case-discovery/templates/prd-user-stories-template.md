@@ -1,76 +1,47 @@
-# Product Requirements & User Stories Template
+> Fragment for `## 3. Functional Requirements & User Stories` in
+> [`product-template.md`](./product-template.md). The problem statement,
+> vision, success metrics, and personas go in `## 1. Executive Summary & Vision`.
+> `FR-001` is reserved for the SDD initialization requirement: number product
+> requirements from `FR-002`. IDs use three digits and are each defined once.
 
-## Document Metadata
-- **Project Name**: [Project Title]
-- **Version**: `1.0.0`
-- **Date**: [YYYY-MM-DD]
-- **Target Release**: [MVP / Phase 1]
+### Functional Requirements (EARS Syntax)
 
----
-
-## 1. Problem Statement & Business Goals
-- **Problem Statement**: [Describe the current pain point or market opportunity]
-- **Business Vision**: [High-level solution overview and value proposition]
-- **Success Metrics**: [KPIs: e.g., 50% reduction in workflow time, 99.9% uptime]
-
----
-
-## 2. User Personas
-| Persona Name | Role / Title | Key Goals | Main Pain Points |
-| :--- | :--- | :--- | :--- |
-| **[Persona 1]** | [e.g., Data Analyst] | [e.g., Fast dataset visualization] | [e.g., Manual formatting in Excel] |
-| **[Persona 2]** | [e.g., Admin] | [e.g., User & access management] | [e.g., Lack of audit logs] |
-
----
-
-## 3. Functional Requirements (EARS Syntax)
-
-> `FR-001` is reserved for the SDD initialization requirement. Number product
-> requirements from `FR-002`; FR, UC, US, and ADR IDs are each defined once.
-
-| Requirement ID | EARS Syntax Rule | Requirement Statement | MoSCoW Priority | Traceability (Use Case ID) |
+| Requirement ID | EARS Pattern | Statement | MoSCoW Priority | Traceability |
 | :--- | :--- | :--- | :--- | :--- |
-| `FR-002` | Ubiquitous | The system shall encrypt all stored user data at rest using AES-256. | Must Have | `UC-01` |
-| `FR-003` | Event-Driven | WHEN a user uploads a CSV file, the system shall validate columns within 1s. | Must Have | `UC-01` |
-| `FR-004` | State-Driven | WHILE processing data, the system shall display a real-time progress bar. | Should Have | `UC-02` |
-| `FR-005` | Optional | WHERE GPU execution is available, the system shall accelerate ML inference. | Could Have | `UC-03` |
-| `FR-006` | Unwanted / Error | IF an invalid payload is received, THEN the system shall return HTTP 400 with details. | Must Have | `UC-01` |
+| `FR-002` | Ubiquitous | The system shall encrypt all stored user data at rest using AES-256. | Must Have | `UC-001` |
+| `FR-003` | Event-Driven | WHEN a user uploads a CSV file, the system shall validate columns within 1s. | Must Have | `UC-001` |
+| `FR-004` | State-Driven | WHILE processing data, the system shall display a real-time progress bar. | Should Have | `UC-002` |
+| `FR-005` | Optional | WHERE GPU execution is available, the system shall accelerate ML inference. | Could Have | `UC-003` |
+| `FR-006` | Unwanted / Error | IF an invalid payload is received, THEN the system shall return HTTP 400 with details. | Must Have | `UC-001` |
 
----
+- **MVP Won't Have**: [Capabilities explicitly out of scope for this release]
 
-## 4. User Stories & Acceptance Criteria
+### Non-Functional Requirements (NFRs)
 
-### Epics Overview
-- **Epic 1**: [Epic Title - e.g., Data Ingestion & Validation]
-- **Epic 2**: [Epic Title - e.g., Analytics & ML Inference]
+- **Performance**: [e.g., response time < 500ms for 95th percentile requests]
+- **Reliability & Availability**: [e.g., 99.9% availability]
+- **Security**: [e.g., token-based authentication with role-based access]
+- **Maintainability**: [e.g., automated test coverage above 80%]
 
----
+### User Story `US-001`: [Story Title]
 
-### Story `US-01`: [Story Title]
-- **As a**: [User Persona]
-- **I want to**: [Action / Goal]
-- **So that**: [Value / Benefit]
+Repeat this `###` block for each user story.
+
+- **Card**: As a [persona], I want [goal], so that [benefit].
+- **Epic**: [Epic title]
 - **Priority**: [Must Have / Should Have / Could Have / Won't Have]
+- **Traceability**: `FR-002`
 
 #### Acceptance Criteria (Given-When-Then)
 ```gherkin
 SCENARIO 1: Successful execution
-  GIVEN [Precondition]
-  WHEN [User action]
-  THEN [System response]
-  AND [Additional verification]
+  GIVEN [precondition]
+  WHEN [user action]
+  THEN [system response]
+  AND [additional verification]
 
 SCENARIO 2: Error handling
-  GIVEN [Precondition]
-  WHEN [Invalid action]
-  THEN [System error response]
+  GIVEN [precondition]
+  WHEN [invalid action]
+  THEN [system error response]
 ```
-
----
-
-## 5. Non-Functional Requirements (NFRs)
-
-- **Performance**: Response time < 500ms for 95th percentile requests.
-- **Reliability & Availability**: 99.9% operational availability.
-- **Security**: OAuth2 / JWT token-based authentication with RBAC.
-- **Maintainability**: Automated CI test coverage exceeding 80%.

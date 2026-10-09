@@ -26,8 +26,8 @@ A well-configured development environment ensures developer productivity, elimin
 - Specify runtime versions in root dotfiles (`.python-version`, `.nvmrc`).
 
 ### 4. Container Isolation & Local Dependencies
-- Use **Docker** and **Docker Compose** to run local databases, caches, and microservices in isolated environments.
-- Maintain a local `docker-compose.yml` mirroring production service topologies (e.g., PostgreSQL, Redis, local S3 mock).
+- When the project needs local services (databases, caches, microservices), isolate them, for example with **Docker Compose**; a devcontainer, host-only, or no-container setup is equally valid when the project calls for it.
+- When containers are used, keep the local service topology close to production (e.g., PostgreSQL, Redis, local S3 mock).
 
 ### 5. Environment Variables & Secret Safety
 - Maintain a version-controlled `.env.example` file documenting all required configuration keys.
