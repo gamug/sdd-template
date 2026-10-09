@@ -161,7 +161,11 @@ uv run --with-requirements "$SKILL_DIR/scripts/requirements.txt" python "$SKILL_
 ```
 
 Below, `validate_config.py <mode>` stands for this command, run from the
-project root.
+project root. The defaults are `config.yaml`, `docs/PRODUCT.md` and the skill's
+`memory/constitution.md`; `--config`, `--product` and `--template` (placed
+before the mode) override them. `scaffold --force` overwrites an existing
+`config.yaml`, and `render --output PATH` changes where the constitution is
+written (default `.sdd/constitution.md`).
 
 ### WI-002: create the configuration
 
