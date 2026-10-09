@@ -5,3 +5,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+  # The initialization tooling's pinned Python dependencies.
+  - package-ecosystem: pip
+    directory: /skills/tech-use-case-discovery/scripts
+    schedule:
+      interval: weekly

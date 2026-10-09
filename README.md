@@ -47,10 +47,10 @@ The template is based on these principles:
 │       └── CHANGELOG.md            # Changelog usage placeholder
 ├── skills/
 │   └── tech-use-case-discovery/    # Required discovery workflow
-│       └── scripts/                # validate_discovery.py and validate_config.py
+│       └── scripts/                # validate_discovery.py, validate_config.py, requirements.txt
 ├── tests/                          # Regression tests for the validators
 ├── .github/workflows/validators.yml  # Runs the tests on pull requests (actions pinned to SHAs)
-├── .github/dependabot.yml          # Proposes updates to the pinned actions
+├── .github/dependabot.yml          # Proposes updates to the pinned actions and PyYAML
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
 └── README.md
 ```
@@ -121,7 +121,7 @@ The constitution template is generic. Every placeholder it contains is a
 decision the project must make. Generate the root configuration skeleton:
 
 ```bash
-uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py scaffold
+uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py scaffold
 ```
 
 This writes `config.yaml`, with the PRODUCT.md section each key usually comes
@@ -143,7 +143,7 @@ from, and appends a `Configuration Decisions` table (key, value, source) to
    `user, YYYY-MM-DD`.
 
 ```bash
-uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check
+uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check
 ```
 
 The check fails on missing or empty keys, sources that are malformed or cite
@@ -157,7 +157,7 @@ unchanged.
 ### WI-003: render the constitution and create the SDD objects
 
 ```bash
-uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render
+uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render
 ```
 
 `render` re-runs `check`, then writes `.sdd/constitution.md` and fails on any
@@ -216,10 +216,12 @@ Before starting the agent, prepare:
    command execution, and human approval for consequential actions.
 5. Access to the user who will answer discovery questions. The agent must not
    invent answers when the project has not yet defined its use case.
-6. Python 3.8 or later and [`uv`](https://docs.astral.sh/uv/) on the host.
+6. Python 3.10 or later and [`uv`](https://docs.astral.sh/uv/) on the host.
    The initialization tooling (`validate_discovery.py` and
-   `validate_config.py`, which needs PyYAML through `uv run --with pyyaml==6.0.2`)
-   runs in WI-001 to WI-003, before the project's own environment exists.
+   `validate_config.py`, which needs the PyYAML version pinned in
+   `skills/tech-use-case-discovery/scripts/requirements.txt`, installed by
+   `uv run --with-requirements`) runs in WI-001 to WI-003, before the
+   project's own environment exists.
 
 Do not create `config.yaml` or application source code manually before the
 agent starts. The initial tasks define when those files are created. Apart
@@ -310,8 +312,8 @@ change, so these artifacts cannot drift silently:
 
 ```bash
 python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
-uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py check
-uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify
+uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py check
+uv run --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python skills/tech-use-case-discovery/scripts/validate_config.py render --verify
 ```
 
 Every production code commit must use Conventional Commits and include the
@@ -356,11 +358,11 @@ Keep real environment files out of Git:
 ## Testing the template tooling
 
 The validators carry a stdlib `unittest` regression suite under `tests/`,
-which `.github/workflows/validators.yml` runs on Python 3.8 and the latest
+which `.github/workflows/validators.yml` runs on Python 3.10 and the latest
 Python for every pull request:
 
 ```bash
-uv run --no-project --with pyyaml==6.0.2 python -m unittest discover -s tests
+uv run --no-project --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python -m unittest discover -s tests
 ```
 
 ## License and ownership
