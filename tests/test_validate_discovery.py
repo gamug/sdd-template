@@ -64,6 +64,28 @@ class DiscoveryTest(unittest.TestCase):
         product = self.sample.replace("Trade-offs", "Compromises")
         self.assertFails(self.validate(product, "--draft"), "One or more ADRs are missing")
 
+    def test_fr_001_is_reserved_for_initialization(self):
+        product = self.sample.replace("| `FR-002` |", "| `FR-001` |")
+        self.assertFails(self.validate(product, "--draft"), "FR-001 is reserved for initialization")
+
+    def test_duplicate_ids_fail(self):
+        # Reviewer's repro: a second FR-002 row used to pass as "4 unique" IDs.
+        product = self.sample.replace("| `FR-003` |", "| `FR-002` |")
+        self.assertFails(self.validate(product, "--draft"), "Duplicate ID definition(s): FR-002")
+        product = self.sample.replace("## 6. Development Environment Setup", (
+            "### `ADR-001`: A second record\n\nContext, decision, consequences, trade-offs.\n\n"
+            "## 6. Development Environment Setup"
+        ))
+        self.assertFails(self.validate(product, "--draft"), "Duplicate ID definition(s): ADR-001")
+
+    def test_sub_items_of_an_id_are_not_duplicates(self):
+        # The sample's "Exception Flow `UC-01-EX1`" sits under "Use Case `UC-01`".
+        self.assertIn("UC-01-EX1", self.sample)
+        product = self.sample.replace("#### Basic Flow (Happy Path)", "#### Basic Flow of `UC-01`")
+        result = self.validate(product, "--draft")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("are each defined once", result.stdout)
+
     def test_hash_flag_prints_recorded_hash(self):
         path = os.path.join(self.dir, "PRODUCT.md")
         write(path, self.sample)

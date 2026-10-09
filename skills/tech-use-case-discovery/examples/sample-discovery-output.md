@@ -44,11 +44,11 @@ The SDSS Spectra Classifier is an AI-driven web application designed for astrono
 
 | Requirement ID | EARS Pattern | Statement | MoSCoW Priority | Traceability |
 | :--- | :--- | :--- | :--- | :--- |
-| `FR-001` | Event-Driven | WHEN a user uploads a `.fits` file, the system shall extract flux and wavelength data within 1.5 seconds. | Must Have | `UC-01` |
-| `FR-002` | Ubiquitous | The backend shall return all classification responses in structured JSON format containing category and confidence scores. | Must Have | `UC-01` |
-| `FR-003` | State-Driven | WHILE deep learning inference is executing, the UI shall display a responsive spinner indicator. | Should Have | `UC-01` |
-| `FR-004` | Optional | WHERE GPU acceleration is present, the inference service shall utilize CUDA tensor processing. | Could Have | `UC-01` |
-| `FR-005` | Unwanted / Error | IF the file payload exceeds 50MB, THEN the system shall return an HTTP 413 error message. | Must Have | `UC-01` |
+| `FR-002` | Event-Driven | WHEN a user uploads a `.fits` file, the system shall extract flux and wavelength data within 1.5 seconds. | Must Have | `UC-01` |
+| `FR-003` | Ubiquitous | The backend shall return all classification responses in structured JSON format containing category and confidence scores. | Must Have | `UC-01` |
+| `FR-004` | State-Driven | WHILE deep learning inference is executing, the UI shall display a responsive spinner indicator. | Should Have | `UC-01` |
+| `FR-005` | Optional | WHERE GPU acceleration is present, the inference service shall utilize CUDA tensor processing. | Could Have | `UC-01` |
+| `FR-006` | Unwanted / Error | IF the file payload exceeds 50MB, THEN the system shall return an HTTP 413 error message. | Must Have | `UC-01` |
 
 **MVP Won't Have**: Batch processing of multiple FITS files in one request.
 
@@ -133,11 +133,11 @@ Evaluating Backend API Framework Options:
 ## 8. Governance & Workflow
 
 - **Version control**: integration branch `main`; no direct commits to it. Unrelated work on an in-flight pull request goes to a new branch after asking the user.
-- **Commits**: Conventional Commits, enforced by `commitizen`.
-- **CI**: `.github/workflows/ci.yml` runs `ruff check`, `ruff format --check`, `mypy`, and `pytest -q`, in that order.
+- **Commits**: Conventional Commits, enforced by `commitizen`; hooks and CI scan for secrets with `gitleaks`.
+- **CI**: `.github/workflows/validators.yml` (inherited from the template) also runs `ruff check`, `ruff format --check`, `mypy`, and `pytest -q`, in that order.
 - **Tool configuration**: `pyproject.toml` is the single configuration for `ruff`, `mypy`, and `pytest`; tests mirror `src/` under `tests/` and stay hermetic.
 - **Coding agent**: Claude Code, instruction file `CLAUDE.md` (created with `/init`, tracked in Git), which must reference `.sdd/constitution.md` and `.sdd/SPEC.md`.
-- **Agent limits**: new external services, new heavy dependencies, and storage schema changes require approval; never rewrite history already pushed to `main`.
+- **Agent limits**: new external services, new heavy dependencies, and storage schema changes require approval; never rewrite history already pushed to `main`. Agents leave the working tree on the pushed PR branch.
 - **Naming**: "spectrum" for an uploaded FITS observation; "classification" for a model prediction.
 - **Governance**: constitution version `1.0.0`, ratified on approval; amendments are logged in `.sdd/CHANGELOG.md`.
 
@@ -147,4 +147,4 @@ Evaluating Backend API Framework Options:
 
 - **Approved by**: Product Owner (example)
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:d2ce5a53d93d5cad29e2fb3f68b1531630b04cb1c0587426b94552f9360f1219`
+- **Approved content**: `sha256:fed08e36499a19a20a4ba70d017e5b1dbd57a0797d6bcf45d0725be8f26d2618`

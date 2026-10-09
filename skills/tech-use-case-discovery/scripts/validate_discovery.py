@@ -4,8 +4,10 @@ Software Discovery Package Validator
 
 This script inspects a discovery specification Markdown file or directory
 to verify compliance with the Tech Use Case Discovery framework.
-Checks for mandatory sections, requirement IDs, EARS syntax, ADR completeness,
-and MoSCoW prioritization.
+Checks for mandatory sections, requirement IDs (FR-001 is reserved for
+initialization), unique FR/UC/US/ADR IDs, EARS syntax, ADR completeness, and
+MoSCoW prioritization. validate() returns the results; validate_config.py
+uses it in-process as the discovery gate.
 
 Usage:
     python validate_discovery.py [--draft] <path_to_markdown_file_or_directory>
@@ -50,6 +52,10 @@ APPROVAL_HEADING = re.compile(r"^(?:\d+\.\s*)?approval\s*$", re.IGNORECASE)
 # exact H2 is the decisions table; any other spelling is ordinary content.
 DECISIONS_HEADING = "Configuration Decisions"
 TRADE_OFF_PATTERN = re.compile(r"trade[- ]?offs?", re.IGNORECASE)
+# FR-001 is the SDD initialization requirement; product requirements start at FR-002.
+RESERVED_FR = "FR-001"
+# An ID followed by "-" is a sub-item (e.g. UC-01-EX1), not a definition.
+HEADING_ID_PATTERN = re.compile(r"\b(?:UC|US|ADR)-\d+\b(?!-)", re.IGNORECASE)
 
 
 def get_sections(content: str):
@@ -148,19 +154,13 @@ def check_approval(content: str, sections):
     return issues
 
 
-def analyze_content(content: str, filename: str, draft: bool = False):
-    print(f"\n==========================================")
-    print(f" Validating Discovery Spec: {filename}")
-    print(f"==========================================\n")
-    
-    issues = []
-    warnings = []
-    passes = []
+# Each check returns [(status, message)]; validate() runs them all and
+# print_report() is the only place that prints.
+PASS, WARN, FAIL, SKIP = "PASS", "WARN", "FAIL", "SKIP"
 
-    sections = get_sections(content)
 
-    # 1. Check Mandatory Sections
-    print("--- 1. Mandatory Section Coverage ---")
+def check_sections(sections):
+    results = []
     for section_name, heading_pattern, identifier_pattern in REQUIRED_SECTIONS:
         # An enclosing heading (e.g. a document title) must not satisfy the
         # check on behalf of a more specific, empty section beneath it.
@@ -178,123 +178,171 @@ def analyze_content(content: str, filename: str, draft: bool = False):
             for heading, section_content, _, _ in matching_sections
         )
         if is_complete:
-            print(f"  [PASS] {section_name}")
-            passes.append(f"Section present: {section_name}")
+            results.append((PASS, section_name))
         else:
-            print(f"  [FAIL] Missing required section: {section_name}")
-            issues.append(f"Missing required section: {section_name}")
+            results.append((FAIL, f"Missing required section: {section_name}"))
+    return results
 
-    # 2. Check Requirement IDs and EARS syntax
-    print("\n--- 2. Requirements & EARS Syntax Check ---")
-    fr_matches = re.findall(r"FR-\d+", content, re.IGNORECASE)
-    if fr_matches:
-        print(f"  [PASS] Found {len(set(fr_matches))} unique Functional Requirement ID(s) ({', '.join(sorted(set(fr_matches))[:5])}...)")
-        passes.append("Functional Requirement IDs present")
-    else:
-        print("  [WARN] No FR-xxx requirement IDs found.")
-        warnings.append("No FR-xxx requirement IDs found.")
 
-    requirement_lines = []
+def requirement_rows(content: str):
+    """[(FR id, line)] for every functional requirement table row or bullet."""
+    rows = []
     for line in content.splitlines():
-        table_match = re.match(r"^\s*\|\s*`?(FR-\d+)`?\s*\|", line, re.IGNORECASE)
-        bullet_match = re.match(r"^\s*[-*]\s*`?(FR-\d+)`?\s*[:|-]", line, re.IGNORECASE)
-        if table_match or bullet_match:
-            requirement_lines.append(line)
-    invalid_requirement_lines = [
-        line for line in requirement_lines
-        if not any(pattern.search(line) for pattern in EARS_PATTERNS)
-    ]
-    if requirement_lines and not invalid_requirement_lines:
-        print(f"  [PASS] EARS syntax validated for {len(requirement_lines)} requirement line(s)")
-        passes.append("EARS syntax validated")
-    elif invalid_requirement_lines:
-        print("  [FAIL] One or more functional requirements do not use a valid EARS form.")
-        issues.append("Invalid EARS syntax in functional requirements")
-    else:
-        print("  [FAIL] No functional requirement lines found to validate.")
-        issues.append("No functional requirement lines found")
+        match = re.match(r"^\s*\|\s*`?(FR-\d+)`?\s*\|", line, re.IGNORECASE) or re.match(
+            r"^\s*[-*]\s*`?(FR-\d+)`?\s*[:|-]", line, re.IGNORECASE
+        )
+        if match:
+            rows.append((match.group(1).upper(), line))
+    return rows
 
-    # 3. Check ADR Completeness
-    print("\n--- 3. Architecture Decision Records (ADR) Check ---")
+
+def check_requirements(content: str):
+    results = []
+    fr_ids = sorted({fr_id.upper() for fr_id in re.findall(r"FR-\d+", content, re.IGNORECASE)})
+    if fr_ids:
+        results.append((PASS, f"Found {len(fr_ids)} Functional Requirement ID(s) ({', '.join(fr_ids[:5])}...)"))
+    else:
+        results.append((WARN, "No FR-xxx requirement IDs found."))
+
+    rows = requirement_rows(content)
+    if any(fr_id == RESERVED_FR for fr_id, _ in rows):
+        results.append((
+            FAIL,
+            f"{RESERVED_FR} is reserved for initialization; number product requirements from FR-002",
+        ))
+    invalid = [line for _, line in rows if not any(pattern.search(line) for pattern in EARS_PATTERNS)]
+    if rows and not invalid:
+        results.append((PASS, f"EARS syntax validated for {len(rows)} requirement line(s)"))
+    elif invalid:
+        results.append((FAIL, "One or more functional requirements do not use a valid EARS form."))
+    else:
+        results.append((FAIL, "No functional requirement lines found to validate."))
+    return results
+
+
+def heading_id(heading: str):
+    match = HEADING_ID_PATTERN.search(heading)
+    return match.group(0).upper() if match else None
+
+
+def check_unique_ids(content: str, sections):
+    """FR rows and UC/US/ADR headings each define an ID once.
+
+    A heading repeating the ID of a heading that encloses it (e.g. the flows
+    of a use case) is part of that definition, not a second one.
+    """
+    definitions = [fr_id for fr_id, _ in requirement_rows(content)]
+    for heading, _, start, _ in sections:
+        own = heading_id(heading)
+        if own and not any(
+            outer_start < start < outer_end and heading_id(outer) == own
+            for outer, _, outer_start, outer_end in sections
+        ):
+            definitions.append(own)
+    duplicates = sorted({item for item in definitions if definitions.count(item) > 1})
+    if duplicates:
+        return [(FAIL, f"Duplicate ID definition(s): {', '.join(duplicates)}")]
+    return [(PASS, f"{len(definitions)} FR, UC, US, and ADR ID(s) are each defined once")]
+
+
+def check_adrs(sections):
     adr_sections = [
         section_content
         for heading, section_content, _, _ in sections
         if re.search(r"\bADR-\d+\b", heading, re.IGNORECASE)
     ]
-    if adr_sections:
-        adr_ids = [
-            adr_id
-            for heading, *_ in sections
-            for adr_id in re.findall(r"ADR-\d+", heading, re.IGNORECASE)
-        ]
-        print(f"  [PASS] Found {len(set(adr_ids))} unique ADR ID(s): {', '.join(sorted(set(adr_ids)))}")
-        incomplete_adrs = [
-            section_content
-            for section_content in adr_sections
-            if "context" not in section_content.lower()
-            or "decision" not in section_content.lower()
-            or "consequences" not in section_content.lower()
-            or not TRADE_OFF_PATTERN.search(section_content)
-        ]
-        if not incomplete_adrs:
-            print("  [PASS] ADR structural elements complete (Context, Decision, Consequences/Trade-offs).")
-            passes.append("ADR structural elements complete")
-        else:
-            print("  [FAIL] One or more ADRs are missing Context, Decision, or Consequences/Trade-offs.")
-            issues.append("Incomplete ADR structure")
+    if not adr_sections:
+        return [(FAIL, "No ADR-xxx records detected.")]
+    adr_ids = sorted({
+        adr_id.upper()
+        for heading, *_ in sections
+        for adr_id in re.findall(r"ADR-\d+", heading, re.IGNORECASE)
+    })
+    results = [(PASS, f"Found {len(adr_ids)} ADR ID(s): {', '.join(adr_ids)}")]
+    incomplete_adrs = [
+        section_content
+        for section_content in adr_sections
+        if "context" not in section_content.lower()
+        or "decision" not in section_content.lower()
+        or "consequences" not in section_content.lower()
+        or not TRADE_OFF_PATTERN.search(section_content)
+    ]
+    if incomplete_adrs:
+        results.append((FAIL, "One or more ADRs are missing Context, Decision, or Consequences/Trade-offs."))
     else:
-        print("  [FAIL] No ADR-xxx records detected.")
-        issues.append("No ADR-xxx records detected")
+        results.append((PASS, "ADR structural elements complete (Context, Decision, Consequences/Trade-offs)."))
+    return results
 
-    # 4. Check MoSCoW Prioritization
-    print("\n--- 4. MoSCoW MVP Scoping Check ---")
+
+def check_moscow(sections):
     # Priorities count only inside requirement and user-story sections, with
     # typographic apostrophes normalized ("Won’t Have" == "Won't Have").
     prioritized_content = "\n".join(
         section_content
         for heading, section_content, _, _ in sections
         if re.match(r"^#{1,6}\s+.*(?:functional requirement|user stor)", f"# {heading}", re.IGNORECASE)
-    ).lower().replace("\u2019", "'")
-    moscow_found = [kw for kw in MOSCOW_KEYWORDS if kw in prioritized_content]
-    missing_moscow = [kw for kw in MOSCOW_KEYWORDS if kw not in moscow_found]
-    if not missing_moscow:
-        print(f"  [PASS] All MoSCoW priorities identified: {', '.join(moscow_found)}")
-        passes.append("Complete MoSCoW priorities present")
-    else:
-        print(f"  [FAIL] Missing MoSCoW priorities: {', '.join(missing_moscow)}")
-        issues.append("Incomplete MoSCoW priorities")
+    ).lower().replace("’", "'")
+    missing = [kw for kw in MOSCOW_KEYWORDS if kw not in prioritized_content]
+    if missing:
+        return [(FAIL, f"Missing MoSCoW priorities: {', '.join(missing)}")]
+    return [(PASS, f"All MoSCoW priorities identified: {', '.join(MOSCOW_KEYWORDS)}")]
 
-    # 5. Check user approval
-    print("\n--- 5. User Approval Check ---")
+
+def check_user_approval(content: str, sections, draft: bool):
     if draft:
-        print("  [SKIP] Draft mode: approval not required yet.")
-    else:
-        approval_issues = check_approval(content, sections)
-        for issue in approval_issues:
-            print(f"  [FAIL] {issue}")
-        if approval_issues:
-            issues.extend(approval_issues)
-        else:
-            print("  [PASS] Approved by the user with no unresolved decisions.")
-            passes.append("User approval recorded")
+        return [(SKIP, "Draft mode: approval not required yet.")]
+    issues = check_approval(content, sections)
+    if issues:
+        return [(FAIL, issue) for issue in issues]
+    return [(PASS, "Approved by the user with no unresolved decisions.")]
 
-    # Summary
+
+def validate(content: str, draft: bool = False):
+    """Run every check and return [(title, [(status, message)])]."""
+    sections = get_sections(content)
+    return [
+        ("Mandatory Section Coverage", check_sections(sections)),
+        ("Requirements & EARS Syntax Check", check_requirements(content)),
+        ("Unique Identifiers", check_unique_ids(content, sections)),
+        ("Architecture Decision Records (ADR) Check", check_adrs(sections)),
+        ("MoSCoW MVP Scoping Check", check_moscow(sections)),
+        ("User Approval Check", check_user_approval(content, sections, draft)),
+    ]
+
+
+def failures(report):
+    return [message for _, results in report for status, message in results if status == FAIL]
+
+
+def print_report(report, filename: str) -> bool:
+    print("\n==========================================")
+    print(f" Validating Discovery Spec: {filename}")
+    print("==========================================")
+    for number, (title, results) in enumerate(report, 1):
+        print(f"\n--- {number}. {title} ---")
+        for status, message in results:
+            print(f"  [{status}] {message}")
+
+    statuses = [status for _, results in report for status, _ in results]
     print("\n==========================================")
     print(" Validation Summary")
     print("==========================================")
-    print(f"  Passes:   {len(passes)}")
-    print(f"  Warnings: {len(warnings)}")
-    print(f"  Errors:   {len(issues)}")
+    print(f"  Passes:   {statuses.count(PASS)}")
+    print(f"  Warnings: {statuses.count(WARN)}")
+    print(f"  Errors:   {statuses.count(FAIL)}")
 
-    if issues:
-        print("\n  STATUS: FAILED - Please address critical errors above.")
+    if FAIL in statuses:
+        print("\n  STATUS: FAILED - Fix the errors above.")
         return False
-    elif warnings:
-        print("\n  STATUS: PASSED WITH WARNINGS - Document is complete but can be improved.")
+    if WARN in statuses:
+        print("\n  STATUS: PASSED WITH WARNINGS")
         return True
-    else:
-        print("\n  STATUS: PASSED - Excellent discovery specification package!")
-        return True
+    print("\n  STATUS: PASSED")
+    return True
+
+
+def analyze_content(content: str, filename: str, draft: bool = False) -> bool:
+    return print_report(validate(content, draft), filename)
 
 
 def main():

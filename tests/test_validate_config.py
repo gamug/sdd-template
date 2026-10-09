@@ -24,6 +24,7 @@ class DiscoveryGateTest(unittest.TestCase):
         result = project.run("check")
         self.assertEqual(result.returncode, 1)
         self.assertIn("not an approved discovery package", result.stdout)
+        self.assertIn("[FAIL] Missing Approval section", result.stdout)
 
     def test_refuses_product_edited_after_approval(self):
         # Reviewer's repro: fake evidence inserted after approval.
@@ -35,6 +36,39 @@ class DiscoveryGateTest(unittest.TestCase):
         result = project.run("check")
         self.assertEqual(result.returncode, 1)
         self.assertIn("changed after approval", result.stdout)
+
+
+class ScaffoldTest(unittest.TestCase):
+    def test_scaffold_fill_check_render_verify(self):
+        # The path every fork takes: scaffold -> fill -> check -> render -> verify.
+        project = Project(self)
+        write(project.product_path, project.product)
+        result = project.invoke("scaffold")
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+        config = validate_config.load_config(project.config_path)
+        for key in project.required:
+            self.assertTrue(validate_config.lookup(config, key)[0], key)
+        self.assertIn("# PRODUCT.md: Governance & Workflow", read(project.config_path))
+        product = read(project.product_path)
+        self.assertEqual(product.count("\n## Configuration Decisions\n"), 1)
+        for key in project.required:
+            self.assertIn(f"| `{key}` |  |  |", product)
+
+        rerun = project.invoke("scaffold")
+        self.assertEqual(rerun.returncode, 1)
+        self.assertIn("already exists", rerun.stdout)
+        forced = project.invoke("scaffold", "--force")
+        self.assertEqual(forced.returncode, 0, forced.stdout)
+        self.assertEqual(read(project.product_path).count("\n## Configuration Decisions\n"), 1)
+
+        unfilled = project.invoke("check")
+        self.assertEqual(unfilled.returncode, 1)
+        self.assertIn("Empty value: project.name", unfilled.stdout)
+
+        for mode in (("check",), ("render",), ("render", "--verify")):
+            result = project.run(*mode)
+            self.assertEqual(result.returncode, 0, f"{mode}: {result.stdout}")
 
 
 class CheckTest(unittest.TestCase):

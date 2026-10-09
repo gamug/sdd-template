@@ -25,13 +25,16 @@
 
 ## 3. Functional Requirements (EARS Syntax)
 
+> `FR-001` is reserved for the SDD initialization requirement. Number product
+> requirements from `FR-002`; FR, UC, US, and ADR IDs are each defined once.
+
 | Requirement ID | EARS Syntax Rule | Requirement Statement | MoSCoW Priority | Traceability (Use Case ID) |
 | :--- | :--- | :--- | :--- | :--- |
-| `FR-001` | Ubiquitous | The system shall encrypt all stored user data at rest using AES-256. | Must Have | `UC-01` |
-| `FR-002` | Event-Driven | WHEN a user uploads a CSV file, the system shall validate columns within 1s. | Must Have | `UC-01` |
-| `FR-003` | State-Driven | WHILE processing data, the system shall display a real-time progress bar. | Should Have | `UC-02` |
-| `FR-004` | Optional | WHERE GPU execution is available, the system shall accelerate ML inference. | Could Have | `UC-03` |
-| `FR-005` | Unwanted / Error | IF an invalid payload is received, THEN the system shall return HTTP 400 with details. | Must Have | `UC-01` |
+| `FR-002` | Ubiquitous | The system shall encrypt all stored user data at rest using AES-256. | Must Have | `UC-01` |
+| `FR-003` | Event-Driven | WHEN a user uploads a CSV file, the system shall validate columns within 1s. | Must Have | `UC-01` |
+| `FR-004` | State-Driven | WHILE processing data, the system shall display a real-time progress bar. | Should Have | `UC-02` |
+| `FR-005` | Optional | WHERE GPU execution is available, the system shall accelerate ML inference. | Could Have | `UC-03` |
+| `FR-006` | Unwanted / Error | IF an invalid payload is received, THEN the system shall return HTTP 400 with details. | Must Have | `UC-01` |
 
 ---
 

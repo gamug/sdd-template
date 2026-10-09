@@ -37,14 +37,12 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 
 import validate_discovery
 
 DEFAULT_TEMPLATE = os.path.join(".specify", "memory", "constitution.md")
 DEFAULT_OUTPUT = os.path.join(".sdd", "constitution.md")
-DISCOVERY_VALIDATOR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "validate_discovery.py")
 DECISIONS_HEADING = validate_discovery.DECISIONS_HEADING
 
 COMMENT_PATTERN = re.compile(r"\{\{!--.*?--\}\}\n*", re.DOTALL)
@@ -333,16 +331,13 @@ def check_required(config, required) -> list:
 def require_approved_product(product_path: str):
     if not os.path.isfile(product_path):
         fail(f"'{product_path}' not found. Complete WI-001 (discovery) before configuring the project.")
-    result = subprocess.run(
-        [sys.executable, "-I", DISCOVERY_VALIDATOR, product_path],
-        capture_output=True, text=True, encoding="utf-8", errors="replace",
-    )
-    if result.returncode != 0:
-        failures = [line.strip() for line in result.stdout.splitlines() if "[FAIL]" in line]
-        detail = "\n  ".join(failures) or result.stdout.strip() or result.stderr.strip()
-        fail(f"'{product_path}' is not an approved discovery package (WI-001):\n  {detail}")
     with open(product_path, "r", encoding="utf-8") as f:
-        return f.read()
+        product = f.read()
+    failures = validate_discovery.failures(validate_discovery.validate(product))
+    if failures:
+        detail = "\n  ".join(f"[FAIL] {failure}" for failure in failures)
+        fail(f"'{product_path}' is not an approved discovery package (WI-001):\n  {detail}")
+    return product
 
 
 def decisions_section(product: str):

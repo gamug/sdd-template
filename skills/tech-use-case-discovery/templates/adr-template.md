@@ -56,6 +56,6 @@ Chosen Option: **[Option 1]**
 ---
 
 ## 6. Traceability & References
-- **Related Requirements**: `FR-001`, `FR-002`
+- **Related Requirements**: `FR-002`, `FR-003`
 - **Related Use Cases**: `UC-01`
 - **External Docs**: [Links to benchmarks, framework docs, or internal spikes]
