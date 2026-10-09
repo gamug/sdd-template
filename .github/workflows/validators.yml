@@ -1,0 +1,31 @@
+name: validators
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+# Forks keep these steps and add their initialization checks (TASK-015):
+# validate_discovery.py docs/PRODUCT.md, validate_config.py check, and
+# validate_config.py render --verify.
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The oldest supported Python (README prerequisites) and the latest.
+        python-version: ["3.10", "3.x"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        id: python
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      # Run the documented commands with the matrix interpreter.
+      - run: echo "UV_PYTHON=${{ steps.python.outputs.python-path }}" >> "$GITHUB_ENV"
+      - name: Validate the bundled discovery sample
+        run: python skills/tech-use-case-discovery/scripts/validate_discovery.py skills/tech-use-case-discovery/examples/sample-discovery-output.md
+      - name: Run validator regression tests
+        run: uv run --no-project --with-requirements skills/tech-use-case-discovery/scripts/requirements.txt python -m unittest discover -s tests -v
