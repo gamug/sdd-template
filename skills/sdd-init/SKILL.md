@@ -149,14 +149,15 @@ inputs live in [`memory/`](memory/): `constitution.md`, `SPEC.md`, `PLAN.md`,
 
 ### Running the tooling
 
-Commands are written for a project root that contains this skill at
-`skills/sdd-init/`; if the skill is installed elsewhere, substitute its path.
-`validate_discovery.py` needs only the standard library and runs with plain
-`python`. `validate_config.py` needs the PyYAML version pinned in
+Paths are relative to this skill. `$SKILL_DIR` is the directory containing
+this `SKILL.md` (`skills/sdd-init` in a fork of this template); run the
+commands from the project root, where `docs/PRODUCT.md`, `config.yaml` and
+`.sdd/` live. `validate_discovery.py` needs only the standard library and runs
+with plain `python`. `validate_config.py` needs the PyYAML version pinned in
 `scripts/requirements.txt`:
 
 ```bash
-uv run --with-requirements skills/sdd-init/scripts/requirements.txt python skills/sdd-init/scripts/validate_config.py <mode>
+uv run --with-requirements "$SKILL_DIR/scripts/requirements.txt" python "$SKILL_DIR/scripts/validate_config.py" <mode>
 ```
 
 Below, `validate_config.py <mode>` stands for this command, run from the
@@ -225,7 +226,7 @@ Then create the remaining canonical objects from `docs/PRODUCT.md`:
 Preserve the hierarchy above and acceptance-criteria traceability.
 `FR-001` stays the initialization requirement, and product requirements are
 numbered from `FR-002` (discovery rejects an `FR-001` row in `docs/PRODUCT.md`).
-Do not modify the template inputs in `skills/sdd-init/memory/`: task status is not
+Do not modify the template inputs in `$SKILL_DIR/memory/`: task status is not
 tracked before this step, and `.sdd/TASKS.md` starts tracking it with the
 completed initialization tasks marked done.
 
@@ -245,11 +246,11 @@ To ensure all discovery deliverables meet quality standards and completeness rul
 
 ```bash
 # While writing PRODUCT.md (approval not required yet)
-python skills/sdd-init/scripts/validate_discovery.py --draft docs/PRODUCT.md
+python "$SKILL_DIR/scripts/validate_discovery.py" --draft docs/PRODUCT.md
 # After user approval: print the hash to record as "Approved content"
-python skills/sdd-init/scripts/validate_discovery.py --hash docs/PRODUCT.md
+python "$SKILL_DIR/scripts/validate_discovery.py" --hash docs/PRODUCT.md
 # Then validate the approved document (required before WI-002)
-python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
+python "$SKILL_DIR/scripts/validate_discovery.py" docs/PRODUCT.md
 ```
 
 The script verifies:
