@@ -111,11 +111,13 @@ The discovery process is executed in six sequential phases and produces one docu
    `UNRESOLVED:` and the question to ask.
 4. **Approval**: Resolve every `UNRESOLVED:` item with the user, then end
    `docs/PRODUCT.md` with an `## Approval` section containing
-   `Approved by: <name or role>`, `Approved on: YYYY-MM-DD`, and
-   `Approved content: <hash>`, where `<hash>` is the output of
-   `validate_discovery.py --hash docs/PRODUCT.md` for the version the user
-   approved. Any later edit outside the Approval and Configuration Decisions
-   sections fails validation until the user approves again. Configuration
+   `Approved by: <name or role>`, `First approved on: YYYY-MM-DD`,
+   `Approved on: YYYY-MM-DD`, and `Approved content: <hash>`, where `<hash>`
+   is the output of `validate_discovery.py --hash docs/PRODUCT.md` for the
+   version the user approved. Any later edit outside the Approval and
+   Configuration Decisions sections fails validation until the user approves
+   again; a re-approval updates `Approved on` and the hash and keeps
+   `First approved on`. Configuration
    (WI-002) cannot start until this validates.
 
 ---
@@ -139,7 +141,9 @@ The script verifies:
   Governance & Workflow).
 - EARS syntax compliance, product requirements numbered from `FR-002`
   (`FR-001` is reserved for initialization), and three-digit FR, UC, US, ADR,
-  and RSK IDs that are each defined once.
+  and RSK IDs that are each defined once. FR rows define requirements only in
+  the Functional Requirements section and RSK rows only in the Risk section;
+  elsewhere (e.g. a traceability matrix) they are references.
 - ADR completeness (Context, Decision, Trade-offs, Consequences).
 - The risk matrix: at least one `RSK-xxx` row, Score = Impact × Probability on
   1-3 scales, and a mitigation plan for every score of 6 or more.
@@ -148,12 +152,17 @@ The script verifies:
   `Won't Have:` line).
 - Each FR's EARS pattern column matches its statement (WHEN, WHILE, WHERE,
   IF … THEN, or none for Ubiquitous), and every referenced ID is defined.
-- No template `[...]` placeholders are left outside code and `>` guidance
-  notes (a warning with `--draft`).
-- User approval: an `Approval` section with a non-empty approver, date, and a
-  content hash on their own lines that matches the current document, and no
-  remaining `UNRESOLVED:` markers outside `>` guidance notes (skipped with
-  `--draft`).
+- No template `[...]` placeholders are left outside code (a warning with
+  `--draft`). Links, task boxes, numeric citations (`[1]`, `[1, 2]`,
+  `[1-3]`), and footnotes (`[^1]`) are not placeholders.
+- User approval: an `Approval` section with an approver that is not a
+  template placeholder, real `First approved on` and `Approved on` dates (the
+  first no later than the second), and a content hash on their own lines that
+  matches the current document, and no remaining `UNRESOLVED:` markers
+  (skipped with `--draft`).
+
+Lines starting with `>` are template guidance: every content check skips
+them, but the approval hash covers them.
 
 When validating from a directory, pass the project root or a directory that
 contains exactly one generated `PRODUCT.md`; bundled templates, references,

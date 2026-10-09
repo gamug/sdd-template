@@ -15,12 +15,16 @@ Usage:
     python validate_discovery.py --hash <path_to_PRODUCT.md>
 
 Without --draft the document must also be approved: an "Approval" section
-with "Approved by:", "Approved on: YYYY-MM-DD", and
+with "Approved by:", "First approved on: YYYY-MM-DD" (set on the first
+approval and kept on every re-approval), "Approved on: YYYY-MM-DD", and
 "Approved content: sha256:<hash>", and no "UNRESOLVED:" markers. The hash
 binds the approval to the content the user saw: it covers the whole document
 except the Approval and "## Configuration Decisions" sections, so any later edit
 fails validation until the user approves again. --hash prints the value to
 record. Use --draft while PRODUCT.md is still being written (TASK-003).
+
+Lines starting with ">" are template guidance: every content check skips
+them, but the hash covers them.
 
 Directory mode requires exactly one file named PRODUCT.md somewhere below the
 provided directory and validates that file only.
@@ -63,9 +67,14 @@ RISK_COLUMNS = "| Risk ID | Description | Impact | Probability | Score | Mitigat
 MITIGATION_THRESHOLD = 6
 # "> " blockquote lines are template guidance, not document content.
 GUIDANCE_LINE = re.compile(r"^\s*>")
-# "[...]" left from a template; Markdown links "[text](url)" / "[text][ref]"
-# and task boxes "[ ]" / "[x]" are not placeholders.
-PLACEHOLDER_PATTERN = re.compile(r"\[(?![ xX]\])[^\]\n]+\](?![(\[])")
+# "[...]" left from a template. Not placeholders: Markdown links "[text](url)"
+# / "[text][ref]", task boxes "[ ]" / "[x]", numeric citations "[1]" /
+# "[1, 2]" / "[1-3]", and footnotes "[^1]" / "[^note]: text".
+PLACEHOLDER_PATTERN = re.compile(
+    r"\[(?![ xX]\]|\^|\d+(?:\s*[,\u2013-]\s*\d+)*\])[^\]\n]+\](?![(\[])"
+)
+FR_SECTION = re.compile(r"^#{1,6}\s+.*functional requirement", re.IGNORECASE)
+RISK_SECTION = re.compile(r"^#{1,6}\s+.*risk", re.IGNORECASE)
 TABLE_SEPARATOR = re.compile(r"^\s*\|[\s:|-]+\|?\s*$")
 EARS_FORMS = ("ubiquitous", "event-driven", "state-driven", "optional", "unwanted")
 MOSCOW_VALUES = ("must have", "should have", "could have", "won't have")
@@ -94,6 +103,27 @@ def most_specific(sections):
             for other in sections
         )
     ]
+
+
+def strip_guidance(content: str) -> str:
+    """Blank every ">" guidance line, keeping line positions."""
+    content = content.replace("\r\n", "\n")
+    return "\n".join("" if GUIDANCE_LINE.match(line) else line for line in content.split("\n"))
+
+
+def section_content(content: str, heading_pattern) -> str:
+    """The text of every section whose heading matches, each line once."""
+    ranges = sorted(
+        (start, end) for heading, _, start, end in get_sections(content)
+        if heading_pattern.match(f"# {heading}")
+    )
+    parts, position = [], 0
+    for start, end in ranges:
+        start = max(start, position)
+        if start < end:
+            parts.append(content[start:end])
+            position = end
+    return "\n".join(parts)
 
 
 def is_decisions_section(content: str, heading: str, start: int) -> bool:
@@ -134,21 +164,34 @@ def use_utf8_output():
 
 
 def approval_field(label: str, value: str, text: str):
-    """Match "<label>: <value>" with the value on the label's own line."""
-    return re.search(rf"{label}[^\w\n]*{value}", text, re.IGNORECASE)
+    """Match "<label>: <value>" with the value on the label's own line.
+
+    The label must start a phrase, so "approved on" does not match inside
+    "First approved on".
+    """
+    return re.search(rf"(?<!\w)(?<!\w\s){label}[^\w\n]*{value}", text, re.IGNORECASE)
 
 
-def approval_date(content: str):
-    """The "Approved on" date of PRODUCT.md, or None when absent or invalid."""
+def field_date(match):
+    try:
+        return datetime.date.fromisoformat(match.group(1)) if match else None
+    except ValueError:
+        return None
+
+
+def approval_date(content: str, label: str = "approved on"):
+    """A date field of the Approval section, or None when absent or invalid."""
     content = content.replace("\r\n", "\n")
     for heading, text, _, _ in get_sections(content):
         if APPROVAL_HEADING.match(heading):
-            match = approval_field("approved on", r"(\d{4}-\d{2}-\d{2})\b", text)
-            try:
-                return datetime.date.fromisoformat(match.group(1)) if match else None
-            except ValueError:
-                return None
+            return field_date(approval_field(label, r"(\d{4}-\d{2}-\d{2})\b", text))
     return None
+
+
+def first_approval_date(content: str):
+    """The "First approved on" date: kept on re-approval, so amendments do not
+    invalidate configuration decisions made after the first approval."""
+    return approval_date(content, "first approved on")
 
 
 def check_approval(content: str, sections):
@@ -166,16 +209,27 @@ def check_approval(content: str, sections):
         if APPROVAL_HEADING.match(heading)
     ]
     approved_by = approval and approval_field("approved by", r"(\w.*)", approval[0])
+    first_on = approval and approval_field("first approved on", r"(\d{4}-\d{2}-\d{2})\b", approval[0])
     approved_on = approval and approval_field("approved on", r"(\d{4}-\d{2}-\d{2})\b", approval[0])
     approved_content = approval and approval_field(
         "approved content", r"(sha256:[0-9a-f]{64})\b", approval[0]
     )
-    if not (approved_by and approved_on and approved_content):
+    if not (approved_by and first_on and approved_on and approved_content):
         issues.append(
-            "Missing Approval section with 'Approved by:', 'Approved on: YYYY-MM-DD', "
-            "and 'Approved content: sha256:<hash>' (print it with --hash)"
+            "Missing Approval section with 'Approved by:', 'First approved on: YYYY-MM-DD', "
+            "'Approved on: YYYY-MM-DD', and 'Approved content: sha256:<hash>' (print it with --hash)"
         )
-    elif approved_content.group(1).lower() != content_hash(content):
+        return issues
+    # The label's separator can swallow "[", so search the whole field.
+    if PLACEHOLDER_PATTERN.search(approved_by.group(0)):
+        issues.append("'Approved by' is still a template placeholder; record who approved")
+    if not (field_date(first_on) and field_date(approved_on)):
+        issues.append("'First approved on' and 'Approved on' must be real dates (YYYY-MM-DD)")
+    elif field_date(first_on) > field_date(approved_on):
+        issues.append(
+            f"'First approved on' ({first_on.group(1)}) is after 'Approved on' ({approved_on.group(1)})"
+        )
+    if approved_content.group(1).lower() != content_hash(content):
         issues.append(
             "PRODUCT.md changed after approval (content hash mismatch). Show the changes "
             "to the user, and record a new approval and --hash only after they approve"
@@ -214,9 +268,11 @@ def check_sections(sections):
 
 
 def requirement_rows(content: str):
-    """[(FR id, line)] for every functional requirement table row or bullet."""
+    """[(FR id, line)] for every table row or bullet that defines a functional
+    requirement: only inside the Functional Requirements section. FR rows
+    elsewhere (e.g. a traceability matrix) are references."""
     rows = []
-    for line in content.splitlines():
+    for line in section_content(content, FR_SECTION).splitlines():
         match = re.match(r"^\s*\|\s*`?(FR-\d+)`?\s*\|", line, re.IGNORECASE) or re.match(
             r"^\s*[-*]\s*`?(FR-\d+)`?\s*[:|-]", line, re.IGNORECASE
         )
@@ -230,9 +286,9 @@ def table_cells(line: str):
 
 
 def risk_rows(content: str):
-    """[(RSK id, line)] for every risk table row."""
+    """[(RSK id, line)] for every risk table row in the Risk section."""
     rows = []
-    for line in content.splitlines():
+    for line in section_content(content, RISK_SECTION).splitlines():
         match = re.match(r"^\s*\|\s*`?(RSK-\d+)`?\s*\|", line, re.IGNORECASE)
         if match:
             rows.append((match.group(1).upper(), line))
@@ -284,7 +340,7 @@ def ears_form(statement: str) -> str:
 def ears_column_issues(content: str):
     """FR table rows whose EARS pattern column disagrees with their statement."""
     issues, header = [], None
-    lines = content.splitlines()
+    lines = section_content(content, FR_SECTION).splitlines()
     for index, line in enumerate(lines):
         if line.strip().startswith("|") and index + 1 < len(lines) and TABLE_SEPARATOR.match(lines[index + 1]):
             header = [name.lower() for name in table_cells(line)]
@@ -474,16 +530,21 @@ def check_user_approval(content: str, sections, draft: bool):
 
 
 def validate(content: str, draft: bool = False):
-    """Run every check and return [(title, [(status, message)])]."""
-    sections = get_sections(content)
+    """Run every check and return [(title, [(status, message)])].
+
+    Content checks see the document without ">" guidance notes; the approval
+    hash still covers the whole document.
+    """
+    body = strip_guidance(content)
+    sections = get_sections(body)
     return [
         ("Mandatory Section Coverage", check_sections(sections)),
-        ("Requirements & EARS Syntax Check", check_requirements(content)),
-        ("Unique Identifiers", check_unique_ids(content, sections)),
-        ("Risk Matrix Check", check_risks(content)),
+        ("Requirements & EARS Syntax Check", check_requirements(body)),
+        ("Unique Identifiers", check_unique_ids(body, sections)),
+        ("Risk Matrix Check", check_risks(body)),
         ("Architecture Decision Records (ADR) Check", check_adrs(sections)),
-        ("MoSCoW MVP Scoping Check", check_moscow(content, sections)),
-        ("Template Placeholders", check_placeholders(content, draft)),
+        ("MoSCoW MVP Scoping Check", check_moscow(body, sections)),
+        ("Template Placeholders", check_placeholders(body, draft)),
         ("User Approval Check", check_user_approval(content, sections, draft)),
     ]
 

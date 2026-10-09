@@ -132,11 +132,18 @@ class CheckTest(unittest.TestCase):
         project.set("project.name", "x-project-name", "user, 2999-01-01")
         self.assertCheckFails(project, "Source date for project.name (2999-01-01) is in the future")
 
-    def test_user_source_date_is_not_before_approval(self):
-        # The sample is approved on 2026-01-15.
+    def test_user_source_date_is_not_before_first_approval(self):
+        # The sample is first approved on 2026-01-15.
         project = Project(self)
         project.set("project.name", "x-project-name", "user, 2026-01-14")
-        self.assertCheckFails(project, "is before PRODUCT.md was approved (2026-01-15)")
+        self.assertCheckFails(project, "is before PRODUCT.md was first approved (2026-01-15)")
+
+    def test_reapproval_keeps_earlier_decisions(self):
+        # Reviewer's repro: re-approving PRODUCT.md on a later date gave 41 failures.
+        project = Project(self)
+        project.product = project.product.replace("- **Approved on**: 2026-01-15", "- **Approved on**: 2026-03-01")
+        result = project.run("check")
+        self.assertEqual(result.returncode, 0, result.stdout)
 
     def test_collection_drift(self):
         project = Project(self)

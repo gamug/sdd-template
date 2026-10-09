@@ -152,5 +152,6 @@ A score of 6 or more requires a mitigation plan.
 ## 9. Approval
 
 - **Approved by**: [Name or role]
+- **First approved on**: [YYYY-MM-DD]
 - **Approved on**: [YYYY-MM-DD]
 - **Approved content**: [Output of `validate_discovery.py --hash docs/PRODUCT.md` for the approved version]

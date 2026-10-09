@@ -158,5 +158,6 @@ A score of 6 or more requires a mitigation plan.
 ## 9. Approval
 
 - **Approved by**: Product Owner (example)
+- **First approved on**: 2026-01-15
 - **Approved on**: 2026-01-15
 - **Approved content**: `sha256:d29db4715a20147a93509efdabcc7e5de4d529b7c9d316694a87301c5250cef8`

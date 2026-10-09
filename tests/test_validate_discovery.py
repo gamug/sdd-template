@@ -213,12 +213,61 @@ class DiscoveryTest(unittest.TestCase):
     def test_filled_approval_on_unfilled_template_fails(self):
         template = read(PRODUCT_TEMPLATE).replace("\r\n", "\n")
         template = template.replace("- **Approved by**: [Name or role]", "- **Approved by**: Product Owner")
+        template = template.replace("- **First approved on**: [YYYY-MM-DD]", "- **First approved on**: 2026-10-01")
         template = template.replace("- **Approved on**: [YYYY-MM-DD]", "- **Approved on**: 2026-10-01")
         template = template.replace(
             "- **Approved content**: [Output of `validate_discovery.py --hash docs/PRODUCT.md` for the approved version]",
             f"- **Approved content**: `{validate_discovery.content_hash(template)}`",
         )
         self.assertFails(self.validate(template), "template placeholder(s) left")
+
+    def test_placeholder_approver_fails(self):
+        # Reviewer's repro: the template's approver passed.
+        product = self.sample.replace("Product Owner (example)", "[Name or role]")
+        self.assertFails(self.validate(product), "'Approved by' is still a template placeholder")
+
+    def test_citations_and_footnotes_are_not_placeholders(self):
+        # Reviewer's repro: "[1]" and "[^1]" failed as template placeholders.
+        addition = (
+            "- **Standards**: FITS 4.0 [1], see note[^1]; also [1, 2] and [1-3].\n\n"
+            "[^1]: The FITS standard.\n\n"
+        )
+        product = self.approved(self.sample.replace("- **Naming**:", addition + "- **Naming**:"))
+        result = self.validate(product)
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_traceability_rows_outside_owning_sections_are_references(self):
+        # Reviewer's repro: a traceability matrix gave EARS, duplicate, and MoSCoW failures.
+        matrix = (
+            "### Traceability\n\n| ID | ADR |\n| :--- | :--- |\n"
+            "| `FR-002` | `ADR-001` |\n| `RSK-001` | `ADR-001` |\n\n"
+        )
+        product = self.approved(self.sample.replace("## 6. Development Environment", matrix + "## 6. Development Environment"))
+        result = self.validate(product)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        unresolved = product.replace("| `FR-002` | `ADR-001` |", "| `FR-009` | `ADR-001` |")
+        self.assertFails(self.validate(unresolved, "--draft"), "Reference(s) to undefined ID(s): FR-009")
+
+    def test_guidance_notes_are_skipped_by_id_checks(self):
+        # Reviewer's repro: an example ID in a note failed as undefined.
+        note = "> Example: number use cases like `UC-007`, never `UC-7`.\n\n"
+        product = self.approved(self.sample.replace("## 1. Executive Summary", note + "## 1. Executive Summary"))
+        result = self.validate(product)
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_first_approval_date_is_required_and_not_after_approval(self):
+        missing = self.sample.replace("- **First approved on**: 2026-01-15\n", "")
+        self.assertFails(self.validate(missing), "'First approved on: YYYY-MM-DD'")
+        later = self.sample.replace("- **First approved on**: 2026-01-15", "- **First approved on**: 2026-02-01")
+        self.assertFails(self.validate(later), "'First approved on' (2026-02-01) is after 'Approved on' (2026-01-15)")
+        invalid = self.sample.replace("- **Approved on**: 2026-01-15", "- **Approved on**: 2026-13-45")
+        self.assertFails(self.validate(invalid), "must be real dates")
+
+    def test_reapproval_keeps_first_approval_date(self):
+        reapproved = self.sample.replace("- **Approved on**: 2026-01-15", "- **Approved on**: 2026-03-01")
+        self.assertEqual(self.validate(reapproved).returncode, 0)
+        self.assertEqual(validate_discovery.approval_date(reapproved).isoformat(), "2026-03-01")
+        self.assertEqual(validate_discovery.first_approval_date(reapproved).isoformat(), "2026-01-15")
 
     def test_enclosing_heading_does_not_satisfy_empty_sections(self):
         product = (
