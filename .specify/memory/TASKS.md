@@ -3,6 +3,11 @@
 Task register for the hierarchy `FR-001 > WI > Task` defined in
 [`PLAN.md`](./PLAN.md). Every task has exactly one parent Work Item.
 
+`Status: pending` is the template value. This register is immutable, so task
+status is not tracked before WI-003: TASK-010 carries it into
+`.sdd/TASKS.md`, marks TASK-001 through TASK-009 done, and tracks status there
+from then on.
+
 ## WI-001 — Run the discovery skill and create PRODUCT.md
 
 ### TASK-001 — Execute the discovery workflow
@@ -94,7 +99,9 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
   For every value `docs/PRODUCT.md` does not state, ask a context-rich
   question. A value the document only implies is proposed to the user and
   confirmed, never written silently. Record each answer in the table with
-  source `user, YYYY-MM-DD`.
+  source `user, YYYY-MM-DD`. Propose `.github/workflows/validators.yml` as
+  `quality.ci_file`: the project's quality gates are added to that inherited
+  workflow, so it stays the single CI file.
 
 ### TASK-008 — Validate config.yaml
 
@@ -128,7 +135,11 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Acceptance criteria:** AC-FR001-03
 - **Action:** Create or update `.sdd/SPEC.md`, `.sdd/PLAN.md`, `.sdd/TASKS.md`,
   and `.sdd/CHANGELOG.md` to match the approved `docs/PRODUCT.md` and preserve
-  traceability. Finish with `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`.
+  traceability. Keep `FR-001` and its Work Items as the initialization
+  requirement and add the product requirements from `docs/PRODUCT.md`, which
+  are numbered from `FR-002`. Carry this task register into `.sdd/TASKS.md`
+  with TASK-001 through TASK-009 marked done; status is tracked there from now
+  on. Finish with `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify`.
 
 ## WI-004 — Create folders and non-programmatic dependencies
 

@@ -172,7 +172,11 @@ Then create the remaining canonical objects from `docs/PRODUCT.md`:
 ```
 
 Preserve the `FR > WI > Task` hierarchy and acceptance-criteria traceability.
-Do not modify the template inputs in `.specify/memory/`.
+`FR-001` stays the initialization requirement, and product requirements are
+numbered from `FR-002` (discovery rejects an `FR-001` row in `docs/PRODUCT.md`).
+Do not modify the template inputs in `.specify/memory/`: task status is not
+tracked before this step, and `.sdd/TASKS.md` starts tracking it with the
+completed initialization tasks marked done.
 
 ### WI-004 through WI-006: prepare and reproduce the environment
 

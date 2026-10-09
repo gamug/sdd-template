@@ -15,7 +15,10 @@ FR-001
 
 FR-001 does not define the project's purpose, scope, product, stack, or
 architecture in advance. Those decisions are discovered through WI-001 and
-then applied by the remaining Work Items.
+then applied by the remaining Work Items. FR-001 is reserved for
+initialization: the product requirements discovered in WI-001 are numbered
+from `FR-002`, and `validate_discovery.py` rejects an `FR-001` row in
+`docs/PRODUCT.md`.
 
 ## Acceptance criteria
 

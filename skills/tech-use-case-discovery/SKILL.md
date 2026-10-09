@@ -67,6 +67,8 @@ The discovery process is executed in six sequential phases. For each phase, cons
 
 ### Phase 2: Functional Requirements & User Stories
 1. Convert high-level goals into precise functional requirements using EARS (Easy Approach to Requirements Syntax) rules (*Event-Driven*, *State-Driven*, *Ubiquitous*, *Optional*, *Unwanted*).
+   `FR-001` is reserved for the SDD initialization requirement: number product
+   requirements from `FR-002`.
 2. Create User Stories following the 3 C's framework (*Card, Conversation, Confirmation*): `As a [persona], I want [goal], so that [benefit]`.
 3. Define testable Acceptance Criteria for every user story.
 4. Apply MoSCoW prioritization (*Must have*, *Should have*, *Could have*, *Won't have*).
@@ -91,10 +93,11 @@ The discovery process is executed in six sequential phases. For each phase, cons
 1. Define local and team developer environment standards: IDE setup, version control, language runtimes, version managers, package managers, and container isolation (e.g., Docker).
 2. Set up linters, formatters, environment variable configurations (`.env.example`), and CI/CD pipelines.
 3. Record the repository governance and workflow decisions the project
-   constitution needs: integration branch and commit policy, commit convention
-   and hook, CI file and gate order, canonical tool configuration, the coding-agent
-   framework and its instruction file, scope-expansion approvals, and the initial
-   governance version.
+   constitution needs: integration branch and commit policy, the commit hook and
+   secret scanner, CI gate order (run in the inherited `validators.yml`),
+   canonical tool configuration, the coding-agent framework and its instruction
+   file, scope-expansion approvals, whether agents leave the working tree on the
+   pushed PR branch, and the initial governance version.
 4. **Output format**: Use `templates/dev-environment-checklist.md`.
 
 ### Phase 6: Feasibility, Risk Assessment & MVP Roadmap
@@ -130,9 +133,11 @@ python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT
 
 The script verifies:
 - Presence of required sections in `docs/PRODUCT.md` (Use Cases, Functional
-  Requirements, Tech Stack, ADRs, Dev Environment, Risks, Governance &
-  Workflow).
-- EARS syntax compliance and unique Requirement IDs.
+  Requirements, User Stories, Tech Stack, ADRs, Dev Environment, Risks,
+  Governance & Workflow).
+- EARS syntax compliance, product requirements numbered from `FR-002`
+  (`FR-001` is reserved for initialization), and FR, UC, US, and ADR IDs that
+  are each defined once.
 - ADR completeness (Context, Decision, Trade-offs, Consequences).
 - MoSCoW priority distribution for the MVP.
 - User approval: an `Approval` section with approver, date, and a content

@@ -80,6 +80,9 @@ re-runs `render`.
 Then create or update all SDD objects under `.sdd/`—`SPEC.md`, `PLAN.md`,
 `TASKS.md`, and `CHANGELOG.md`—to match the approved `docs/PRODUCT.md`
 definition while preserving the `FR > WI > Task` hierarchy and traceability.
+`FR-001` stays the initialization requirement; product requirements are
+numbered from `FR-002`. Task status starts being tracked in `.sdd/TASKS.md`
+here, with the tasks completed so far marked done.
 
 **Exit criteria:** `uv run --with pyyaml==6.0.2 python skills/tech-use-case-discovery/scripts/validate_config.py render --verify` passes, and all SDD objects agree
 with `docs/PRODUCT.md`.

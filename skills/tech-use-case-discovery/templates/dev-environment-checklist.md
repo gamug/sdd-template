@@ -43,8 +43,8 @@
 
 ## 5. Local Services & Verification
 
-- [ ] Local services started: `docker compose up -d`
-- [ ] Database migration and health check validated: `GET /health` returns success.
+- [ ] Local services (if any) start with the documented command.
+- [ ] Data migrations (if any) apply, and the documented health or smoke check passes.
 - [ ] Test suite verified: local tests pass without errors.
 
 ---
@@ -55,16 +55,19 @@ These answers feed the project constitution through root `config.yaml`.
 
 - [ ] **Version control**: integration branch, whether direct commits to it are
   allowed, and the policy for unrelated work on an in-flight pull request.
-- [ ] **Commits**: commit convention (e.g. Conventional Commits) and the hook
-  that enforces it.
-- [ ] **CI**: workflow file and the ordered quality gates it runs.
+- [ ] **Commits**: the hook that enforces the template's commit convention
+  (Conventional Commits with the `[FR][WI][TASK]` suffix), and the secret
+  scanner that hooks and CI run.
+- [ ] **CI**: the ordered quality gates. They run in the inherited
+  `.github/workflows/validators.yml`, which is the project's CI file.
 - [ ] **Tool configuration**: the canonical configuration file per tool and the
   test layout / fixture policy.
 - [ ] **Coding agent**: framework, instruction file (e.g. `CLAUDE.md`,
   `AGENTS.md`, `.github/copilot-instructions.md`), its init command, whether it
   is tracked in Git, and the files it must reference.
 - [ ] **Agent limits**: changes that require approval before scope expansion,
-  and the destructive-history boundary.
+  the destructive-history boundary, and whether agents leave the working tree
+  on the pushed PR branch.
 - [ ] **Naming**: established terms that must not be renamed.
 - [ ] **Governance**: initial constitution version, ratification date, and
   amendment log location.
