@@ -46,8 +46,9 @@ needed, why it affects the project, and what concrete options or examples the
 user should consider.
 
 **Exit criteria:** Every `UNRESOLVED:` decision has been resolved with the
-user, `docs/PRODUCT.md` records the user's approval in its `## Approval`
-section, and `validate_discovery.py docs/PRODUCT.md` passes without `--draft`.
+user, `docs/PRODUCT.md` records the user's approval and the hash of the
+approved content in its `## Approval` section, and
+`validate_discovery.py docs/PRODUCT.md` passes without `--draft`.
 
 ### WI-002 — Create config.yaml
 
@@ -60,10 +61,12 @@ every key required by the generic `.specify/memory/constitution.md` template
 and the PRODUCT.md section each one usually comes from.
 
 1. Fill values that `docs/PRODUCT.md` states explicitly, with source
-   `PRODUCT.md § <section>`.
+   `PRODUCT.md § <section>`. The cited section must contain each value (every
+   item, for lists and maps) as a whole token.
 2. Define the project's domain sections (`domain_sections`) from the use
    cases, requirements, ADRs, and risks, and confirm them with the user. The
-   template carries no domain rules of its own.
+   template carries no domain rules of its own. Their source is always
+   `user, YYYY-MM-DD`.
 3. Ask the user for every other value. A value PRODUCT.md only implies is
    proposed and confirmed, never written silently. Record answers with source
    `user, YYYY-MM-DD`.
@@ -131,10 +134,14 @@ baseline checks can run without committed secrets.
 Create the automation needed to reproduce the environment setup from a clean
 checkout. Prefer `scripts/init.sh` when compatible with the approved
 environment; otherwise use the project-appropriate equivalent and document why.
+Add the initialization checks (`validate_discovery.py`, `validate_config.py
+check`, and `validate_config.py render --verify`) to the fork's pre-commit
+hook and CI so the rendered constitution stays in sync after WI-003.
 
 **Exit criteria:** Re-running the initialization automation produces the
-documented environment or reports actionable errors, and the procedure is
-documented for contributors.
+documented environment or reports actionable errors, the procedure is
+documented for contributors, and pre-commit and CI fail when
+`docs/PRODUCT.md`, `config.yaml`, or `.sdd/constitution.md` drift.
 
 ## Planning rules
 

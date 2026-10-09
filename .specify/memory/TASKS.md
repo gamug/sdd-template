@@ -43,9 +43,13 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Ask the user about every `UNRESOLVED:` item and update
   `docs/PRODUCT.md`. Present the document for approval and record it in its
-  `## Approval` section (`Approved by:`, `Approved on: YYYY-MM-DD`). Run the
-  validator without `--draft`; it must pass. This is the entry gate of WI-002,
-  enforced by `validate_config.py`.
+  `## Approval` section (`Approved by:`, `Approved on: YYYY-MM-DD`, and
+  `Approved content:` with the hash printed by `validate_discovery.py --hash
+  docs/PRODUCT.md` once the user has approved). Run the validator without
+  `--draft`; it must pass. Any later edit outside the Approval and
+  Configuration Decisions sections invalidates the approval until the user
+  approves again. This is the entry gate of WI-002, enforced by
+  `validate_config.py`.
 
 ## WI-002 — Create config.yaml
 
@@ -60,8 +64,9 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
   `Configuration Decisions` table to `docs/PRODUCT.md`. Fill only values that
   `docs/PRODUCT.md` states explicitly, and record each one in the table with
   source `PRODUCT.md § <section>`; `check` verifies that the section exists and
-  contains the value. Record lists and maps as compact JSON and escape `|` in
-  values as `\|`.
+  contains the value (every item, for lists and maps) as a whole token, so
+  `3.1` is not evidence for "3.12.2". Record lists and maps as compact JSON
+  and escape `|` in values as `\|`.
 
 ### TASK-006 — Define domain sections
 
@@ -74,7 +79,8 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
   example models, services, storage, AI behavior, evaluation) as
   `domain_sections` entries with a `title` and `rules`. Confirm them with the
   user, write them to `config.yaml`, and record the `domain_sections` row as
-  compact JSON so `check` detects any later change. An
+  compact JSON with source `user, YYYY-MM-DD` (`check` rejects a
+  `PRODUCT.md §` source here) so `check` detects any later change. An
   empty list is valid only when the user confirms the project needs none.
 
 ### TASK-007 — Ask the user for every remaining value
@@ -173,7 +179,15 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 - **Depends on:** TASK-014
 - **Acceptance criteria:** AC-FR001-06
 - **Action:** Create `scripts/init.sh` or the approved equivalent to reproduce
-  the environment from a clean checkout.
+  the environment from a clean checkout. Wire these checks into the fork's
+  pre-commit hook and CI (the configured `quality.commit_hook` and
+  `quality.ci_file`), so `docs/PRODUCT.md`, `config.yaml`, and
+  `.sdd/constitution.md` cannot drift after initialization:
+  - `python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md`
+  - `uv run --with pyyaml python validate_config.py check`
+  - `uv run --with pyyaml python validate_config.py render --verify`
+
+  Show that a hand edit to `.sdd/constitution.md` fails the hook.
 
 ### TASK-016 — Verify reproducibility and document recovery
 

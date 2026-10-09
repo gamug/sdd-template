@@ -48,6 +48,8 @@ The template is based on these principles:
 │       └── CHANGELOG.md            # Changelog usage placeholder
 ├── skills/
 │   └── tech-use-case-discovery/    # Required discovery workflow
+├── tests/                          # Regression tests for the validators
+├── .github/workflows/validators.yml  # Runs the tests on pull requests
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
 └── README.md
 ```
@@ -98,13 +100,17 @@ through all six phases. The skill guides the user through:
 The output is `docs/PRODUCT.md`. The skill must ask focused questions and must
 not invent missing product, technical, or operational decisions. Open
 decisions are marked `UNRESOLVED:` and must all be resolved with the user,
-who then approves the document in its `## Approval` section:
+who then approves the document in its `## Approval` section. The approval
+records who, when, and a hash of the approved content:
 
 ```bash
+python skills/tech-use-case-discovery/scripts/validate_discovery.py --hash docs/PRODUCT.md
 python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
 ```
 
-`validate_config.py` refuses to run until this passes.
+`validate_config.py` refuses to run until this passes. Editing
+`docs/PRODUCT.md` after approval, outside the Approval and Configuration
+Decisions sections, invalidates the approval until the user approves again.
 
 ### WI-002: create the configuration
 
@@ -121,11 +127,12 @@ from, and appends a `Configuration Decisions` table (key, value, source) to
 
 1. Fill the values `docs/PRODUCT.md` states, with source
    `PRODUCT.md § <section>`. The cited section must exist and contain the
-   value. Lists and maps are recorded as compact JSON, and `|` in a value is
-   escaped as `\|`.
+   value (every item, for lists and maps) as a whole token. Lists and maps
+   are recorded as compact JSON, and `|` in a value is escaped as `\|`.
 2. Define the project's domain sections (`domain_sections`: a `title` and
    `rules` each), such as models, services, storage, or evaluation, from the
-   use cases, requirements, and ADRs, and confirm them with the user.
+   use cases, requirements, and ADRs, and confirm them with the user. Their
+   source is always `user, YYYY-MM-DD`.
 3. Ask the user for every other value, including the coding-agent instruction
    file (for example `CLAUDE.md`, `AGENTS.md`, or
    `.github/copilot-instructions.md`). Values PRODUCT.md only implies are
@@ -171,7 +178,9 @@ Do not modify the template inputs in `.specify/memory/`.
 Create the approved folders and non-programmatic dependencies in WI-004. Set
 up the approved devcontainer, Docker, host-only, or no-container environment
 in WI-005. In WI-006, create `scripts/init.sh` or the approved equivalent so
-the environment can be reproduced from a clean checkout.
+the environment can be reproduced from a clean checkout, and add the
+initialization checks to the fork's pre-commit hook and CI (see
+[Ongoing development workflow](#ongoing-development-workflow)).
 
 ## Getting started after forking
 
@@ -279,8 +288,20 @@ After initialization, every product change follows this cycle:
 4. Execute tasks in dependency order, using applicable skills.
 5. Run the configured tests, linting, type checks, security scans, and other
    validation commands.
-6. Update affected SDD and architecture artifacts.
+6. Update affected SDD and architecture artifacts. A change to
+   `config.yaml` also updates its `Configuration Decisions` row and is
+   followed by `validate_config.py render`; a change to the approved
+   content of `docs/PRODUCT.md` needs the user's re-approval.
 7. Move completed work to `.sdd/CHANGELOG.md`.
+
+The pre-commit hook and CI added in WI-006 run the initialization checks on
+every change, so these artifacts cannot drift silently:
+
+```bash
+python skills/tech-use-case-discovery/scripts/validate_discovery.py docs/PRODUCT.md
+uv run --with pyyaml python validate_config.py check
+uv run --with pyyaml python validate_config.py render --verify
+```
 
 Every production code commit must use Conventional Commits and include the
 traceability suffix required by the constitution:
@@ -315,6 +336,16 @@ Keep real environment files out of Git:
 - commit placeholder values only in environment examples;
 - never commit secrets; and
 - reproduce setup through the approved initialization script or equivalent.
+
+## Testing the template tooling
+
+The validators carry a stdlib `unittest` regression suite under `tests/`,
+which `.github/workflows/validators.yml` runs on Python 3.8 and the latest
+Python for every pull request:
+
+```bash
+uv run --no-project --with pyyaml python -m unittest discover -s tests
+```
 
 ## License and ownership
 
