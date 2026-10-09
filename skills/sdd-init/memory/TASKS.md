@@ -108,8 +108,8 @@ from then on.
   question. A value the document only implies is proposed to the user and
   confirmed, never written silently. Record each answer in the table with
   source `user, YYYY-MM-DD`. Propose `.github/workflows/validators.yml` as
-  `quality.ci_file`: the project's quality gates are added to that inherited
-  workflow, so it stays the single CI file.
+  `quality.ci_file`: the project's quality gates replace the template's
+  maintenance steps in that workflow, so it stays the single CI file.
 
 ### TASK-008 — Validate config.yaml
 
@@ -200,13 +200,20 @@ from then on.
 - **Action:** Create `scripts/init.sh` or the approved equivalent to reproduce
   the environment from a clean checkout. Wire these checks into the fork's
   pre-commit hook (the configured `quality.commit_hook`, which also enforces
-  the commit convention) and add them as steps to the inherited
-  `.github/workflows/validators.yml`, keeping its template sample and test
-  steps, so `docs/PRODUCT.md`, `config.yaml`, and `.sdd/constitution.md`
-  cannot drift after initialization:
-  - `python "$SKILL_DIR/scripts/validate_discovery.py" docs/PRODUCT.md`
+  the commit convention) and add them as steps to
+  `.github/workflows/validators.yml`, so `docs/PRODUCT.md`, `config.yaml`, and
+  `.sdd/constitution.md` cannot drift after initialization:
+  - `validate_discovery.py docs/PRODUCT.md`
   - `validate_config.py check`
   - `validate_config.py render --verify`
+
+  The skill only starts the project, so neither the hook nor the workflow may
+  point at it. Copy `validate_discovery.py`, `validate_config.py`,
+  `requirements.txt` and the constitution template from `$SKILL_DIR` into the
+  fork (at the approved tooling path) and run that copy. Remove the template's
+  own maintenance files, `tests/` and the template sample and test steps of
+  `validators.yml`, and keep the workflow as the single CI file for the
+  project's quality gates.
 
   Show that a hand edit to `.sdd/constitution.md` fails the hook.
 

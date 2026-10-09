@@ -94,7 +94,7 @@ The discovery process is executed in six sequential phases and produces one docu
 2. Set up linters, formatters, environment variable configurations (`.env.example`), and CI/CD pipelines.
 3. Record the repository governance and workflow decisions the project
    constitution needs: integration branch and commit policy, the commit hook and
-   secret scanner, CI gate order (run in the inherited `validators.yml`),
+   secret scanner, CI gate order (run in `validators.yml`),
    canonical tool configuration, the coding-agent framework and its instruction
    file, scope-expansion approvals, whether agents leave the working tree on the
    pushed PR branch, and the initial governance version.
