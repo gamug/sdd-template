@@ -17,7 +17,7 @@ criterion it satisfies.
 ### WI-001 — Run the discovery skill and create PRODUCT.md
 
 **Parent:** FR-001  
-**Depends on:** none
+**Depends on:** none  
 **Acceptance criteria:** AC-FR001-01
 
 Run [`skills/tech-use-case-discovery/SKILL.md`](../../skills/tech-use-case-discovery/SKILL.md)
@@ -40,7 +40,7 @@ approved content in its `## Approval` section, and
 ### WI-002 — Create config.yaml
 
 **Parent:** FR-001  
-**Depends on:** WI-001 (approved `docs/PRODUCT.md`)
+**Depends on:** WI-001 (approved `docs/PRODUCT.md`)  
 **Acceptance criteria:** AC-FR001-02
 
 Build root `config.yaml` from scratch with `validate_config.py scaffold`, which lists
@@ -67,7 +67,7 @@ source matching its value.
 ### WI-003 — Render constitution.md and synchronize SDD objects
 
 **Parent:** FR-001  
-**Depends on:** WI-002
+**Depends on:** WI-002  
 **Acceptance criteria:** AC-FR001-03
 
 Render `.sdd/constitution.md` from root `config.yaml` and the immutable
@@ -90,7 +90,7 @@ with `docs/PRODUCT.md`.
 ### WI-004 — Create folders and non-programmatic dependencies
 
 **Parent:** FR-001  
-**Depends on:** WI-003
+**Depends on:** WI-003  
 **Acceptance criteria:** AC-FR001-04
 
 Create the directories, configuration locations, documentation locations,
@@ -104,7 +104,7 @@ matches the approved constitution and PRODUCT definition.
 ### WI-005 — Set up the system environment
 
 **Parent:** FR-001  
-**Depends on:** WI-004
+**Depends on:** WI-004  
 **Acceptance criteria:** AC-FR001-05
 
 Set up the development environment using the approach selected in
@@ -118,7 +118,7 @@ baseline checks can run without committed secrets.
 ### WI-006 — Automate environment reproduction
 
 **Parent:** FR-001  
-**Depends on:** WI-005
+**Depends on:** WI-005  
 **Acceptance criteria:** AC-FR001-06
 
 Create the automation needed to reproduce the environment setup from a clean

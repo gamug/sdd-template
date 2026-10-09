@@ -29,9 +29,10 @@ Software architecture is the composition of architectural design decisions. An A
 2. **Status**: Current lifecycle state (*Proposed*, *Accepted*, *Deprecated*, *Superseded*).
 3. **Context**: The business problem, technical constraints, quality attribute requirements, and forces at play.
 4. **Decision**: Explicit statement of the chosen solution and architectural pattern.
-5. **Alternatives Considered**: Evaluated options with pros/cons analysis for each.
+5. **Considered Options / Rejected Options**: Evaluated options with pros/cons analysis for each, and why the rejected ones lost.
 6. **Consequences**:
    - **Positive**: Expected performance, developer speed, or maintainability gains.
-   - **Negative / Trade-offs**: Introduced complexity, memory overhead, or vendor lock-in.
+   - **Trade-offs**: Introduced complexity, memory overhead, or vendor lock-in, and the mitigation that contains them.
    - **Neutral**: Structural shifts or secondary operational impacts.
-7. **References**: Links to PRDs, benchmark reports, or external specifications.
+7. **Traceability**: The `FR-xxx` and `UC-xxx` IDs the decision serves.
+8. **External Docs**: Links to PRDs, benchmark reports, or external specifications.

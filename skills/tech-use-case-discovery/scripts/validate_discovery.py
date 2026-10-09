@@ -7,8 +7,9 @@ to verify compliance with the Tech Use Case Discovery framework.
 Checks for mandatory sections, requirement IDs (FR-001 is reserved for
 initialization), three-digit FR/UC/US/ADR/RSK IDs defined once, EARS syntax,
 ADR completeness, the risk matrix (Score = Impact x Probability, and a
-mitigation plan for scores of 6 or more), and MoSCoW prioritization. validate() returns the results; validate_config.py
-uses it in-process as the discovery gate.
+mitigation plan for scores of 6 or more), and MoSCoW prioritization.
+validate() returns the results; validate_config.py uses it in-process as the
+discovery gate.
 
 Usage:
     python validate_discovery.py [--draft] <path_to_markdown_file_or_directory>
@@ -586,7 +587,7 @@ def analyze_content(content: str, filename: str, draft: bool = False) -> bool:
 
 def main():
     use_utf8_output()
-    flags =[arg for arg in sys.argv[1:] if arg in ("--draft", "--hash")]
+    flags = [arg for arg in sys.argv[1:] if arg in ("--draft", "--hash")]
     args = [arg for arg in sys.argv[1:] if arg not in flags]
     draft = "--draft" in flags
     if len(args) != 1 or len(flags) > 1:
