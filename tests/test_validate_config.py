@@ -70,8 +70,8 @@ class ScaffoldTest(unittest.TestCase):
             result = project.run(*mode)
             self.assertEqual(result.returncode, 0, f"{mode}: {result.stdout}")
 
-    def test_scaffold_header_does_not_embed_the_install_path(self):
-        # config.yaml is committed, so it must not carry this machine's paths.
+    def test_scaffold_config_does_not_reference_the_skill(self):
+        # config.yaml is committed in the fork: no install path, no pointer back to the skill.
         project = Project(self)
         write(project.product_path, project.product)
         result = run(
@@ -83,9 +83,9 @@ class ScaffoldTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout)
         text = read(project.config_path)
-        self.assertIn("# Generated from $SKILL_DIR/memory/constitution.md", text)
-        self.assertNotIn(os.path.dirname(os.path.dirname(CONFIG_SCRIPT)), text)
-        self.assertNotIn("skills/sdd-init", text)
+        for leak in (os.path.dirname(os.path.dirname(CONFIG_SCRIPT)), "skills/sdd-init", "SKILL_DIR", "validate_config"):
+            self.assertNotIn(leak, text)
+        self.assertIn("$SKILL_DIR", result.stdout)
 
 
 class CheckTest(unittest.TestCase):
@@ -215,6 +215,14 @@ class RenderTest(unittest.TestCase):
         self.assertIn("2026-01-15", rendered)
         self.assertIn("1.10", rendered)
         self.assertEqual(project.run("render", "--verify").returncode, 0)
+
+    def test_rendered_constitution_does_not_reference_the_skill(self):
+        # The skill only starts the project; what it generates must stand alone.
+        project = Project(self)
+        self.assertEqual(project.run("render").returncode, 0)
+        rendered = read(os.path.join(project.dir, ".sdd", "constitution.md"))
+        for leak in ("skills/", "sdd-init", "SKILL", "validate_config", "validate_discovery"):
+            self.assertNotIn(leak, rendered)
 
     def test_verify_detects_stale_render(self):
         project = Project(self)

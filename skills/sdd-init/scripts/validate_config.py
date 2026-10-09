@@ -47,7 +47,6 @@ DEFAULT_TEMPLATE = os.path.normpath(
 )
 # Stable names for files written into the project, which must not embed this
 # machine's install path.
-TEMPLATE_LABEL = "$SKILL_DIR/memory/constitution.md"
 RUN_COMMAND = (
     'uv run --with-requirements "$SKILL_DIR/scripts/requirements.txt" '
     'python "$SKILL_DIR/scripts/validate_config.py"'
@@ -598,16 +597,14 @@ def scaffold(args):
     _, required = load_template(args.template)
     if os.path.exists(args.config) and not args.force:
         fail(f"'{args.config}' already exists. Use --force to overwrite it.")
-    template_label = TEMPLATE_LABEL if args.template == DEFAULT_TEMPLATE else args.template
     header = (
-        f"# Generated from {template_label} by validate_config.py scaffold.\n"
-        f"# Fill each value from {args.product} and record its source in the\n"
-        f"# '{DECISIONS_HEADING}' table there; ask the user for anything it does\n"
-        f"# not state. Then run: {RUN_COMMAND} check\n"
+        f"# Project configuration. Every value comes from {args.product}; its source\n"
+        f"# is recorded in the '{DECISIONS_HEADING}' table there.\n"
     )
     with open(args.config, "w", encoding="utf-8") as f:
         f.write(header + render_skeleton(build_tree(required)) + "\n")
     print(f"[PASS] Wrote {len(required)} required key(s) to {args.config}.")
+    print(f"Fill each value, asking the user for anything {args.product} does not state, then run: {RUN_COMMAND} check")
 
     if decisions_section(product) is None:
         rows = "\n".join(f"| `{key}` |  |  |" for key in sorted(required))

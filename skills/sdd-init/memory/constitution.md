@@ -13,11 +13,9 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - Project-specific parameters and operational variables are defined exclusively
   in the root `config.yaml`; informal task notes and prompts cannot replace
   configuration.
-- The files under `skills/sdd-init/memory/` are immutable template inputs.
-  Initialization creates the canonical project artifacts under `.sdd/`,
-  including `.sdd/constitution.md`; from then on, `.sdd/constitution.md` is the
-  generated governance contract and is not an independent source of project
-  decisions.
+- Initialization created the canonical project artifacts under `.sdd/`,
+  including `.sdd/constitution.md`. It is the generated governance contract and
+  is not an independent source of project decisions.
 - Renderers, build scripts, CLI harnesses, and AI context generators must
   validate the configuration before execution. Missing required configuration
   keys, mandatory environment variables, or schema parameters must fail
@@ -94,14 +92,13 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - Project-specific decisions are collected and approved in `docs/PRODUCT.md`
   during discovery, normalized into root `config.yaml` with the source of
   every value recorded in the `Configuration Decisions` table of
-  `docs/PRODUCT.md`, and rendered into `.sdd/constitution.md` by
-  `validate_config.py render`. `.sdd/SPEC.md`, `.sdd/PLAN.md`, and
+  `docs/PRODUCT.md`, and rendered into `.sdd/constitution.md`. `.sdd/SPEC.md`, `.sdd/PLAN.md`, and
   `.sdd/TASKS.md` are then derived from `docs/PRODUCT.md`. `FR-001` is the
   initialization requirement; product requirements are numbered from `FR-002`.
 - `docs/PRODUCT.md` is the decision source; `config.yaml` is the
   authoritative normalized configuration. Any edit to `config.yaml` must
   update its `Configuration Decisions` row, be synchronized to the affected
-  SDD artifacts, and be followed by `validate_config.py render`.
+  SDD artifacts and to `.sdd/constitution.md`.
 - Missing or ambiguous inputs must be presented as explicit, context-rich
   questions that identify the decision, explain its impact, and provide
   concrete options or an expected answer format. Agents must not guess or
