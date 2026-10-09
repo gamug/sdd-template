@@ -53,7 +53,7 @@ The template is based on these principles:
 │       ├── examples/               # Approved sample discovery package
 │       └── scripts/                # validate_discovery.py, validate_config.py, requirements.txt
 ├── tests/                          # Regression tests for the validators
-├── .github/workflows/validators.yml  # Validates the sample and runs the tests on pull requests and pushes to master (actions pinned to SHAs)
+├── .github/workflows/validators.yml  # Validates the sample, runs the tests (actions pinned to SHAs)
 ├── .github/dependabot.yml          # Proposes updates to the pinned actions and PyYAML
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
 └── README.md

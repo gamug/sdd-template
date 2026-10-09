@@ -114,8 +114,8 @@ SCENARIO: [Scenario name]
 - **Environment isolation**: [Devcontainer, Docker, host-only, or no-container, and why]
 - **Local services**: [Services the project needs locally and the command that starts them, or none]
 - **Editor configuration**: [Shared workspace settings and recommended extensions]
-- **Code quality**: [Linters, formatters, type checkers]
 - **Configuration variables**: [Environment example file and where local values live]
+- **Code quality**: [Linters, formatters, type checkers]
 - **Verification command**: [Command that proves the environment works]
 
 ---

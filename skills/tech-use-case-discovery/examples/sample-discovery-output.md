@@ -114,8 +114,8 @@ Evaluating Backend API Framework Options:
 - **Environment isolation**: Docker Compose running the local FastAPI server and a PostgreSQL test instance.
 - **Local services**: PostgreSQL test instance, started with `docker compose up -d`.
 - **Editor configuration**: Shared `.vscode/settings.json` and recommended extensions for Python, Ruff, and Docker.
-- **Code quality**: `ruff` for linting and formatting, `mypy` for static type enforcement.
 - **Configuration variables**: `.env.example` lists every required key; local values live in `.env`, which stays out of Git.
+- **Code quality**: `ruff` for linting and formatting, `mypy` for static type enforcement.
 - **Verification command**:
   ```bash
   docker compose up -d
@@ -164,4 +164,4 @@ A score of 6 or more requires a mitigation plan.
 - **Approved by**: Product Owner (example)
 - **First approved on**: 2026-01-15
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:abc157d06209de99d66a323492e07f2b22f56801b486a47a025e027445730892`
+- **Approved content**: `sha256:7d9c6c655596f4f57a6f8d6e80667557620feb4e8f4c187067247e3147096b26`
