@@ -38,7 +38,9 @@ mitigation plan for scores of 6 or more.
 - Establish clear success metrics and feedback loops for the MVP release.
 
 ### Phased Roadmap Structure
-A phase may be split into sprints; use phases, sprints, or both, as long as the MVP boundary stays explicit.
+
+A phase may be split into sprints. Use phases, sprints, or both, as long as the
+MVP boundary stays explicit.
 
 1. **Phase 0: Discovery & Technical Spikes (Weeks 1–3)**: Finalize architecture, setup dev environments, conduct POC spikes on high-risk components.
 2. **Phase 1: MVP Core Build (Weeks 4–10)**: Implement core use cases, primary API endpoints, and essential UI flows.
