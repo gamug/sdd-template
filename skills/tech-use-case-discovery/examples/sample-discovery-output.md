@@ -87,7 +87,7 @@ Evaluating Backend API Framework Options:
 | **Async Request Performance** | 4 | 4 (ASGI / Uvicorn) | 4 (Event loop) | 4 (Netty async) |
 | **Team Skill Alignment** | 4 | 5 (High Python fluency) | 3 (Moderate) | 2 (Low Java fluency) |
 | **AI Coding Proficiency (LLM Support)**| 4 | 5 (Extensive LLM training data)| 5 (High) | 4 (High) |
-| **Weighted Score Total** | -- | **81 / 85** | **59 / 85** | **49 / 85** |
+| **Weighted Score Total** | -- | **81 / 85** | **58 / 85** | **50 / 85** |
 
 **Decision**: Selected **FastAPI + PyTorch + Astropy** in Python due to complete ecosystem alignment, high performance, and minimal cross-language data conversion overhead.
 
@@ -108,8 +108,12 @@ Evaluating Backend API Framework Options:
 
 ## 6. Development Environment Setup
 
+- **Target platforms**: Linux and macOS.
+- **Version control**: Git hosted on GitHub; contributors authenticate over SSH.
 - **Runtimes and version managers**: `pyenv` (Python 3.12.2), `nvm` (Node 20 LTS for frontend tools).
 - **Environment isolation**: Docker Compose running the local FastAPI server and a PostgreSQL test instance.
+- **Local services**: PostgreSQL test instance, started with `docker compose up -d`.
+- **Editor configuration**: Shared `.vscode/settings.json` and recommended extensions for Python, Ruff, and Docker.
 - **Code quality**: `ruff` for linting and formatting, `mypy` for static type enforcement.
 - **Configuration variables**: `.env.example` lists every required key; local values live in `.env`, which stays out of Git.
 - **Verification command**:
@@ -160,4 +164,4 @@ A score of 6 or more requires a mitigation plan.
 - **Approved by**: Product Owner (example)
 - **First approved on**: 2026-01-15
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:d29db4715a20147a93509efdabcc7e5de4d529b7c9d316694a87301c5250cef8`
+- **Approved content**: `sha256:08397c613cdb4dea57339c81479259e2b2e30522f4812f6671eec1a5d543b1fa`

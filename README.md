@@ -47,15 +47,19 @@ The template is based on these principles:
 │       └── CHANGELOG.md            # Changelog usage placeholder
 ├── skills/
 │   └── tech-use-case-discovery/    # Required discovery workflow
+│       ├── SKILL.md                # Six-phase discovery workflow
+│       ├── references/             # One guide per phase
+│       ├── templates/              # product-template.md and per-phase fragments
+│       ├── examples/               # Approved sample discovery package
 │       └── scripts/                # validate_discovery.py, validate_config.py, requirements.txt
 ├── tests/                          # Regression tests for the validators
-├── .github/workflows/validators.yml  # Runs the tests on pull requests (actions pinned to SHAs)
+├── .github/workflows/validators.yml  # Validates the sample and runs the tests on pull requests and pushes to master (actions pinned to SHAs)
 ├── .github/dependabot.yml          # Proposes updates to the pinned actions and PyYAML
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
 └── README.md
 ```
 
-The constitution template uses `{{ key }}` placeholders for scalar values,
+The constitution template uses `{{key}}` placeholders for scalar values,
 `{{#each key}}` blocks for collections, `{{#if key}}` blocks for optional
 content, and `{{!-- --}}` comments. `validate_config.py render` implements this
 subset and fails when a required value is missing.
