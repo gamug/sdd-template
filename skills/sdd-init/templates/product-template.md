@@ -91,6 +91,8 @@ SCENARIO: [Scenario name]
 ## 5. Architecture Decision Records (ADRs)
 
 > Fragment: [`adr-template.md`](./adr-template.md), one `###` block per decision.
+> In Phase 4 each block is also seeded into the root `ADR.md` (see
+> `adr-log-template.md`).
 
 ### `ADR-001`: [Decision Title]
 
@@ -99,7 +101,7 @@ SCENARIO: [Scenario name]
 - **Decision**: [The chosen option]
 - **Consequences (Positive)**: [Benefits]
 - **Consequences (Trade-offs)**: [Costs and how they are mitigated]
-- **Traceability**: `FR-002`, `UC-001`
+- **Traceability**: [`FR-002`, `UC-001`: only the IDs this decision serves]
 
 ---
 
