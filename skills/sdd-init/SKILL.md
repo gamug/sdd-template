@@ -176,11 +176,12 @@ inputs live in [`memory/`](memory/): `constitution.md`, `SPEC.md`, `PLAN.md`,
 - The hierarchy is strict: `FR > WI > Task`. Every Work Item belongs to a
   functional requirement and every task to exactly one Work Item. `FR-001` is
   reserved for initialization; product requirements start at `FR-002`.
-- After each task: from WI-003 on, check the task's box in `.sdd/TASKS.md`
-  and, once every task of its Work Item is checked, the Work Item's box
-  (before that, report progress in the handoff); record
-  decisions in the required SDD artifact; run the relevant validation; and
-  report what changed and what evidence was produced.
+- After each task: record decisions in the required SDD artifact; run the
+  relevant validation; then, once `.sdd/TASKS.md` exists (TASK-010 creates it
+  and checks TASK-001 through TASK-009; before that, report progress in the
+  handoff), check the task's box there and, once every task of its Work Item
+  is checked, the Work Item's box; and report what changed and what evidence
+  was produced.
 - When information is missing, stop and ask one clear question that explains
   the decision, its impact, and the acceptable answers. Continue only after
   the user resolves it.
