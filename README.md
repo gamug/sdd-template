@@ -134,9 +134,9 @@ python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
 
 `validate_config.py` refuses to run until this passes. It does not check
 `ADR.md`; accepting the seeded ADRs is a manual step before WI-002, described
-in Phase 6 step 5 of the skill. Editing
-`docs/PRODUCT.md` after approval, outside the Approval and Configuration
-Decisions sections, invalidates the approval until the user approves again.
+in Phase 6 step 5 of the skill. Editing `docs/PRODUCT.md` after approval,
+outside the Approval and Configuration Decisions sections, invalidates the
+approval until the user approves again.
 A re-approval updates `Approved on` and the hash but keeps
 `First approved on`, so configuration decisions recorded since the first
 approval stay valid.
