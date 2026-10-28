@@ -5,33 +5,23 @@
 > of `product-template.md`. In `ADR.md`, replace this guidance block with one
 > line: "Live ADR log. Rules: the constitution's Architecture decisions
 > section. Discovery snapshot: `docs/PRODUCT.md` § 5." That constitution
-> section holds the rules for proposing, validating, and superseding ADRs.
+> section holds the rules for proposing, validating, and superseding ADRs;
+> `SKILL.md` (Phases 4 and 6) holds the procedure that seeds this file from
+> `docs/PRODUCT.md` § 5 (fragment `adr-template.md`) and accepts the seeded ADRs.
 >
-> Discovery Phase 4 seeds `ADR.md` with every `###` block written in
-> `docs/PRODUCT.md` § 5 (fragment `adr-template.md`) and keeps both in sync
-> (same ID, title, and decision content) until PRODUCT.md is approved. Add
-> the fields below that § 5 lacks (`Approved by`, `Approved on`, `Rejected by`,
-> `Rejected on`, `Rejection reason`, `Deprecated by`, `Deprecated on`,
-> `Deprecation reason`, `Supersedes`) to each seeded block as `N/A`, and set
-> `Proposed on` to the date the block is written to `ADR.md`. Approval then
-> sets every seeded `Proposed` ADR to `Accepted` and copies PRODUCT's
-> `Approved by` and `First approved on` (as `Approved on`) to every seeded
-> ADR; ADRs already `Deprecated` or `Superseded` keep their status. A later
-> PRODUCT.md re-approval does not rewrite `ADR.md`. If PRODUCT.md is approved
-> but a seeded ADR is still `Proposed`, apply the approval to it before
-> continuing. IDs use three digits.
->
-> Fields set per status; every other status-dependent field holds `N/A`:
+> Each status adds to the fields of the one before it; every other
+> status-dependent field holds `N/A`. Moves: `Proposed` to `Accepted` or
+> `Rejected`, `Accepted` to `Deprecated` or `Superseded`.
 >
 > | Status | Fields set |
 > | :--- | :--- |
 > | Proposed | `Proposed on` |
-> | Accepted | `Proposed on`, `Approved by`, `Approved on` |
-> | Rejected | `Proposed on`, `Rejected by`, `Rejected on`, `Rejection reason` |
-> | Deprecated | `Approved by`, `Approved on` kept, plus `Deprecated by`, `Deprecated on`, `Deprecation reason` |
-> | Superseded | `Approved by`, `Approved on` kept, plus `Superseded By` (its date is the successor's `Approved on`) |
+> | Accepted | Proposed, plus `Approved by`, `Approved on` |
+> | Rejected | Proposed, plus `Rejected by`, `Rejected on`, `Rejection reason` |
+> | Deprecated | Accepted, plus `Deprecated by`, `Deprecated on`, `Deprecation reason` |
+> | Superseded | Accepted, plus `Superseded By` (its date is the successor's `Approved on`) |
 >
-> Repeat the `###` block for each decision.
+> IDs use three digits. Repeat the `###` block for each decision.
 
 ### `ADR-001`: [Concise, descriptive title]
 
@@ -45,8 +35,9 @@
 - **Deprecated by**: [Name or role of the user who deprecated it, or N/A]
 - **Deprecated on**: [YYYY-MM-DD, or N/A]
 - **Deprecation reason**: [Why it is no longer relevant, or N/A]
-- **Supersedes**: [ADR ID, or N/A. When set, mark that ADR `Superseded` and
-  put this ID in its `Superseded By`]
+- **Supersedes**: [ADR ID(s), or N/A. Once this ADR is `Accepted`, mark each
+  as `Superseded` and put this ID in its `Superseded By`; if this ADR is
+  rejected, leave them unchanged]
 - **Superseded By**: [ADR ID, or N/A]
 - **Context**: [Technical context, business drivers, quality attributes, and
   forces at play. Explain why a decision is needed now.]
