@@ -113,7 +113,8 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - `ADR.md` in the project root is the live record of architecture decisions.
   It was seeded from `docs/PRODUCT.md` section 5, which is a frozen discovery
   snapshot and is not edited after approval. If `ADR.md` does not exist, create
-  it from the ADR log template before adding the first ADR.
+  it from `skills/sdd-init/templates/adr-log-template.md` before adding the
+  first ADR.
 - An architecture change is adding, upgrading, replacing, or removing a
   library, framework, model checkpoint, storage engine, or platform
   dependency, or a change to the runtime or language version, a core
@@ -123,8 +124,8 @@ Governing principles for **{{project.name}}** under a specification-driven devel
   `Status: Proposed`, present it to the user, and stop until the user decides.
   Do not implement the change, or work that depends on it, while the ADR is
   `Proposed`. If a `Proposed` ADR already exists for the same change, resume it
-  instead of adding another. Do not change a `Proposed` ADR's decision content
-  after presenting it; if it changes, present it again before accepting.
+  instead of adding another. If a `Proposed` ADR's decision content changes
+  after it was presented, present it again before accepting.
 - The decision must be an explicit instruction from the user (for example in
   chat or a review comment). If the user approves, set `Status: Accepted`,
   record the name or role the user gave in `Approved by` and the date in
@@ -135,13 +136,17 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - One explicit user decision may satisfy both this rule and a scope-expansion
   approval under Coding-agent conduct when it names both.
 - ADR statuses move only from `Proposed` to `Accepted` or `Rejected`, and from
-  `Accepted` to `Deprecated` or `Superseded`. A `Rejected` ADR is never
-  reopened: revisiting the idea requires a new `Proposed` ADR with a new ID.
+  `Accepted` to `Deprecated` or `Superseded`. Moving an `Accepted` ADR to
+  `Deprecated` also needs an explicit user decision, recorded in
+  `Deprecated by`, `Deprecated on`, and `Deprecation reason`. A `Rejected` ADR
+  is never reopened: revisiting the idea requires a new `Proposed` ADR with a
+  new ID.
 - A decision that replaces an earlier one names it in `Supersedes`; once the
   new ADR is `Accepted`, the earlier ADR becomes `Superseded` and records the
-  new ID in `Superseded By`; both updates are made in the same change, and an
-  ADR that is already `Superseded` is not superseded again. ADR IDs have three digits, continue after the
-  highest existing ID, and are never reused.
+  new ID in `Superseded By`. Both updates are made in the same change, and an
+  ADR that is already `Superseded` is not superseded again.
+- ADR IDs have three digits, continue after the highest existing ID, and are
+  never reused.
 - An ADR does not replace a constitution amendment: a change that alters the
   guarantees under Technological foundation also follows Governance, and its
   implementation waits for both an `Accepted` ADR and the approved amendment.
