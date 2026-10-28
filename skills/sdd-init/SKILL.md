@@ -97,9 +97,10 @@ The discovery process is executed in six sequential phases and produces `docs/PR
      `Rejected by`, `Rejected on`, `Rejection reason`, `Deprecated by`,
      `Deprecated on`, `Deprecation reason`, `Supersedes`) as `N/A`, and set
      `Proposed on` to the date the block is written.
-   - Copy `Decision Drivers`, `Considered Options`, `Mitigation`,
-     `Rejected Options`, and `External Docs` from section 5 when it has them;
-     write `N/A` when it does not. Never leave a template placeholder.
+   - Copy `Traceability`, `Superseded By`, `Decision Drivers`,
+     `Considered Options`, `Mitigation`, `Rejected Options`, and
+     `External Docs` from section 5 when it has them; write `N/A` when it does
+     not. Never leave a template placeholder.
    - Replace the template's guidance block with the one-line pointer it
      describes.
    - Until `docs/PRODUCT.md` is approved, apply every change to an ADR in
@@ -139,14 +140,18 @@ The discovery process is executed in six sequential phases and produces `docs/PR
    `First approved on`. Configuration
    (WI-002) cannot start until this validates.
 5. **Accept the seeded ADRs**: once the approved `docs/PRODUCT.md` validates,
-   first confirm that every ADR ID, title, and decision in section 5 has a
-   matching `ADR.md` block, and fix any mismatch. Then set every seeded
+   first reconcile the two records in both directions: every ADR in section 5
+   has a matching `ADR.md` block, and every seeded `ADR.md` block has a
+   matching section 5 ADR (same ID, title, and decision content, as the Phase 4
+   sync rule requires). Fix or remove any mismatch. Then set every seeded
    `Proposed` ADR to `Accepted` and copy the approval's `Approved by` and
    `First approved on` into its `Approved by` and `Approved on`. After approval,
    section 5 is a frozen snapshot: a re-approval does not change its ADR blocks
    and does not rewrite `ADR.md`; new or changed decisions are recorded in
-   `ADR.md` as new ADRs. Before treating the approval as complete, re-read
-   `ADR.md`: if any seeded ADR is still `Proposed`, apply this step to it first.
+   `ADR.md` as new ADRs, with `Supersedes` naming the ADR a changed decision
+   replaces. Before treating the approval as complete, re-read `ADR.md`: every
+   seeded ADR must be `Accepted` with `Approved by` and `Approved on` filled;
+   apply this step to any that is not.
 
 ---
 
