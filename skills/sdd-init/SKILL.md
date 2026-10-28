@@ -88,6 +88,17 @@ The discovery process is executed in six sequential phases and produces one docu
 2. Detail the context, decision rationale, trade-offs, and positive/negative consequences.
 3. Ensure bidirectional traceability between requirements and decisions.
 4. **Output format**: Section 5 of the product template, one block per decision from `templates/adr-template.md`.
+5. **Seed `ADR.md`**: create the root `ADR.md` from
+   [`templates/adr-log-template.md`](templates/adr-log-template.md), with one
+   block per ADR written in section 5. Seed every ADR as `Proposed`; Phase 4
+   writes no `Deprecated` or `Superseded` ADR. Add the fields section 5 lacks
+   (`Approved by`, `Approved on`, `Rejected by`, `Rejected on`,
+   `Rejection reason`, `Deprecated by`, `Deprecated on`, `Deprecation reason`,
+   `Supersedes`) as `N/A`, set `Proposed on` to the date the block is written,
+   and replace the template's guidance block with the one-line pointer it
+   describes. Until `docs/PRODUCT.md` is approved, apply every change to an ADR
+   in section 5 to its `ADR.md` block in the same step: the ID, title, and
+   decision content stay identical (`Status` differs by design).
 
 ### Phase 5: Development Environment Setup
 1. Define local and team developer environment standards: IDE setup, version control, language runtimes, version managers, package managers, and container isolation (e.g., Docker).
@@ -121,6 +132,12 @@ The discovery process is executed in six sequential phases and produces one docu
    again; a re-approval updates `Approved on` and the hash and keeps
    `First approved on`. Configuration
    (WI-002) cannot start until this validates.
+5. **Accept the seeded ADRs**: once the approved `docs/PRODUCT.md` validates,
+   set every seeded `Proposed` ADR in `ADR.md` to `Accepted` and copy the
+   approval's `Approved by` and `First approved on` into its `Approved by` and
+   `Approved on`. A later re-approval of `docs/PRODUCT.md` does not rewrite
+   `ADR.md`. Before treating the approval as complete, re-read `ADR.md`: if any
+   seeded ADR is still `Proposed`, apply this step to it first.
 
 ---
 
