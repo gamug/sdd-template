@@ -278,16 +278,6 @@ initialization checks to the fork's pre-commit hook and CI.
 
 ---
 
-## After initialization
-
-The root `ADR.md` is the live record of architecture decisions.
-`docs/PRODUCT.md` section 5 is a frozen snapshot of the discovery ADRs: a
-re-approval of `docs/PRODUCT.md` must not change its ADR blocks and must not
-rewrite `ADR.md`. New and changed decisions, and architecture changes, follow
-the constitution's "Architecture decisions" section.
-
----
-
 ## Validation Protocol
 
 To ensure all discovery deliverables meet quality standards and completeness rules, run the bundled validation script:
@@ -337,6 +327,16 @@ the approval hash.
 When validating from a directory, pass the project root or a directory that
 contains exactly one generated `PRODUCT.md`; bundled templates, references,
 and examples are not discovery output and are not aggregated.
+
+---
+
+## After initialization
+
+The root `ADR.md` is the live record of architecture decisions.
+`docs/PRODUCT.md` section 5 is a frozen snapshot of the discovery ADRs: a
+re-approval of `docs/PRODUCT.md` must not change its ADR blocks and must not
+rewrite `ADR.md`. New and changed decisions, and architecture changes, follow
+the constitution's "Architecture decisions" section.
 
 ---
 
