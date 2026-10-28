@@ -105,7 +105,6 @@ may have several scenarios under the same ID.
     GIVEN a clean checkout missing a documented prerequisite
     WHEN the environment initialization is run
     THEN it reports an actionable error
-    AND it does not leave a half-built environment
   ```
 
 ## Traceability
