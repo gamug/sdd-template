@@ -48,13 +48,14 @@ The template is based on these principles:
 │       │   ├── TASKS.md            # Initial task register
 │       │   └── CHANGELOG.md        # Changelog usage placeholder
 │       ├── references/             # One guide per discovery phase
-│       ├── templates/              # product-template.md and per-phase fragments
+│       ├── templates/              # product-template.md, per-phase fragments, adr-log-template.md (ADR.md)
 │       ├── examples/               # Approved sample discovery package
 │       └── scripts/                # validate_discovery.py, validate_config.py, requirements.txt
 ├── tests/                          # Regression tests for the validators
 ├── .github/workflows/validators.yml  # Validates the sample, runs the tests (actions pinned to SHAs)
 ├── .github/dependabot.yml          # Proposes updates to the pinned actions and PyYAML
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
+├── ADR.md                          # Created by WI-001: the live ADR record, seeded from docs/PRODUCT.md § 5
 └── README.md
 ```
 
@@ -117,7 +118,9 @@ through all six phases. The skill guides the user through:
 
 The output is `docs/PRODUCT.md`, built from the skill's
 [`product-template.md`](./skills/sdd-init/templates/product-template.md)
-with three-digit IDs (`UC-001`, `FR-002`, …). The skill must ask focused questions and must
+with three-digit IDs (`UC-001`, `FR-002`, …), and the root `ADR.md`, seeded in
+Phase 4 from the ADRs in `docs/PRODUCT.md` section 5 with the skill's
+[`adr-log-template.md`](./skills/sdd-init/templates/adr-log-template.md). The skill must ask focused questions and must
 not invent missing product, technical, or operational decisions. Open
 decisions are marked `UNRESOLVED:` and must all be resolved with the user,
 who then approves the document in its `## Approval` section. The approval
@@ -129,7 +132,10 @@ python skills/sdd-init/scripts/validate_discovery.py --hash docs/PRODUCT.md
 python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
 ```
 
-`validate_config.py` refuses to run until this passes. Editing
+`validate_config.py` refuses to run until this passes. It does not check
+`ADR.md`: once the approval validates, the skill reconciles `ADR.md` with
+section 5 and accepts the seeded ADRs with the approver and first approval
+date (Phase 6 step 5), and that is a manual gate before WI-002. Editing
 `docs/PRODUCT.md` after approval, outside the Approval and Configuration
 Decisions sections, invalidates the approval until the user approves again.
 A re-approval updates `Approved on` and the hash but keeps
@@ -223,7 +229,8 @@ The agent must:
 
 1. Execute WI-001 and use
    [`skills/sdd-init/SKILL.md`](./skills/sdd-init/SKILL.md)
-   to create `docs/PRODUCT.md`.
+   to create `docs/PRODUCT.md` and the root `ADR.md`, and to accept the seeded
+   ADRs once the user approves `docs/PRODUCT.md`.
 2. Execute WI-002 to build root `config.yaml` with
    [`validate_config.py`](./skills/sdd-init/scripts/validate_config.py), recording the source of every
    value (`docs/PRODUCT.md` or an explicit user decision).
@@ -256,6 +263,12 @@ After initialization, every product change follows this cycle:
    content of `docs/PRODUCT.md` needs the user's re-approval.
 7. Move completed work to `.sdd/CHANGELOG.md`.
 
+An architecture change (for example a new runtime version, framework, library,
+storage engine, API contract, or schema) also needs a new ADR in `ADR.md`, which
+the user accepts before the change is implemented; the constitution's
+"Architecture decisions" section has the rule. `docs/PRODUCT.md` section 5 stays
+a frozen discovery snapshot.
+
 The validators, the template tests and the sample check prepare the repository;
 the pre-commit hook and CI that WI-006 configures run the project's own quality
 gates, not the skill's.
@@ -277,8 +290,8 @@ Before changing a fork:
 - Match existing placement, naming, bootstrap, and configuration patterns.
 - Prefer the smallest complete change and avoid unrelated refactors.
 - Obtain approval before expanding scope covered by the constitution.
-- Update documentation and architecture records when implementation changes
-  their documented state.
+- Update documentation and architecture records (`ADR.md`) when
+  implementation changes their documented state.
 - Never weaken a check, fabricate repository state, commit secrets, or hide a
   failure to make a change pass.
 
