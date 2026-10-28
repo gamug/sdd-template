@@ -31,14 +31,18 @@ may have several scenarios under the same ID.
   SCENARIO: Discovery package approved
     GIVEN the discovery phases are complete
     WHEN the user approves `docs/PRODUCT.md`
-    THEN it contains the complete discovery package, has no unresolved decisions, records the user's approval, and passes `validate_discovery.py` without `--draft`
+    THEN it contains the complete discovery package
+    AND it has no unresolved decisions
+    AND it records the user's approval
+    AND `validate_discovery.py` passes without `--draft`
   ```
 
   ```gherkin
   SCENARIO: Discovery ADRs accepted
     GIVEN `docs/PRODUCT.md` is approved
     WHEN the seeded ADRs are accepted
-    THEN the root `ADR.md` holds the discovery ADRs, each `Accepted` with `Approved by` and `Approved on` filled from the approver and first approval date recorded in `docs/PRODUCT.md`
+    THEN the root `ADR.md` holds the discovery ADRs
+    AND each is `Accepted` with `Approved by` and `Approved on` filled from the approver and first approval date recorded in `docs/PRODUCT.md`
   ```
 
 - **AC-FR001-02:**
@@ -47,16 +51,25 @@ may have several scenarios under the same ID.
   SCENARIO: Configuration built
     GIVEN an approved `docs/PRODUCT.md`
     WHEN root `config.yaml` is built
-    THEN it defines every key the constitution template requires, each value's source (`PRODUCT.md § <section>` or `user, YYYY-MM-DD`) is recorded in the `Configuration Decisions` table of `docs/PRODUCT.md`, and `validate_config.py check` passes
+    THEN it defines every key the constitution template requires
+    AND each value's source (`PRODUCT.md § <section>` or `user, YYYY-MM-DD`) is recorded in the `Configuration Decisions` table of `docs/PRODUCT.md`
+    AND `validate_config.py check` passes
   ```
 
 - **AC-FR001-03:**
 
   ```gherkin
-  SCENARIO: Constitution rendered and SDD objects synchronized
+  SCENARIO: Constitution rendered
     GIVEN a `config.yaml` that passes `validate_config.py check`
-    WHEN `validate_config.py render` runs and the other canonical `.sdd/` artifacts are created
-    THEN `.sdd/constitution.md` has no placeholders left and the other canonical `.sdd/` artifacts are synchronized with `docs/PRODUCT.md`
+    WHEN `validate_config.py render` runs
+    THEN `.sdd/constitution.md` has no placeholders left
+  ```
+
+  ```gherkin
+  SCENARIO: SDD objects synchronized
+    GIVEN a rendered `.sdd/constitution.md`
+    WHEN the other canonical `.sdd/` artifacts are created
+    THEN they are synchronized with `docs/PRODUCT.md`
   ```
 
 - **AC-FR001-04:**
@@ -65,7 +78,8 @@ may have several scenarios under the same ID.
   SCENARIO: Project structure created
     GIVEN the approved constitution and `docs/PRODUCT.md`
     WHEN the project structure is created
-    THEN the approved project structure and non-programmatic dependencies exist, and no product source code has been implemented
+    THEN the approved project structure and non-programmatic dependencies exist
+    AND no product source code has been implemented
   ```
 
 - **AC-FR001-05:**
@@ -81,9 +95,17 @@ may have several scenarios under the same ID.
 
   ```gherkin
   SCENARIO: Environment reproduced
-    GIVEN a clean checkout
+    GIVEN a clean checkout and every documented prerequisite
     WHEN the environment initialization is run
-    THEN it reproduces the documented setup or reports actionable errors
+    THEN it reproduces the documented setup
+  ```
+
+  ```gherkin
+  SCENARIO: Missing prerequisite reported
+    GIVEN a clean checkout missing a documented prerequisite
+    WHEN the environment initialization is run
+    THEN it reports an actionable error
+    AND it does not leave a half-built environment
   ```
 
 ## Traceability
