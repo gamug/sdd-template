@@ -91,21 +91,21 @@ The discovery process is executed in six sequential phases and produces `docs/PR
 5. **Seed `ADR.md`**: create the root `ADR.md` from
    [`templates/adr-log-template.md`](templates/adr-log-template.md), with one
    block per ADR written in section 5, as follows:
-   - Seed every ADR as `Proposed`; Phase 4 writes no `Deprecated` or
-     `Superseded` ADR.
+   - Section 5 blocks carry no `Status`: set `Status` to `Proposed` on every
+     seeded block, and set `Proposed on` to the date the block is written.
    - Add the fields section 5 lacks (`Approved by`, `Approved on`,
      `Rejected by`, `Rejected on`, `Rejection reason`, `Deprecated by`,
-     `Deprecated on`, `Deprecation reason`, `Supersedes`) as `N/A`, and set
-     `Proposed on` to the date the block is written.
-   - Copy `Traceability`, `Superseded By`, `Decision Drivers`,
-     `Considered Options`, `Mitigation`, `Rejected Options`, and
-     `External Docs` from section 5 when it has them; write `N/A` when it does
-     not. Never leave a template placeholder.
+     `Deprecated on`, `Deprecation reason`, `Supersedes`, `Superseded By`) as
+     `N/A`.
+   - Copy `Traceability`, `Decision Drivers`, `Considered Options`,
+     `Mitigation`, `Rejected Options`, and `External Docs` from section 5 when
+     it has them; write `N/A` when it does not. Never leave a template
+     placeholder.
    - Replace the template's guidance block with the one-line pointer it
      describes.
    - Until `docs/PRODUCT.md` is approved, apply every change to an ADR in
      section 5 to its `ADR.md` block in the same step: the ID, title, and
-     decision content stay identical (`Status` differs by design).
+     decision content stay identical.
 
 ### Phase 5: Development Environment Setup
 1. Define local and team developer environment standards: IDE setup, version control, language runtimes, version managers, package managers, and container isolation (e.g., Docker).
