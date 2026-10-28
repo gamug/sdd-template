@@ -133,9 +133,8 @@ python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
 ```
 
 `validate_config.py` refuses to run until this passes. It does not check
-`ADR.md`: once the approval validates, the skill reconciles `ADR.md` with
-section 5 and accepts the seeded ADRs with the approver and first approval
-date (Phase 6 step 5), and that is a manual gate before WI-002. Editing
+`ADR.md`; accepting the seeded ADRs is a manual step before WI-002, described
+in Phase 6 step 5 of the skill. Editing
 `docs/PRODUCT.md` after approval, outside the Approval and Configuration
 Decisions sections, invalidates the approval until the user approves again.
 A re-approval updates `Approved on` and the hash but keeps
@@ -264,7 +263,7 @@ After initialization, every product change follows this cycle:
 7. Move completed work to `.sdd/CHANGELOG.md`.
 
 An architecture change (for example a new runtime version, framework, library,
-storage engine, API contract, or schema) also needs a new ADR in `ADR.md`, which
+storage engine, API contract, or schema) also needs an ADR in `ADR.md`, which
 the user accepts before the change is implemented; the constitution's
 "Architecture decisions" section has the rule. `docs/PRODUCT.md` section 5 stays
 a frozen discovery snapshot.
