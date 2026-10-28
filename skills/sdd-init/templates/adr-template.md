@@ -2,6 +2,10 @@
 > [`product-template.md`](./product-template.md). Repeat this `###` block for
 > each decision. The ID stays in the heading and uses three digits; the
 > validator requires Context, Decision, Consequences, and Trade-offs.
+>
+> Each block is also seeded into the root `ADR.md`, which adds the approval
+> and lifecycle fields only it holds (see
+> [`adr-log-template.md`](./adr-log-template.md)).
 
 ### `ADR-001`: [Concise, descriptive title]
 
@@ -23,5 +27,5 @@
 - **Consequences (Trade-offs)**: [Costs of the chosen option]
 - **Mitigation**: [How the trade-offs are contained]
 - **Rejected Options**: [Option 2 and 3: key benefits and drawbacks]
-- **Traceability**: `FR-002`, `FR-003`, `UC-001`
+- **Traceability**: [`FR-002`, `UC-001`: only the IDs this decision serves]
 - **External Docs**: [Benchmarks, framework docs, or internal spikes]
