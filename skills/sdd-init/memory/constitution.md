@@ -114,9 +114,12 @@ Governing principles for **{{project.name}}** under a specification-driven devel
   It was seeded from `docs/PRODUCT.md` section 5, which is a frozen discovery
   snapshot and is not edited after approval. If `ADR.md` does not exist, create
   it before adding the first ADR: a title, then one `###` block per ADR, headed
-  `ADR-001`, `ADR-002`, and so on, with `Status`, the date and user fields
-  named in this section, `Supersedes`, `Superseded By`, `Context`, `Decision`,
-  `Consequences`, and `Traceability`.
+  `ADR-001`, `ADR-002`, and so on, with `Status`, `Proposed on`, `Approved by`,
+  `Approved on`, `Rejected by`, `Rejected on`, `Rejection reason`,
+  `Deprecated by`, `Deprecated on`, `Deprecation reason`, `Supersedes`,
+  `Superseded By`, `Context`, `Decision`, `Consequences (Positive)`,
+  `Consequences (Trade-offs)`, and `Traceability` (fields that do not apply
+  hold `N/A`).
 - An architecture change is adding, upgrading, replacing, or removing a
   library, framework, model checkpoint, storage engine, or platform
   dependency, or a change to the runtime or language version, a core
