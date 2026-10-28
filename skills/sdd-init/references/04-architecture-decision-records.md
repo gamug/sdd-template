@@ -29,10 +29,10 @@ Allowed moves: `Proposed` to `Accepted` or `Rejected`, and `Accepted` to `Deprec
 ## Anatomy of an ADR
 
 1. **Title & Number**: Sequential identifier and clear summary (e.g., `ADR-001: Use FastAPI for Asynchronous Backend API`).
-2. **Status and dates**: Current lifecycle state (*Proposed*, *Accepted*, *Rejected*, *Deprecated*, *Superseded*), `Proposed on`, and the fields of the state it reached: `Approved by` and `Approved on`; `Rejected by`, `Rejected on` and `Rejection reason`; `Deprecated by`, `Deprecated on` and `Deprecation reason`. `Supersedes` and `Superseded By` link a replacement to the ADR it replaces. Fields that do not apply hold `N/A`.
+2. **Status and dates** (in `ADR.md`; a section 5 block carries only the content fields below): Current lifecycle state (*Proposed*, *Accepted*, *Rejected*, *Deprecated*, *Superseded*), `Proposed on`, and the fields of the state it reached: `Approved by` and `Approved on`; `Rejected by`, `Rejected on` and `Rejection reason`; `Deprecated by`, `Deprecated on` and `Deprecation reason`. `Supersedes` on the new ADR names the ADR(s) it replaces; `Superseded By` on the replaced ADR names the new one. Fields that do not apply hold `N/A`.
 3. **Context**: The business problem, technical constraints, quality attribute requirements, and forces at play.
 4. **Decision**: Explicit statement of the chosen solution and architectural pattern.
-5. **Considered Options / Rejected Options**: Evaluated options with pros/cons analysis for each, and why the rejected ones lost.
+5. **Considered Options / Rejected Options**: Alternatives the decision weighed and did not choose, with pros/cons for each and why they lost. This is not the ADR's own rejection (see *Rejected* above).
 6. **Consequences**:
    - **Positive**: Expected performance, developer speed, or maintainability gains.
    - **Trade-offs**: Introduced complexity, memory overhead, or vendor lock-in, and the mitigation that contains them.
@@ -52,15 +52,12 @@ Allowed moves: `Proposed` to `Accepted` or `Rejected`, and `Accepted` to `Deprec
 
 ## User Validation of a New ADR
 
-After initialization, the constitution's "Architecture decisions" rule governs every architecture change:
+After initialization, the constitution's "Architecture decisions" section governs every architecture change; if this guide and that section differ, the constitution governs. In outline: the agent adds a new ADR to `ADR.md` as `Proposed`, presents it, and stops; the user's explicit decision accepts or rejects it; and only an accepted ADR is implemented.
 
-1. Add a new ADR to `ADR.md` as `Proposed` and present it to the user. Do not implement the change, or work that depends on it, until the user decides.
-2. The decision is an explicit user instruction. If the user approves, set `Accepted` and record the name or role the user gave in `Approved by` and the date in `Approved on`, then implement. If the user rejects, set `Rejected` and record `Rejected by`, `Rejected on`, and `Rejection reason`; do not implement.
-3. If the ADR replaces an earlier one, name it in `Supersedes`; once the new ADR is `Accepted`, mark the earlier ADR `Superseded` and record the new ID in its `Superseded By`, in the same change.
-4. IDs have three digits, continue after the highest existing ID, and are never reused.
+The decision belongs to the user because an architecture change is costly to reverse and an agent must not approve its own proposal. That is also why `Approved by` and `Rejected by` record the name or role the user gave, never the agent.
 
 ---
 
 ## Keeping the Field Lists in Step
 
-The ADR fields are listed in three places: `templates/adr-log-template.md`, the seeding step in `SKILL.md` (Phase 4 step 5), and the constitution's "Architecture decisions" section. When a field is added, renamed, or removed, change all three together.
+The ADR fields are listed in several places: `templates/adr-log-template.md`, the seeding step in `SKILL.md` (Phase 4 step 5), the constitution's "Architecture decisions" section, and the Anatomy above. The content fields shared with section 5 (`Context`, `Decision`, `Consequences`, `Traceability`, and so on) also appear in `templates/adr-template.md` and the ADR block of `templates/product-template.md`. When a field is added, renamed, or removed, change every list that names it together.
