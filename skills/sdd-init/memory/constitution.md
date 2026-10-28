@@ -113,8 +113,10 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - `ADR.md` in the project root is the live record of architecture decisions.
   It was seeded from `docs/PRODUCT.md` section 5, which is a frozen discovery
   snapshot and is not edited after approval. If `ADR.md` does not exist, create
-  it from `skills/sdd-init/templates/adr-log-template.md` before adding the
-  first ADR.
+  it before adding the first ADR: a title, then one `###` block per ADR, headed
+  `ADR-001`, `ADR-002`, and so on, with `Status`, the date and user fields
+  named in this section, `Supersedes`, `Superseded By`, `Context`, `Decision`,
+  `Consequences`, and `Traceability`.
 - An architecture change is adding, upgrading, replacing, or removing a
   library, framework, model checkpoint, storage engine, or platform
   dependency, or a change to the runtime or language version, a core
