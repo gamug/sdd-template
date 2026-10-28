@@ -24,8 +24,10 @@ Run [`SKILL.md`](../SKILL.md)
 through all six phases. Collect the user's problem definition, actors,
 workflows, requirements, user stories, stack evaluation, ADRs, environment and
 governance decisions, risks, and roadmap in `docs/PRODUCT.md`, built from the
-skill's `templates/product-template.md`. Discovery runs first: no other FR-001 work starts before it, and `validate_config.py` refuses
-to run until `docs/PRODUCT.md` is approved.
+skill's `templates/product-template.md`, and seed the root `ADR.md` from its
+ADRs. Discovery runs first: no other FR-001 work starts before it, and `validate_config.py` refuses
+to run until `docs/PRODUCT.md` is approved; it does not check `ADR.md`, so the
+acceptance of the seeded ADRs is a manual exit criterion below.
 
 The skill must ask focused questions interactively. It must not guess missing
 inputs. When an answer is required, the question must state what decision is
@@ -34,13 +36,15 @@ user should consider.
 
 **Exit criteria:** Every `UNRESOLVED:` decision has been resolved with the
 user, `docs/PRODUCT.md` records the user's approval and the hash of the
-approved content in its `## Approval` section, and
-`validate_discovery.py docs/PRODUCT.md` passes without `--draft`.
+approved content in its `## Approval` section,
+`validate_discovery.py docs/PRODUCT.md` passes without `--draft`, and every
+seeded ADR in `ADR.md` is `Accepted` with `Approved by` and `Approved on` filled
+from the approver and first approval date recorded in `docs/PRODUCT.md`.
 
 ### WI-002 — Create config.yaml
 
 **Parent:** FR-001  
-**Depends on:** WI-001 (approved `docs/PRODUCT.md`)  
+**Depends on:** WI-001 (approved `docs/PRODUCT.md` and accepted seeded ADRs)  
 **Acceptance criteria:** AC-FR001-02
 
 Build root `config.yaml` from scratch with `validate_config.py scaffold`, which lists

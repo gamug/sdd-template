@@ -24,7 +24,9 @@ from `FR-002`, and `validate_discovery.py` rejects an `FR-001` row in
 
 - **AC-FR001-01:** `docs/PRODUCT.md` contains the complete discovery package,
   has no unresolved decisions, and records the user's approval; it passes
-  `validate_discovery.py` without `--draft`.
+  `validate_discovery.py` without `--draft`. The root `ADR.md` holds the
+  discovery ADRs, each `Accepted` with `Approved by` and `Approved on` filled
+  from the approver and first approval date recorded in `docs/PRODUCT.md`.
 - **AC-FR001-02:** Root `config.yaml` defines every key the constitution
   template requires, and each value's source (`PRODUCT.md § <section>` or
   `user, YYYY-MM-DD`) is recorded in the `Configuration Decisions` table of
