@@ -3,10 +3,11 @@
 > each decision. The ID stays in the heading and uses three digits; the
 > validator requires Context, Decision, Consequences, and Trade-offs.
 >
-> In Phase 4 each block is also seeded into the root `ADR.md` as `Proposed`,
-> which adds the approval and lifecycle fields only it holds (see
-> `adr-log-template.md`). Keep the two in sync until PRODUCT.md is approved;
-> `SKILL.md` Phases 4 and 6 describe the procedure.
+> In Phase 4 each block is also seeded into the root `ADR.md` as `Proposed`.
+> `ADR.md` adds the approval and lifecycle fields only it holds (see
+> `adr-log-template.md`). Keep the ID, title, and decision content identical
+> until PRODUCT.md is approved; `Status` differs by design. `SKILL.md`
+> Phases 4 and 6 describe the procedure.
 
 ### `ADR-001`: [Concise, descriptive title]
 
