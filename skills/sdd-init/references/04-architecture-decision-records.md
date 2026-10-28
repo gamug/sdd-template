@@ -28,6 +28,8 @@ Allowed moves: `Proposed` to `Accepted` or `Rejected`, and `Accepted` to `Deprec
 
 ## Anatomy of an ADR
 
+This is a conceptual outline; the templates (`templates/adr-log-template.md` for `ADR.md`, `templates/adr-template.md` for section 5) list the exact fields, including `Decision Drivers` and `Mitigation`.
+
 1. **Title & Number**: Sequential identifier and clear summary (e.g., `ADR-001: Use FastAPI for Asynchronous Backend API`).
 2. **Status and dates** (in `ADR.md`; a section 5 block carries only the content fields below): Current lifecycle state (*Proposed*, *Accepted*, *Rejected*, *Deprecated*, *Superseded*), `Proposed on`, and the fields of the state it reached: `Approved by` and `Approved on`; `Rejected by`, `Rejected on` and `Rejection reason`; `Deprecated by`, `Deprecated on` and `Deprecation reason`. `Supersedes` on the new ADR names the ADR(s) it replaces; `Superseded By` on the replaced ADR names the new one. Fields that do not apply hold `N/A`.
 3. **Context**: The business problem, technical constraints, quality attribute requirements, and forces at play.
@@ -45,7 +47,7 @@ Allowed moves: `Proposed` to `Accepted` or `Rejected`, and `Accepted` to `Deprec
 ## Where ADRs Live
 
 - **`docs/PRODUCT.md` section 5** holds the ADRs written during discovery. It is covered by the approval hash and is a frozen snapshot after approval.
-- **`ADR.md` in the project root** is the live record. Discovery Phase 4 seeds it from section 5 (every ADR as `Proposed`, built from `templates/adr-log-template.md`), and the approval of `docs/PRODUCT.md` accepts the seeded ADRs. After that, every new, changed, rejected, deprecated, or superseded decision is recorded in `ADR.md` only; section 5 is not edited and `docs/PRODUCT.md` is not re-approved for it.
+- **`ADR.md` in the project root** is the live record. Discovery Phase 4 seeds it from section 5 (every ADR as `Proposed`, built from `templates/adr-log-template.md`), and the approval of `docs/PRODUCT.md` accepts the seeded ADRs. After that, every new, rejected, deprecated, or superseded decision is recorded in `ADR.md` only, and a changed decision is recorded as a new ADR that supersedes the old one (an accepted ADR is not rewritten); section 5 is not edited and `docs/PRODUCT.md` is not re-approved for it.
 - The scripts check section 5 (Context, Decision, Consequences, Trade-offs) but not `ADR.md`; Phase 6 step 5 of `SKILL.md` (reconcile with section 5, accept, re-read) is its check.
 
 ---
