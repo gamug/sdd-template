@@ -22,24 +22,90 @@ from `FR-002`, and `validate_discovery.py` rejects an `FR-001` row in
 
 ## Acceptance criteria
 
-- **AC-FR001-01:** `docs/PRODUCT.md` contains the complete discovery package,
-  has no unresolved decisions, and records the user's approval; it passes
-  `validate_discovery.py` without `--draft`. The root `ADR.md` holds the
-  discovery ADRs, each `Accepted` with `Approved by` and `Approved on` filled
-  from the approver and first approval date recorded in `docs/PRODUCT.md`.
-- **AC-FR001-02:** Root `config.yaml` defines every key the constitution
-  template requires, and each value's source (`PRODUCT.md § <section>` or
-  `user, YYYY-MM-DD`) is recorded in the `Configuration Decisions` table of
-  `docs/PRODUCT.md`; `validate_config.py check` passes.
-- **AC-FR001-03:** `.sdd/constitution.md` is rendered by
-  `validate_config.py render` with no placeholders left, and the other canonical `.sdd/`
-  artifacts are synchronized with `docs/PRODUCT.md`.
-- **AC-FR001-04:** The approved project structure and non-programmatic
-  dependencies exist without implementing product source code.
-- **AC-FR001-05:** The selected development environment can be created and
-  its documented baseline checks pass without committed secrets.
-- **AC-FR001-06:** Environment initialization can reproduce the documented
-  setup from a clean checkout or reports actionable errors.
+Each criterion uses the constitution's executable GIVEN-WHEN-THEN form. A criterion
+may have several scenarios under the same ID.
+
+- **AC-FR001-01:**
+
+  ```gherkin
+  SCENARIO: Discovery package approved
+    GIVEN the discovery phases are complete
+    WHEN the user approves `docs/PRODUCT.md`
+    THEN it contains the complete discovery package
+    AND it has no unresolved decisions
+    AND it records the user's approval
+    AND `validate_discovery.py` passes without `--draft`
+  ```
+
+  ```gherkin
+  SCENARIO: Discovery ADRs accepted
+    GIVEN `docs/PRODUCT.md` is approved
+    WHEN the seeded ADRs are accepted
+    THEN the root `ADR.md` holds the discovery ADRs
+    AND each is `Accepted` with `Approved by` and `Approved on` filled from the approver and first approval date recorded in `docs/PRODUCT.md`
+  ```
+
+- **AC-FR001-02:**
+
+  ```gherkin
+  SCENARIO: Configuration built
+    GIVEN an approved `docs/PRODUCT.md`
+    WHEN root `config.yaml` is built
+    THEN it defines every key the constitution template requires
+    AND each value's source (`PRODUCT.md § <section>` or `user, YYYY-MM-DD`) is recorded in the `Configuration Decisions` table of `docs/PRODUCT.md`
+    AND `validate_config.py check` passes
+  ```
+
+- **AC-FR001-03:**
+
+  ```gherkin
+  SCENARIO: Constitution rendered
+    GIVEN a `config.yaml` that passes `validate_config.py check`
+    WHEN `validate_config.py render` runs
+    THEN `.sdd/constitution.md` has no placeholders left
+  ```
+
+  ```gherkin
+  SCENARIO: SDD objects synchronized
+    GIVEN a rendered `.sdd/constitution.md`
+    WHEN the other canonical `.sdd/` artifacts are created
+    THEN they are synchronized with `docs/PRODUCT.md`
+  ```
+
+- **AC-FR001-04:**
+
+  ```gherkin
+  SCENARIO: Project structure created
+    GIVEN the approved constitution and `docs/PRODUCT.md`
+    WHEN the project structure is created
+    THEN the approved project structure and non-programmatic dependencies exist
+    AND no product source code has been implemented
+  ```
+
+- **AC-FR001-05:**
+
+  ```gherkin
+  SCENARIO: Environment created
+    GIVEN the approved project structure exists
+    WHEN the selected development environment is created
+    THEN its documented baseline checks pass without committed secrets
+  ```
+
+- **AC-FR001-06:**
+
+  ```gherkin
+  SCENARIO: Environment reproduced
+    GIVEN a clean checkout and every documented prerequisite
+    WHEN the environment initialization is run
+    THEN it reproduces the documented setup
+  ```
+
+  ```gherkin
+  SCENARIO: Missing prerequisite reported
+    GIVEN a clean checkout missing a documented prerequisite
+    WHEN the environment initialization is run
+    THEN it reports an actionable error
+  ```
 
 ## Traceability
 
