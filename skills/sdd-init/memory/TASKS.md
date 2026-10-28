@@ -12,7 +12,8 @@ checked, in the same change as its last task. This register is immutable, so
 progress is not tracked before WI-003: TASK-010 carries it into
 `.sdd/TASKS.md`, checks TASK-001 through TASK-009 and the Work Items they
 complete (WI-001 and WI-002), and WI-003 is checked when TASK-010 is. Progress
-is tracked there from then on.
+is tracked there from then on. Work Items and tasks added to `.sdd/TASKS.md`
+carry the same boxes and follow the same rule.
 
 ## WI-001 — Run the discovery skill and create PRODUCT.md
 
@@ -20,8 +21,8 @@ is tracked there from then on.
 
 ### TASK-001 — Execute the discovery workflow
 
-- **Work Item:** WI-001
 - [ ] **Done**
+- **Work Item:** WI-001
 - **Depends on:** none
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Run all six phases of `$SKILL_DIR/SKILL.md`,
@@ -32,8 +33,8 @@ is tracked there from then on.
 
 ### TASK-002 — Collect discovery outputs
 
-- **Work Item:** WI-001
 - [ ] **Done**
+- **Work Item:** WI-001
 - **Depends on:** TASK-001
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Assemble use cases, requirements, user stories, stack evaluation,
@@ -42,8 +43,8 @@ is tracked there from then on.
 
 ### TASK-003 — Write PRODUCT.md
 
-- **Work Item:** WI-001
 - [ ] **Done**
+- **Work Item:** WI-001
 - **Depends on:** TASK-002
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Write `docs/PRODUCT.md` from
@@ -60,8 +61,8 @@ is tracked there from then on.
 
 ### TASK-004 — Resolve open decisions and record approval
 
-- **Work Item:** WI-001
 - [ ] **Done**
+- **Work Item:** WI-001
 - **Depends on:** TASK-003
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Ask the user about every `UNRESOLVED:` item and update
@@ -85,8 +86,8 @@ is tracked there from then on.
 
 ### TASK-005 — Scaffold config.yaml and fill stated values
 
-- **Work Item:** WI-002
 - [ ] **Done**
+- **Work Item:** WI-002
 - **Depends on:** TASK-004
 - **Acceptance criteria:** AC-FR001-02
 - **Action:** Run `validate_config.py scaffold`. It writes the `config.yaml` skeleton,
@@ -101,8 +102,8 @@ is tracked there from then on.
 
 ### TASK-006 — Define domain sections
 
-- **Work Item:** WI-002
 - [ ] **Done**
+- **Work Item:** WI-002
 - **Depends on:** TASK-005
 - **Acceptance criteria:** AC-FR001-02
 - **Action:** From the use cases, functional requirements, ADRs, and risks in
@@ -116,8 +117,8 @@ is tracked there from then on.
 
 ### TASK-007 — Ask the user for every remaining value
 
-- **Work Item:** WI-002
 - [ ] **Done**
+- **Work Item:** WI-002
 - **Depends on:** TASK-006
 - **Acceptance criteria:** AC-FR001-02
 - **Action:** This task is the only place configuration questions are asked.
@@ -130,8 +131,8 @@ is tracked there from then on.
 
 ### TASK-008 — Validate config.yaml
 
-- **Work Item:** WI-002
 - [ ] **Done**
+- **Work Item:** WI-002
 - **Depends on:** TASK-007
 - **Acceptance criteria:** AC-FR001-02
 - **Action:** Run `validate_config.py check`. It fails on missing or empty keys, keys
@@ -144,8 +145,8 @@ is tracked there from then on.
 
 ### TASK-009 — Render constitution.md
 
-- **Work Item:** WI-003
 - [ ] **Done**
+- **Work Item:** WI-003
 - **Depends on:** TASK-008
 - **Acceptance criteria:** AC-FR001-03
 - **Action:** Run `validate_config.py render` to create `.sdd/constitution.md` from root
@@ -156,8 +157,8 @@ is tracked there from then on.
 
 ### TASK-010 — Synchronize all SDD objects
 
-- **Work Item:** WI-003
 - [ ] **Done**
+- **Work Item:** WI-003
 - **Depends on:** TASK-009
 - **Acceptance criteria:** AC-FR001-03
 - **Action:** Create or update `.sdd/SPEC.md`, `.sdd/PLAN.md`, `.sdd/TASKS.md`,
@@ -174,8 +175,8 @@ is tracked there from then on.
 
 ### TASK-011 — Create the approved project structure
 
-- **Work Item:** WI-004
 - [ ] **Done**
+- **Work Item:** WI-004
 - **Depends on:** TASK-010
 - **Acceptance criteria:** AC-FR001-04
 - **Action:** Create approved folders, configuration locations, documentation
@@ -183,8 +184,8 @@ is tracked there from then on.
 
 ### TASK-012 — Verify non-programmatic dependencies
 
-- **Work Item:** WI-004
 - [ ] **Done**
+- **Work Item:** WI-004
 - **Depends on:** TASK-011
 - **Acceptance criteria:** AC-FR001-04
 - **Action:** Check that the structure matches PRODUCT.md and constitution.md
@@ -196,8 +197,8 @@ is tracked there from then on.
 
 ### TASK-013 — Implement the selected environment setup
 
-- **Work Item:** WI-005
 - [ ] **Done**
+- **Work Item:** WI-005
 - **Depends on:** TASK-012
 - **Acceptance criteria:** AC-FR001-05
 - **Action:** Configure the approved devcontainer, Docker, host-only, or
@@ -205,8 +206,8 @@ is tracked there from then on.
 
 ### TASK-014 — Run baseline environment checks
 
-- **Work Item:** WI-005
 - [ ] **Done**
+- **Work Item:** WI-005
 - **Depends on:** TASK-013
 - **Acceptance criteria:** AC-FR001-05
 - **Action:** Create the environment and run the documented baseline checks
@@ -218,8 +219,8 @@ is tracked there from then on.
 
 ### TASK-015 — Create initialization automation
 
-- **Work Item:** WI-006
 - [ ] **Done**
+- **Work Item:** WI-006
 - **Depends on:** TASK-014
 - **Acceptance criteria:** AC-FR001-06
 - **Action:** Create `scripts/init.sh` or the approved equivalent to reproduce
@@ -231,8 +232,8 @@ is tracked there from then on.
 
 ### TASK-016 — Verify reproducibility and document recovery
 
-- **Work Item:** WI-006
 - [ ] **Done**
+- **Work Item:** WI-006
 - **Depends on:** TASK-015
 - **Acceptance criteria:** AC-FR001-06
 - **Action:** Re-run initialization, verify actionable failures, and document
