@@ -44,7 +44,7 @@ recorded in `docs/PRODUCT.md`.
 ### WI-002 — Create config.yaml
 
 **Parent:** FR-001  
-**Depends on:** WI-001 (approved `docs/PRODUCT.md`)  
+**Depends on:** WI-001 (approved `docs/PRODUCT.md` and accepted seeded ADRs)  
 **Acceptance criteria:** AC-FR001-02
 
 Build root `config.yaml` from scratch with `validate_config.py scaffold`, which lists
