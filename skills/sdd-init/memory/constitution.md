@@ -116,10 +116,9 @@ Governing principles for **{{project.name}}** under a specification-driven devel
   it from the ADR log template before adding the first ADR.
 - An architecture change is adding, upgrading, replacing, or removing a
   library, framework, model checkpoint, storage engine, or platform
-  dependency, or a
-  change to the runtime or language version, a core framework, a public API
-  contract, a storage schema, a security boundary, an architectural layer
-  boundary, or environment isolation.
+  dependency, or a change to the runtime or language version, a core
+  framework, a public API contract, a storage schema, a security boundary, an
+  architectural layer boundary, or environment isolation.
 - Before implementing an architecture change, add a new ADR to `ADR.md` with
   `Status: Proposed`, present it to the user, and stop until the user decides.
   Do not implement the change, or work that depends on it, while the ADR is
