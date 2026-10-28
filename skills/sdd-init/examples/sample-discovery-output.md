@@ -97,7 +97,6 @@ Evaluating Backend API Framework Options:
 
 ### `ADR-001`: Use FastAPI and PyTorch in a Unified Python Runtime
 
-- **Status**: Accepted
 - **Context**: The application requires scientific data extraction from FITS files (`Astropy`, `SciPy`), deep learning inference (`PyTorch ResNet1D`), and real-time REST API serving. Cross-language IPC (e.g. Node.js calling Python scripts) introduces serialization overhead and deployment complexity.
 - **Decision**: Adopt FastAPI (Python 3.12) as the unified backend framework, running model inference and data preprocessing in the same Python process.
 - **Consequences (Positive)**: Zero IPC serialization overhead, unified data structures (`NumPy` arrays to `PyTorch` Tensors), rapid development cycle.
@@ -164,4 +163,4 @@ A score of 6 or more requires a mitigation plan.
 - **Approved by**: Product Owner (example)
 - **First approved on**: 2026-01-15
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:7d9c6c655596f4f57a6f8d6e80667557620feb4e8f4c187067247e3147096b26`
+- **Approved content**: `sha256:4bce521a1660556f1038b2dbb65dd8ffe3495de6ff430c10602a6f67b759e66f`

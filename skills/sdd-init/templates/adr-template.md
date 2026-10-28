@@ -3,16 +3,17 @@
 > each decision. The ID stays in the heading and uses three digits; the
 > validator requires Context, Decision, Consequences, and Trade-offs.
 >
-> In Phase 4 each block is also seeded into the root `ADR.md` as `Proposed`.
-> `ADR.md` adds the approval and lifecycle fields only it holds (see
-> `adr-log-template.md`). Keep the ID, title, and decision content identical
-> until PRODUCT.md is approved; `Status` differs by design. `SKILL.md`
+> In Phase 4 each block is also seeded into the root `ADR.md`, which adds the
+> status, approval, and lifecycle fields only it holds (see
+> `adr-log-template.md`); a section 5 block has no `Status`. Keep the ID,
+> title, and decision content identical until PRODUCT.md is approved. `SKILL.md`
 > Phases 4 and 6 describe the procedure.
+>
+> If a decision is revised during discovery, write only the surviving ADR and
+> record the replaced option in its `Rejected Options`.
 
 ### `ADR-001`: [Concise, descriptive title]
 
-- **Status**: [Proposed | Accepted | Deprecated | Superseded]
-- **Superseded By**: [ADR ID, or N/A]
 - **Context**: [Technical context, business drivers, quality attributes, and
   forces at play. Explain why a decision is needed now.]
 - **Decision Drivers**:

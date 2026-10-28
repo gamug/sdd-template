@@ -96,7 +96,6 @@ SCENARIO: [Scenario name]
 
 ### `ADR-001`: [Decision Title]
 
-- **Status**: [Proposed | Accepted | Deprecated | Superseded]
 - **Context**: [Forces and constraints that require a decision now]
 - **Decision**: [The chosen option]
 - **Consequences (Positive)**: [Benefits]
