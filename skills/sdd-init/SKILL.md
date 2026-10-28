@@ -176,8 +176,9 @@ inputs live in [`memory/`](memory/): `constitution.md`, `SPEC.md`, `PLAN.md`,
 - The hierarchy is strict: `FR > WI > Task`. Every Work Item belongs to a
   functional requirement and every task to exactly one Work Item. `FR-001` is
   reserved for initialization; product requirements start at `FR-002`.
-- After each task: from WI-003 on, update the task and Work Item status in
-  `.sdd/TASKS.md` (before that, report progress in the handoff); record
+- After each task: from WI-003 on, check the task's box in `.sdd/TASKS.md`
+  and, once every task of its Work Item is checked, the Work Item's box
+  (before that, report progress in the handoff); record
   decisions in the required SDD artifact; run the relevant validation; and
   report what changed and what evidence was produced.
 - When information is missing, stop and ask one clear question that explains
@@ -267,9 +268,9 @@ Then create the remaining canonical objects from `docs/PRODUCT.md`:
 Preserve the hierarchy above and acceptance-criteria traceability.
 `FR-001` stays the initialization requirement, and product requirements are
 numbered from `FR-002` (discovery rejects an `FR-001` row in `docs/PRODUCT.md`).
-Do not modify the template inputs in `$SKILL_DIR/memory/`: task status is not
+Do not modify the template inputs in `$SKILL_DIR/memory/`: progress is not
 tracked before this step, and `.sdd/TASKS.md` starts tracking it with the
-completed initialization tasks marked done.
+completed initialization tasks and Work Items checked.
 
 ### WI-004 through WI-006: prepare and reproduce the environment
 
