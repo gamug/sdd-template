@@ -85,8 +85,9 @@ Then create or update all SDD objects under `.sdd/`—`SPEC.md`, `PLAN.md`,
 `TASKS.md`, and `CHANGELOG.md`—to match the approved `docs/PRODUCT.md`
 definition while preserving the `FR > WI > Task` hierarchy and traceability.
 `FR-001` stays the initialization requirement; product requirements are
-numbered from `FR-002`. Task status starts being tracked in `.sdd/TASKS.md`
-here, with the tasks completed so far marked done.
+numbered from `FR-002`. Task and Work Item progress starts being tracked in
+`.sdd/TASKS.md` here, with the tasks completed so far, and the Work Items they
+complete, checked.
 
 **Exit criteria:** `validate_config.py render --verify` passes, and all SDD objects agree
 with `docs/PRODUCT.md`.

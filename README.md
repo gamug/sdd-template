@@ -260,7 +260,9 @@ After initialization, every product change follows this cycle:
    `config.yaml` also updates its `Configuration Decisions` row and is
    followed by `validate_config.py render`; a change to the approved
    content of `docs/PRODUCT.md` needs the user's re-approval.
-7. Move completed work to `.sdd/CHANGELOG.md`.
+7. Check each completed task's box in `.sdd/TASKS.md` and, once all its tasks
+   are checked, its Work Item's box; then move completed work to
+   `.sdd/CHANGELOG.md`.
 
 An architecture change (for example a new runtime version, framework, library,
 storage engine, API contract, or schema) also needs an ADR in `ADR.md`, which

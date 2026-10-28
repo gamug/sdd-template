@@ -88,7 +88,8 @@ Governing principles for **{{project.name}}** under a specification-driven devel
   commit format defined under Code and Git.
 - Acceptance criteria use stable identifiers such as `AC-FR001-01`; every task
   must reference the acceptance-criteria IDs it implements.
-- Work Item status and task status must remain synchronized.
+- Work Item status and task status must remain synchronized: a Work Item is
+  marked done only when every one of its tasks is.
 - Project-specific decisions are collected and approved in `docs/PRODUCT.md`
   during discovery, normalized into root `config.yaml` with the source of
   every value recorded in the `Configuration Decisions` table of
