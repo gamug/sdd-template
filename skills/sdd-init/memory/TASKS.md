@@ -21,9 +21,9 @@ from then on.
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Run all six phases of `$SKILL_DIR/SKILL.md`,
   including the Governance & Workflow checklist, except that writing
-  `docs/PRODUCT.md` and seeding `ADR.md` are TASK-003, and the approval and
-  accepting the seeded ADRs are TASK-004. Nothing else in FR-001 may start
-  before this task.
+  `docs/PRODUCT.md` and seeding `ADR.md` are TASK-003, and approving
+  PRODUCT.md and accepting the seeded ADRs are TASK-004. Nothing else in
+  FR-001 may start before this task.
 
 ### TASK-002 — Collect discovery outputs
 
@@ -70,9 +70,9 @@ from then on.
   approves again. This is the entry gate of WI-002, enforced by
   `validate_config.py`. Then accept the seeded ADRs as Phase 6 step 5 of
   `$SKILL_DIR/SKILL.md` describes (reconcile with section 5, accept, re-read).
-  `validate_config.py` does not check the ADR acceptance; it is a manual gate. This task is
-  not done, and TASK-005 does not start, until every seeded ADR in `ADR.md` is
-  `Accepted` with `Approved by` and `Approved on` filled.
+  `validate_config.py` does not check the ADR acceptance; it is a manual
+  gate. This task is not done, and TASK-005 does not start, until every seeded
+  ADR in `ADR.md` is `Accepted` with `Approved by` and `Approved on` filled.
 
 ## WI-002 — Create config.yaml
 
