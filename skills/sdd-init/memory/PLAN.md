@@ -38,8 +38,8 @@ user should consider.
 user, `docs/PRODUCT.md` records the user's approval and the hash of the
 approved content in its `## Approval` section,
 `validate_discovery.py docs/PRODUCT.md` passes without `--draft`, and every
-seeded ADR in `ADR.md` is `Accepted` with the approver and first approval date
-recorded in `docs/PRODUCT.md`.
+seeded ADR in `ADR.md` is `Accepted` with `Approved by` and `Approved on` filled
+from the approver and first approval date recorded in `docs/PRODUCT.md`.
 
 ### WI-002 — Create config.yaml
 
