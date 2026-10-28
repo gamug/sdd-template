@@ -92,7 +92,10 @@ The discovery process is executed in six sequential phases and produces `docs/PR
    [`templates/adr-log-template.md`](templates/adr-log-template.md), with one
    block per ADR written in section 5, as follows:
    - Section 5 blocks carry no `Status`: set `Status` to `Proposed` on every
-     seeded block, and set `Proposed on` to the date the block is written.
+     seeded block, and set `Proposed on` to the date the block is written. If a
+     section 5 block carries a `Status` or `Superseded By` anyway, remove it
+     from section 5 before approval; the seeded block still gets
+     `Status: Proposed`.
    - Add the fields section 5 lacks (`Approved by`, `Approved on`,
      `Rejected by`, `Rejected on`, `Rejection reason`, `Deprecated by`,
      `Deprecated on`, `Deprecation reason`, `Supersedes`, `Superseded By`) as

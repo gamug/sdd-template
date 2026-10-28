@@ -8,6 +8,9 @@
 > `adr-log-template.md`); a section 5 block has no `Status`. Keep the ID,
 > title, and decision content identical until PRODUCT.md is approved. `SKILL.md`
 > Phases 4 and 6 describe the procedure.
+>
+> If a decision is revised during discovery, write only the surviving ADR and
+> record the replaced option in its `Rejected Options`.
 
 ### `ADR-001`: [Concise, descriptive title]
 
