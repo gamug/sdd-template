@@ -108,6 +108,56 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 - SDD acceptance criteria should use a consistent executable form such as
   GIVEN-WHEN-THEN where applicable.
 
+## Architecture decisions
+
+- `ADR.md` in the project root is the live record of architecture decisions.
+  It was seeded from `docs/PRODUCT.md` section 5, which is a frozen discovery
+  snapshot and is not edited after approval. If `ADR.md` does not exist, create
+  it before adding the first ADR: a title, then one `###` block per ADR, headed
+  `ADR-001`, `ADR-002`, and so on, with `Status`, `Proposed on`, `Approved by`,
+  `Approved on`, `Rejected by`, `Rejected on`, `Rejection reason`,
+  `Deprecated by`, `Deprecated on`, `Deprecation reason`, `Supersedes`,
+  `Superseded By`, `Context`, `Decision`, `Consequences (Positive)`,
+  `Consequences (Trade-offs)`, and `Traceability` (fields that do not apply
+  hold `N/A`).
+- An architecture change is adding, upgrading, replacing, or removing a
+  library, framework, model checkpoint, storage engine, or platform
+  dependency, or a change to the runtime or language version, a core
+  framework, a public API contract, a storage schema, a security boundary, an
+  architectural layer boundary, or environment isolation.
+- Before implementing an architecture change, add a new ADR to `ADR.md` with
+  `Status: Proposed`, present it to the user, and stop until the user decides.
+  Do not implement the change, or work that depends on it, while the ADR is
+  `Proposed`. If a `Proposed` ADR already exists for the same change, resume it
+  instead of adding another. If a `Proposed` ADR's decision content changes
+  after it was presented, present it again before accepting.
+- The decision must be an explicit instruction from the user (for example in
+  chat or a review comment). If the user approves, set `Status: Accepted`,
+  record the name or role the user gave in `Approved by` and the date in
+  `Approved on`, and only then implement the change. If the user rejects, set
+  `Status: Rejected` and record `Rejected by`, `Rejected on`, and
+  `Rejection reason`; the change is not implemented. `Approved by` and
+  `Rejected by` never name the agent.
+- One explicit user decision may satisfy both this rule and a scope-expansion
+  approval under Coding-agent conduct when it names both.
+- ADR statuses move only from `Proposed` to `Accepted` or `Rejected`, and from
+  `Accepted` to `Deprecated` or `Superseded`. Moving an `Accepted` ADR to
+  `Deprecated` also needs an explicit user decision, recorded in
+  `Deprecated by`, `Deprecated on`, and `Deprecation reason`. A `Rejected` ADR
+  is never reopened: revisiting the idea requires a new `Proposed` ADR with a
+  new ID.
+- A decision that replaces an earlier one names it in `Supersedes`; once the
+  new ADR is `Accepted`, the earlier ADR becomes `Superseded` and records the
+  new ID in `Superseded By`. Both updates are made in the same change, and an
+  ADR that is already `Superseded` is not superseded again.
+- ADR IDs have three digits, continue after the highest existing ID, and are
+  never reused.
+- An ADR does not replace a constitution amendment: a change that alters the
+  guarantees under Technological foundation also follows Governance, and its
+  implementation waits for both an `Accepted` ADR and the approved amendment.
+  ADR changes after approval are recorded in `ADR.md` only and do not require
+  re-approving `docs/PRODUCT.md`.
+
 ## Coding-agent conduct
 
 - Read this constitution and `.sdd/SPEC.md` before planning or editing.
@@ -210,18 +260,19 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 This constitution supersedes ad-hoc convention when the two conflict.
 
 - Amendments identify the affected section, exact change, rationale, and migration impact.
-- Amendments that change architecture or governance include an ADR describing
-  business rationale, technical impact, trade-offs, and migration steps.
+- Amendments that change architecture or governance include an ADR in `ADR.md`
+  describing business rationale, technical impact, trade-offs, and migration
+  steps.
 - Amendments are reviewed through the normal pull-request path before being relied upon.
 - Use semantic versioning: MAJOR for removed or redefined guarantees, MINOR for new or materially expanded principles, PATCH for non-semantic corrections.
 - The highest applicable impact wins: MAJOR overrides MINOR, and MINOR
   overrides PATCH. Runtime, framework, breaking API, and security-boundary
   changes are MAJOR.
 - When an amendment is approved, update every affected artifact together,
-  including `docs/PRODUCT.md`, `.sdd/SPEC.md`, `.sdd/PLAN.md`,
+  including `docs/PRODUCT.md` (except ADR changes after approval, which are
+  recorded in `ADR.md` only), `.sdd/SPEC.md`, `.sdd/PLAN.md`,
   `.sdd/TASKS.md`, root `config.yaml`, `.sdd/constitution.md`, templates,
-  architecture records, automation, CI workflows, and contributor
-  documentation.
+  `ADR.md`, automation, CI workflows, and contributor documentation.
 - Reviewers cite the conflicting section when rejecting non-compliant work.
 - The rendered constitution records its version, effective date, and governance
   status from the approved project configuration.
