@@ -30,7 +30,8 @@ from then on.
 - **Depends on:** TASK-001
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Assemble use cases, requirements, user stories, stack evaluation,
-  ADRs, environment and governance decisions, risks, and roadmap.
+  ADRs (which also seed the root `ADR.md`), environment and governance
+  decisions, risks, and roadmap.
 
 ### TASK-003 — Write PRODUCT.md
 
@@ -47,6 +48,8 @@ from then on.
   `python "$SKILL_DIR/scripts/validate_discovery.py" --draft docs/PRODUCT.md`
   until it passes. Draft mode lists the template placeholders still to
   replace; approval fails while any remain.
+  Seed the root `ADR.md` from the ADRs in section 5 as Phase 4 step 5 of
+  `$SKILL_DIR/SKILL.md` describes.
 
 ### TASK-004 — Resolve open decisions and record approval
 
@@ -62,7 +65,10 @@ from then on.
   `--draft`; it must pass. Any later edit outside the Approval and
   Configuration Decisions sections invalidates the approval until the user
   approves again. This is the entry gate of WI-002, enforced by
-  `validate_config.py`.
+  `validate_config.py`. Then accept the seeded ADRs as Phase 6 step 5 of
+  `$SKILL_DIR/SKILL.md` describes (reconcile with section 5, accept, re-read).
+  This task is not done, and TASK-005 does not start, until every seeded ADR in
+  `ADR.md` is `Accepted` with `Approved by` and `Approved on` filled.
 
 ## WI-002 — Create config.yaml
 
