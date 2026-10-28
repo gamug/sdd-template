@@ -20,8 +20,10 @@ from then on.
 - **Depends on:** none
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Run all six phases of `$SKILL_DIR/SKILL.md`,
-  including the Governance & Workflow checklist. Nothing else in FR-001 may
-  start before this task.
+  including the Governance & Workflow checklist, except that writing
+  `docs/PRODUCT.md` and seeding `ADR.md` are TASK-003, and the approval and
+  accepting the seeded ADRs are TASK-004. Nothing else in FR-001 may start
+  before this task.
 
 ### TASK-002 — Collect discovery outputs
 
@@ -58,7 +60,8 @@ from then on.
 - **Depends on:** TASK-003
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Ask the user about every `UNRESOLVED:` item and update
-  `docs/PRODUCT.md`. Present the document for approval and record it in its
+  `docs/PRODUCT.md`, applying any change to a section 5 ADR to its `ADR.md`
+  block in the same step. Present the document for approval and record it in its
   `## Approval` section (`Approved by:`, `First approved on: YYYY-MM-DD`,
   `Approved on: YYYY-MM-DD`, and `Approved content:` with the hash printed by `validate_discovery.py --hash
   docs/PRODUCT.md` once the user has approved). Run the validator without
@@ -67,8 +70,9 @@ from then on.
   approves again. This is the entry gate of WI-002, enforced by
   `validate_config.py`. Then accept the seeded ADRs as Phase 6 step 5 of
   `$SKILL_DIR/SKILL.md` describes (reconcile with section 5, accept, re-read).
-  This task is not done, and TASK-005 does not start, until every seeded ADR in
-  `ADR.md` is `Accepted` with `Approved by` and `Approved on` filled.
+  `validate_config.py` does not check this; it is a manual gate. This task is
+  not done, and TASK-005 does not start, until every seeded ADR in `ADR.md` is
+  `Accepted` with `Approved by` and `Approved on` filled.
 
 ## WI-002 — Create config.yaml
 
