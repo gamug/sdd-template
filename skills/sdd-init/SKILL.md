@@ -26,7 +26,7 @@ Before initiating the discovery workflow, gather the following initial inputs fr
 
 ## Step-by-Step Discovery Workflow
 
-The discovery process is executed in six sequential phases and produces one document, `docs/PRODUCT.md`, built from [`templates/product-template.md`](templates/product-template.md). For each phase, consult the referenced guide in `./references/` and fill the matching numbered section of the product template using the phase's fragment in `./templates/`. Every ID uses three digits (`UC-001`, `FR-002`, `US-001`, `ADR-001`, `RSK-001`), sits in the item's heading or the first table column, and is defined once.
+The discovery process is executed in six sequential phases and produces `docs/PRODUCT.md`, built from [`templates/product-template.md`](templates/product-template.md), and the root `ADR.md` seeded from it in Phase 4. For each phase, consult the referenced guide in `./references/` and fill the matching numbered section of the product template using the phase's fragment in `./templates/`. Every ID uses three digits (`UC-001`, `FR-002`, `US-001`, `ADR-001`, `RSK-001`), sits in the item's heading or the first table column, and is defined once.
 
 ```
   ┌───────────────────────────────┐
@@ -90,15 +90,22 @@ The discovery process is executed in six sequential phases and produces one docu
 4. **Output format**: Section 5 of the product template, one block per decision from `templates/adr-template.md`.
 5. **Seed `ADR.md`**: create the root `ADR.md` from
    [`templates/adr-log-template.md`](templates/adr-log-template.md), with one
-   block per ADR written in section 5. Seed every ADR as `Proposed`; Phase 4
-   writes no `Deprecated` or `Superseded` ADR. Add the fields section 5 lacks
-   (`Approved by`, `Approved on`, `Rejected by`, `Rejected on`,
-   `Rejection reason`, `Deprecated by`, `Deprecated on`, `Deprecation reason`,
-   `Supersedes`) as `N/A`, set `Proposed on` to the date the block is written,
-   and replace the template's guidance block with the one-line pointer it
-   describes. Until `docs/PRODUCT.md` is approved, apply every change to an ADR
-   in section 5 to its `ADR.md` block in the same step: the ID, title, and
-   decision content stay identical (`Status` differs by design).
+   block per ADR written in section 5, as follows:
+   - Seed every ADR as `Proposed`; Phase 4 writes no `Deprecated` or
+     `Superseded` ADR.
+   - Add the fields section 5 lacks (`Approved by`, `Approved on`,
+     `Rejected by`, `Rejected on`, `Rejection reason`, `Deprecated by`,
+     `Deprecated on`, `Deprecation reason`, `Supersedes`) as `N/A`, and set
+     `Proposed on` to the date the block is written.
+   - Copy `Traceability`, `Superseded By`, `Decision Drivers`,
+     `Considered Options`, `Mitigation`, `Rejected Options`, and
+     `External Docs` from section 5 when it has them; write `N/A` when it does
+     not. Never leave a template placeholder.
+   - Replace the template's guidance block with the one-line pointer it
+     describes.
+   - Until `docs/PRODUCT.md` is approved, apply every change to an ADR in
+     section 5 to its `ADR.md` block in the same step: the ID, title, and
+     decision content stay identical (`Status` differs by design).
 
 ### Phase 5: Development Environment Setup
 1. Define local and team developer environment standards: IDE setup, version control, language runtimes, version managers, package managers, and container isolation (e.g., Docker).
@@ -131,13 +138,25 @@ The discovery process is executed in six sequential phases and produces one docu
    Configuration Decisions sections fails validation until the user approves
    again; a re-approval updates `Approved on` and the hash and keeps
    `First approved on`. Configuration
-   (WI-002) cannot start until this validates.
-5. **Accept the seeded ADRs**: once the approved `docs/PRODUCT.md` validates,
-   set every seeded `Proposed` ADR in `ADR.md` to `Accepted` and copy the
-   approval's `Approved by` and `First approved on` into its `Approved by` and
-   `Approved on`. A later re-approval of `docs/PRODUCT.md` does not rewrite
-   `ADR.md`. Before treating the approval as complete, re-read `ADR.md`: if any
-   seeded ADR is still `Proposed`, apply this step to it first.
+   (WI-002) cannot start until this validates and step 5 is complete.
+5. **Accept the seeded ADRs**: once the approved `docs/PRODUCT.md` validates
+   and before starting WI-002:
+   - Reconcile the two records in both directions: every ADR in section 5 has
+     a matching `ADR.md` block, and every seeded `ADR.md` block has a matching
+     section 5 ADR (same ID, title, and decision content, as the Phase 4 sync
+     rule requires). Section 5 is approved and frozen, so change `ADR.md` to
+     match it, never section 5, and remove a seeded block that has no
+     section 5 counterpart.
+   - Set every seeded `Proposed` ADR to `Accepted` and copy the approval's
+     `Approved by` and `First approved on` into its `Approved by` and
+     `Approved on`.
+   - Re-read `ADR.md` before treating the approval as complete: every seeded
+     ADR must be `Accepted` with `Approved by` and `Approved on` filled; apply
+     this step to any that is not.
+   - After approval, section 5 stays a frozen snapshot: a re-approval does not
+     change its ADR blocks and does not rewrite `ADR.md`. New or changed
+     decisions are recorded in `ADR.md` as new ADRs, with `Supersedes` naming
+     the ADR a changed decision replaces.
 
 ---
 
