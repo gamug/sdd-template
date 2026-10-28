@@ -32,8 +32,8 @@ from then on.
 - **Depends on:** TASK-001
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Assemble use cases, requirements, user stories, stack evaluation,
-  ADRs (which also seed the root `ADR.md`), environment and governance
-  decisions, risks, and roadmap.
+  ADRs (seeded into the root `ADR.md` in TASK-003), environment and
+  governance decisions, risks, and roadmap.
 
 ### TASK-003 — Write PRODUCT.md
 
@@ -43,15 +43,15 @@ from then on.
 - **Acceptance criteria:** AC-FR001-01
 - **Action:** Write `docs/PRODUCT.md` from
   `$SKILL_DIR/templates/product-template.md`, filling each
-  numbered section from its phase fragment. Use three-digit IDs, each defined
+  numbered section from its phase fragment. Seed the root `ADR.md` from the
+  ADRs in section 5 as Phase 4 step 5 of `$SKILL_DIR/SKILL.md` describes, and
+  keep it in sync while iterating. Use three-digit IDs, each defined
   once and every reference resolving; give each FR an EARS pattern that matches
   its statement and one MoSCoW priority; score risks as Impact × Probability.
   Mark every open decision with `UNRESOLVED:`, and run
   `python "$SKILL_DIR/scripts/validate_discovery.py" --draft docs/PRODUCT.md`
   until it passes. Draft mode lists the template placeholders still to
   replace; approval fails while any remain.
-  Seed the root `ADR.md` from the ADRs in section 5 as Phase 4 step 5 of
-  `$SKILL_DIR/SKILL.md` describes.
 
 ### TASK-004 — Resolve open decisions and record approval
 
@@ -70,7 +70,7 @@ from then on.
   approves again. This is the entry gate of WI-002, enforced by
   `validate_config.py`. Then accept the seeded ADRs as Phase 6 step 5 of
   `$SKILL_DIR/SKILL.md` describes (reconcile with section 5, accept, re-read).
-  `validate_config.py` does not check this; it is a manual gate. This task is
+  `validate_config.py` does not check the ADR acceptance; it is a manual gate. This task is
   not done, and TASK-005 does not start, until every seeded ADR in `ADR.md` is
   `Accepted` with `Approved by` and `Approved on` filled.
 
