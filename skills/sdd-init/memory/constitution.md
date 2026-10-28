@@ -112,19 +112,26 @@ Governing principles for **{{project.name}}** under a specification-driven devel
 
 - `ADR.md` in the project root is the live record of architecture decisions.
   It was seeded from `docs/PRODUCT.md` section 5, which is a frozen discovery
-  snapshot and is not edited after approval.
-- An architecture change is a change to the runtime or language version, a core
-  framework, a library, framework, model checkpoint, storage engine, or
-  platform dependency being added, a public API contract, a storage schema, a
-  security boundary, an architectural layer boundary, or environment isolation.
+  snapshot and is not edited after approval. If `ADR.md` does not exist, create
+  it from the ADR log template before adding the first ADR.
+- An architecture change is adding, replacing, or removing a library,
+  framework, model checkpoint, storage engine, or platform dependency, or a
+  change to the runtime or language version, a core framework, a public API
+  contract, a storage schema, a security boundary, an architectural layer
+  boundary, or environment isolation.
 - Before implementing an architecture change, add a new ADR to `ADR.md` with
   `Status: Proposed`, present it to the user, and stop until the user decides.
   Do not implement the change, or work that depends on it, while the ADR is
   `Proposed`.
-- If the user approves, set `Status: Accepted`, record the user in `Approved by`
-  and the date in `Approved on`, and only then implement the change. If the
-  user rejects, set `Status: Rejected` and record `Rejected by`, `Rejected on`,
-  and `Rejection reason`; the change is not implemented.
+- The decision must be an explicit instruction from the user (for example in
+  chat or a review comment). If the user approves, set `Status: Accepted`,
+  record the name or role the user gave in `Approved by` and the date in
+  `Approved on`, and only then implement the change. If the user rejects, set
+  `Status: Rejected` and record `Rejected by`, `Rejected on`, and
+  `Rejection reason`; the change is not implemented. `Approved by` and
+  `Rejected by` never name the agent.
+- One explicit user decision may satisfy both this rule and a scope-expansion
+  approval under Coding-agent conduct when it names both.
 - ADR statuses move only from `Proposed` to `Accepted` or `Rejected`, and from
   `Accepted` to `Deprecated` or `Superseded`. A `Rejected` ADR is never
   reopened: revisiting the idea requires a new `Proposed` ADR with a new ID.
@@ -133,8 +140,9 @@ Governing principles for **{{project.name}}** under a specification-driven devel
   new ID in `Superseded By`. ADR IDs have three digits, continue after the
   highest existing ID, and are never reused.
 - An ADR does not replace a constitution amendment: a change that alters the
-  guarantees under Technological foundation also follows Governance. ADR
-  changes after approval are recorded in `ADR.md` only and do not require
+  guarantees under Technological foundation also follows Governance, and its
+  implementation waits for both an `Accepted` ADR and the approved amendment.
+  ADR changes after approval are recorded in `ADR.md` only and do not require
   re-approving `docs/PRODUCT.md`.
 
 ## Coding-agent conduct
