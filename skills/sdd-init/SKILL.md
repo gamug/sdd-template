@@ -144,17 +144,17 @@ The discovery process is executed in six sequential phases and produces `docs/PR
    - Reconcile the two records in both directions: every ADR in section 5 has
      a matching `ADR.md` block, and every seeded `ADR.md` block has a matching
      section 5 ADR (same ID, title, and decision content, as the Phase 4 sync
-     rule requires). Section 5 is approved and frozen, so change `ADR.md` to
-     match it, never section 5, and remove a seeded block that has no
-     section 5 counterpart.
+     rule requires), and each ADR ID appears in exactly one `ADR.md` block.
+     Section 5 is approved and frozen, so change `ADR.md` to match it, never
+     section 5, and remove a seeded block that has no section 5 counterpart.
    - Set every seeded `Proposed` ADR to `Accepted` and copy the approval's
      `Approved by` and `First approved on` into its `Approved by` and
      `Approved on`.
    - Re-read `ADR.md` before treating the approval as complete: every seeded
      ADR must be `Accepted` with `Approved by` and `Approved on` filled; apply
      this step to any that is not.
-   - After approval, section 5 is a frozen snapshot and `ADR.md` is the live
-     record: see "After initialization" below.
+   - After approval, section 5 must stay a frozen snapshot and `ADR.md` is the
+     live record: see "After initialization" below.
 
 ---
 
@@ -276,14 +276,15 @@ in WI-005. In WI-006, create `scripts/init.sh` or the approved equivalent so
 the environment can be reproduced from a clean checkout, and add the
 initialization checks to the fork's pre-commit hook and CI.
 
-### After initialization
+---
 
-The root `ADR.md` is the live record of architecture decisions, and
-`docs/PRODUCT.md` section 5 stays a frozen snapshot of the discovery ADRs: a
-re-approval of `docs/PRODUCT.md` does not change its ADR blocks and does not
-rewrite `ADR.md`. New or changed decisions are recorded in `ADR.md` as new
-ADRs, with `Supersedes` naming the ADR a changed decision replaces. Architecture
-changes follow the rule in the constitution's "Architecture decisions" section.
+## After initialization
+
+The root `ADR.md` is the live record of architecture decisions.
+`docs/PRODUCT.md` section 5 is a frozen snapshot of the discovery ADRs: a
+re-approval of `docs/PRODUCT.md` must not change its ADR blocks and must not
+rewrite `ADR.md`. New and changed decisions, and architecture changes, follow
+the constitution's "Architecture decisions" section.
 
 ---
 
