@@ -26,7 +26,7 @@ Before initiating the discovery workflow, gather the following initial inputs fr
 
 ## Step-by-Step Discovery Workflow
 
-The discovery process is executed in six sequential phases and produces one document, `docs/PRODUCT.md`, built from [`templates/product-template.md`](templates/product-template.md). For each phase, consult the referenced guide in `./references/` and fill the matching numbered section of the product template using the phase's fragment in `./templates/`. Every ID uses three digits (`UC-001`, `FR-002`, `US-001`, `ADR-001`, `RSK-001`), sits in the item's heading or the first table column, and is defined once.
+The discovery process is executed in six sequential phases and produces `docs/PRODUCT.md`, built from [`templates/product-template.md`](templates/product-template.md), and the root `ADR.md` seeded from it in Phase 4. For each phase, consult the referenced guide in `./references/` and fill the matching numbered section of the product template using the phase's fragment in `./templates/`. Every ID uses three digits (`UC-001`, `FR-002`, `US-001`, `ADR-001`, `RSK-001`), sits in the item's heading or the first table column, and is defined once.
 
 ```
   ┌───────────────────────────────┐
@@ -95,6 +95,9 @@ The discovery process is executed in six sequential phases and produces one docu
    (`Approved by`, `Approved on`, `Rejected by`, `Rejected on`,
    `Rejection reason`, `Deprecated by`, `Deprecated on`, `Deprecation reason`,
    `Supersedes`) as `N/A`, set `Proposed on` to the date the block is written,
+   copy `Decision Drivers`, `Considered Options`, `Mitigation`,
+   `Rejected Options`, and `External Docs` from section 5 when it has them and
+   write `N/A` when it does not (never leave a template placeholder),
    and replace the template's guidance block with the one-line pointer it
    describes. Until `docs/PRODUCT.md` is approved, apply every change to an ADR
    in section 5 to its `ADR.md` block in the same step: the ID, title, and
@@ -133,11 +136,14 @@ The discovery process is executed in six sequential phases and produces one docu
    `First approved on`. Configuration
    (WI-002) cannot start until this validates.
 5. **Accept the seeded ADRs**: once the approved `docs/PRODUCT.md` validates,
-   set every seeded `Proposed` ADR in `ADR.md` to `Accepted` and copy the
-   approval's `Approved by` and `First approved on` into its `Approved by` and
-   `Approved on`. A later re-approval of `docs/PRODUCT.md` does not rewrite
-   `ADR.md`. Before treating the approval as complete, re-read `ADR.md`: if any
-   seeded ADR is still `Proposed`, apply this step to it first.
+   first confirm that every ADR ID, title, and decision in section 5 has a
+   matching `ADR.md` block, and fix any mismatch. Then set every seeded
+   `Proposed` ADR to `Accepted` and copy the approval's `Approved by` and
+   `First approved on` into its `Approved by` and `Approved on`. After approval,
+   section 5 is a frozen snapshot: a re-approval does not change its ADR blocks
+   and does not rewrite `ADR.md`; new or changed decisions are recorded in
+   `ADR.md` as new ADRs. Before treating the approval as complete, re-read
+   `ADR.md`: if any seeded ADR is still `Proposed`, apply this step to it first.
 
 ---
 
