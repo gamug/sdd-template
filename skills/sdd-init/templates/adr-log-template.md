@@ -9,9 +9,11 @@
 > `SKILL.md` (Phases 4 and 6) holds the procedure that seeds this file from
 > `docs/PRODUCT.md` § 5 (fragment `adr-template.md`) and accepts the seeded ADRs.
 >
-> Each status adds to the fields of the one before it; every other
+> Each row adds to the fields of the status it names; every other
 > status-dependent field holds `N/A`. Moves: `Proposed` to `Accepted` or
-> `Rejected`, `Accepted` to `Deprecated` or `Superseded`.
+> `Rejected`, `Accepted` to `Deprecated` or `Superseded`. When an ADR becomes
+> `Accepted`, each ADR it supersedes becomes `Superseded` and gets this ID in
+> `Superseded By`; if it is `Rejected`, they are unchanged.
 >
 > | Status | Fields set |
 > | :--- | :--- |
@@ -35,9 +37,7 @@
 - **Deprecated by**: [Name or role of the user who deprecated it, or N/A]
 - **Deprecated on**: [YYYY-MM-DD, or N/A]
 - **Deprecation reason**: [Why it is no longer relevant, or N/A]
-- **Supersedes**: [ADR ID(s), or N/A. Once this ADR is `Accepted`, mark each
-  as `Superseded` and put this ID in its `Superseded By`; if this ADR is
-  rejected, leave them unchanged]
+- **Supersedes**: [ADR ID(s), or N/A]
 - **Superseded By**: [ADR ID, or N/A]
 - **Context**: [Technical context, business drivers, quality attributes, and
   forces at play. Explain why a decision is needed now.]
