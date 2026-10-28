@@ -9,7 +9,7 @@ Task register for the hierarchy `FR-001 > WI > Task` defined in
 Every Work Item and task carries a checkbox: `[ ]` is the template value and
 `[x]` means done. A Work Item is checked only when every task under it is
 checked, in the same change as its last task. This register is immutable, so
-progress is not tracked before WI-003: TASK-010 carries it into
+progress is not tracked before TASK-010: TASK-010 carries it into
 `.sdd/TASKS.md`, checks TASK-001 through TASK-009 and the Work Items they
 complete (WI-001 and WI-002), and WI-003 is checked when TASK-010 is. Progress
 is tracked there from then on. Work Items and tasks added to `.sdd/TASKS.md`
