@@ -153,10 +153,8 @@ The discovery process is executed in six sequential phases and produces `docs/PR
    - Re-read `ADR.md` before treating the approval as complete: every seeded
      ADR must be `Accepted` with `Approved by` and `Approved on` filled; apply
      this step to any that is not.
-   - After approval, section 5 stays a frozen snapshot: a re-approval does not
-     change its ADR blocks and does not rewrite `ADR.md`. New or changed
-     decisions are recorded in `ADR.md` as new ADRs, with `Supersedes` naming
-     the ADR a changed decision replaces.
+   - After approval, section 5 is a frozen snapshot and `ADR.md` is the live
+     record: see "After initialization" below.
 
 ---
 
@@ -278,6 +276,15 @@ in WI-005. In WI-006, create `scripts/init.sh` or the approved equivalent so
 the environment can be reproduced from a clean checkout, and add the
 initialization checks to the fork's pre-commit hook and CI.
 
+### After initialization
+
+The root `ADR.md` is the live record of architecture decisions, and
+`docs/PRODUCT.md` section 5 stays a frozen snapshot of the discovery ADRs: a
+re-approval of `docs/PRODUCT.md` does not change its ADR blocks and does not
+rewrite `ADR.md`. New or changed decisions are recorded in `ADR.md` as new
+ADRs, with `Supersedes` naming the ADR a changed decision replaces. Architecture
+changes follow the rule in the constitution's "Architecture decisions" section.
+
 ---
 
 ## Validation Protocol
@@ -322,6 +329,10 @@ The script verifies:
 Lines starting with `>` are template guidance: every content check skips
 them, but the approval hash covers them.
 
+The scripts do not check `ADR.md`. Phase 6 step 5 (reconcile with section 5,
+accept, re-read) is its check, and `docs/PRODUCT.md` section 5 stays covered by
+the approval hash.
+
 When validating from a directory, pass the project root or a directory that
 contains exactly one generated `PRODUCT.md`; bundled templates, references,
 and examples are not discovery output and are not aggregated.
@@ -343,7 +354,8 @@ and examples are not discovery output and are not aggregated.
 - [use-case-template.md](templates/use-case-template.md): Fragment for section 2, one block per use case.
 - [prd-user-stories-template.md](templates/prd-user-stories-template.md): Fragment for section 3, requirements and user stories.
 - [tech-stack-evaluation-matrix.md](templates/tech-stack-evaluation-matrix.md): Fragment for section 4, the MCDM matrix.
-- [adr-template.md](templates/adr-template.md): Fragment for section 5, one block per ADR.
+- [adr-template.md](templates/adr-template.md): Fragment for section 5, one block per ADR; each block is also seeded into `ADR.md`.
+- [adr-log-template.md](templates/adr-log-template.md): Structure of the root `ADR.md`, the live ADR record seeded from section 5 in Phase 4. Standalone, not a fragment of the product template.
 - [dev-environment-checklist.md](templates/dev-environment-checklist.md): Fragments for sections 6 and 8, environment and governance decisions.
 
 ### Initialization inputs
