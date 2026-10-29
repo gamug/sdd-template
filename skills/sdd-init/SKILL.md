@@ -3,7 +3,7 @@ name: sdd-init
 description: Initializes a Specification-Driven Development project end to end. Runs the six-phase discovery (use cases, requirements, stack selection, ADRs, environment, risks and roadmap) to produce an approved docs/PRODUCT.md, then builds config.yaml, renders the constitution, creates the SDD objects and sets up a reproducible environment. Use when taking a project idea from concept to an initialized, specification-driven repository.
 ---
 
-# SDD Initialization Skill
+# sdd-init
 
 This Skill initializes a project end to end. Its discovery workflow (Phases 1-6 below, WI-001) transforms an initial application idea into an approved technical specification package, preventing scope creep, technical debt, and architectural misalignment. Its initialization workflow (WI-002 to WI-006, further below) then turns that package into `config.yaml`, a rendered constitution, the SDD objects, and a reproducible environment.
 
