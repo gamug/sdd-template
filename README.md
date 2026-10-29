@@ -221,11 +221,7 @@ uv run --no-project --with-requirements skills/sdd-init/scripts/requirements.txt
 
 ## Versions
 
-The template follows [Semantic Versioning](https://semver.org). Releases are Git tags (`v1.0.0` is the first stable one) with notes on the [Releases page](https://github.com/gamug/sdd-template/releases).
-
-A major version changes something a fork has to adapt to: a template file or folder name, the shape of `config.yaml` or `docs/PRODUCT.md`, an ID format, or what the validators accept. A minor version adds capability without breaking an initialized fork, and a patch fixes wording or bugs. The release notes say whether a fork must re-run `validate_config.py render` after merging.
-
-Create a new fork from a tag rather than from the tip of `master`, and record the tag in the fork's first commit message so a later upgrade knows its starting point.
+Releases are tagged `vMAJOR.MINOR.PATCH`; the notes for each are on the [Releases page](https://github.com/gamug/sdd-template/releases).
 
 ## License and ownership
 
