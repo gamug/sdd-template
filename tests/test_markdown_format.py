@@ -1,4 +1,4 @@
-"""Markdown convention: one paragraph or list item per line, never hard-wrapped.
+"""Markdown conventions: one paragraph or list item per line (never hard-wrapped), and ADR in uppercase in running text.
 
 Known limit: a line that starts with `<` is treated as an HTML block and is not checked.
 Indented code blocks, setext heading underlines, thematic breaks, and link reference
@@ -17,6 +17,10 @@ from fixtures import ROOT
 LIST_ITEM = re.compile(r"([-*+]|\d+[.)])\s")
 OPAQUE = re.compile(r"(#|\||<|```|~~~)|([-*_])(\s*\2){2,}$|(=+|-+)$|\[[^\]]+\]:\s")
 QUOTE = re.compile(r"^\s*>\s?")
+LOWERCASE_ADR = re.compile(r"(?<![\w./-])adrs?(?![\w-]|\.\w)")
+# Must match the ID-prefix list in skills/sdd-init/SKILL.md, where `adr` stays lowercase.
+ID_PREFIX_LIST = re.compile(r"FR, UC, US, adr, and RSK")
+CODE_OR_LINK_TARGET = re.compile(r"`[^`]*`|\]\([^)]*\)")
 
 
 def wrapped_lines(text):
@@ -59,6 +63,19 @@ def wrapped_lines(text):
     return found
 
 
+def lowercase_adr_lines(text):
+    """Line numbers where `adr` is a word in running text; code spans, fences, link targets and the ID-prefix list are exempt."""
+    found, fence = [], False
+    for number, line in enumerate(text.split("\n"), 1):
+        if re.match(r"^\s*(```|~~~)", line):
+            fence = not fence
+        elif not fence:
+            prose = ID_PREFIX_LIST.sub("", CODE_OR_LINK_TARGET.sub("", line))
+            if LOWERCASE_ADR.search(prose):
+                found.append(number)
+    return found
+
+
 def tracked_markdown():
     """Tracked `.md` files; outside a git checkout, every `.md` file not under a dot-directory."""
     try:
@@ -90,6 +107,10 @@ class MarkdownFormatTest(unittest.TestCase):
         self.assertEqual(wrapped_lines("- a\n\n  b c\n"), [])
         self.assertEqual(wrapped_lines("| a | b |\n| - | - |\n| c | d |\n"), [])
 
+    def test_detector_flags_lowercase_adr_only_in_running_text(self):
+        self.assertEqual(lowercase_adr_lines("An adr is recorded\nin `adr.md` and [log](./adr.md)\nsee adr-001\n"), [1])
+        self.assertEqual(lowercase_adr_lines("```\nan adr\n```\nthe ADRs\nFR, UC, US, adr, and RSK IDs\n"), [])
+
     def test_falls_back_to_walking_files_without_git(self):
         with mock.patch("subprocess.check_output", side_effect=OSError):
             paths = tracked_markdown()
@@ -102,6 +123,14 @@ class MarkdownFormatTest(unittest.TestCase):
                 text = f.read().replace("\r\n", "\n")
             with self.subTest(file=path):
                 self.assertEqual(wrapped_lines(text), [], "join wrapped lines into one line per paragraph or list item")
+
+
+    def test_repository_markdown_writes_adr_in_uppercase_in_prose(self):
+        for path in tracked_markdown():
+            with open(f"{ROOT}/{path}", encoding="utf-8") as f:
+                text = f.read().replace("\r\n", "\n")
+            with self.subTest(file=path):
+                self.assertEqual(lowercase_adr_lines(text), [], "write ADR in uppercase in running text; adr stays lowercase in filenames and IDs")
 
 
 if __name__ == "__main__":

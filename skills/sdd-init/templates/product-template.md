@@ -83,7 +83,7 @@ SCENARIO: [Scenario name]
 
 ---
 
-## 5. Architecture Decision Records (adrs)
+## 5. Architecture Decision Records (ADRs)
 
 > Fragment: [`adr-template.md`](./adr-template.md), one `###` block per decision. In Phase 4 each block is also seeded into the root `adr.md` (see `adr-log-template.md`).
 

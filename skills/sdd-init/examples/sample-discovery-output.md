@@ -93,7 +93,7 @@ Evaluating Backend API Framework Options:
 
 ---
 
-## 5. Architecture Decision Records (adrs)
+## 5. Architecture Decision Records (ADRs)
 
 ### `adr-001`: Use FastAPI and PyTorch in a Unified Python Runtime
 
@@ -162,4 +162,4 @@ Impact and Probability use 1 (Low) to 3 (High); Score = Impact × Probability. A
 - **Approved by**: Product Owner (example)
 - **First approved on**: 2026-01-15
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:9e09a85532c7ce949c35abdfd54aa06c30208b6cd834cd49c4f16b86a63bd585`
+- **Approved content**: `sha256:887bfc89d3a5896d56e2e950b3c6fedcc47f0b6a6177fc96c674fce8a40ef819`
