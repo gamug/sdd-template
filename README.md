@@ -208,4 +208,8 @@ uv run --no-project --with-requirements skills/sdd-init/scripts/requirements.txt
 
 ## License and ownership
 
-Add the license, maintainers, contribution process, and support policy for the forked project. This template does not assume that those policies are shared by every downstream repository.
+This template and the `sdd-init` skill are released under the [MIT License](./LICENSE). Copyright (c) 2026 Gabriel Jaime Múnera González.
+
+[@gamug](https://github.com/gamug) owns and maintains this repository and is the code owner in [`.github/CODEOWNERS`](./.github/CODEOWNERS).
+
+To contribute, fork the repository, make the change on a branch in your fork, and open a pull request against `master`. Issues are welcome for questions, bugs, and suggestions.
