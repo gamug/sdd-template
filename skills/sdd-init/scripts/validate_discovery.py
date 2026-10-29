@@ -5,8 +5,8 @@ Software Discovery Package Validator
 This script inspects a discovery specification Markdown file or directory
 to verify compliance with the SDD discovery framework.
 Checks for mandatory sections, requirement IDs (FR-001 is reserved for
-initialization), three-digit FR/UC/US/ADR/RSK IDs defined once, EARS syntax,
-ADR completeness, the risk matrix (Score = Impact x Probability, and a
+initialization), three-digit FR/UC/US/adr/RSK IDs defined once, EARS syntax,
+adr completeness, the risk matrix (Score = Impact x Probability, and a
 mitigation plan for scores of 6 or more), and MoSCoW prioritization.
 validate() returns the results; validate_config.py uses it in-process as the
 discovery gate.
@@ -42,7 +42,7 @@ REQUIRED_SECTIONS = [
     ("Functional Requirements", r"^#{1,6}\s+.*functional requirement", r"\bFR-\d+\b"),
     ("User Stories", r"^#{1,6}\s+.*user stor", r"\bUS-\d+\b"),
     ("Tech Stack Selection", r"^#{1,6}\s+.*(?:tech stack|technology stack|mcdm)", None),
-    ("Architecture Decision Records", r"^#{1,6}\s+.*architecture decision", r"\bADR-\d+\b"),
+    ("Architecture Decision Records", r"^#{1,6}\s+.*architecture decision", r"\badr-\d+\b"),
     ("Dev Environment Setup", r"^#{1,6}\s+.*(?:dev environment|development environment)", None),
     ("Risk Assessment & Roadmap", r"^#{1,6}\s+.*(?:risk|roadmap)", r"\bRSK-\d+\b"),
     ("Governance & Workflow", r"^#{1,6}\s+.*governance", None),
@@ -61,9 +61,9 @@ TRADE_OFF_PATTERN = re.compile(r"trade[- ]?offs?", re.IGNORECASE)
 # FR-001 is the SDD initialization requirement; product requirements start at FR-002.
 RESERVED_FR = "FR-001"
 # An ID followed by "-" is a sub-item (e.g. UC-001-EX1), not a definition.
-HEADING_ID_PATTERN = re.compile(r"\b(?:UC|US|ADR)-\d+\b(?!-)", re.IGNORECASE)
-# Every ID uses three digits: FR-002, UC-001, US-001, ADR-001, RSK-001.
-ID_PATTERN = re.compile(r"\b(?:FR|UC|US|ADR|RSK)-(\d+)\b", re.IGNORECASE)
+HEADING_ID_PATTERN = re.compile(r"\b(?:UC|US|adr)-\d+\b(?!-)", re.IGNORECASE)
+# Every ID uses three digits: FR-002, UC-001, US-001, adr-001, RSK-001.
+ID_PATTERN = re.compile(r"\b(?:FR|UC|US|adr|RSK)-(\d+)\b", re.IGNORECASE)
 RISK_COLUMNS = "| Risk ID | Description | Impact | Probability | Score | Mitigation Plan |"
 MITIGATION_THRESHOLD = 6
 # "> " blockquote lines are template guidance, not document content.
@@ -391,19 +391,24 @@ def check_requirements(content: str):
     return results
 
 
+def normalize_id(identifier: str) -> str:
+    """Canonical form of an ID: uppercase prefix, except adr, which stays lowercase."""
+    return identifier.lower() if identifier[:3].lower() == "adr" else identifier.upper()
+
+
 def heading_id(heading: str):
     match = HEADING_ID_PATTERN.search(heading)
-    return match.group(0).upper() if match else None
+    return normalize_id(match.group(0)) if match else None
 
 
 def check_unique_ids(content: str, sections):
-    """IDs use three digits, and FR/RSK rows and UC/US/ADR headings each define an ID once.
+    """IDs use three digits, and FR/RSK rows and UC/US/adr headings each define an ID once.
 
     A heading repeating the ID of a heading that encloses it (e.g. the flows
     of a use case) is part of that definition, not a second one.
     """
     malformed = sorted({
-        match.group(0).upper() for match in ID_PATTERN.finditer(content) if len(match.group(1)) != 3
+        normalize_id(match.group(0)) for match in ID_PATTERN.finditer(content) if len(match.group(1)) != 3
     })
     if malformed:
         return [(FAIL, f"IDs use three digits (e.g. UC-001): {', '.join(malformed)}")]
@@ -420,12 +425,12 @@ def check_unique_ids(content: str, sections):
     if duplicates:
         results.append((FAIL, f"Duplicate ID definition(s): {', '.join(duplicates)}"))
     # Every mention must resolve; a sub-item such as UC-001-EX1 resolves through UC-001.
-    referenced = {match.group(0).upper() for match in ID_PATTERN.finditer(content)}
+    referenced = {normalize_id(match.group(0)) for match in ID_PATTERN.finditer(content)}
     undefined = sorted(referenced - set(definitions) - {RESERVED_FR})
     if undefined:
         results.append((FAIL, f"Reference(s) to undefined ID(s): {', '.join(undefined)}"))
     return results or [
-        (PASS, f"{len(definitions)} FR, UC, US, ADR, and RSK ID(s) are each defined once and every reference resolves")
+        (PASS, f"{len(definitions)} FR, UC, US, adr, and RSK ID(s) are each defined once and every reference resolves")
     ]
 
 
@@ -433,16 +438,16 @@ def check_adrs(sections):
     adr_sections = [
         section_content
         for heading, section_content, _, _ in sections
-        if re.search(r"\bADR-\d+\b", heading, re.IGNORECASE)
+        if re.search(r"\badr-\d+\b", heading, re.IGNORECASE)
     ]
     if not adr_sections:
-        return [(FAIL, "No ADR-xxx records detected.")]
+        return [(FAIL, "No adr-xxx records detected.")]
     adr_ids = sorted({
-        adr_id.upper()
+        normalize_id(adr_id)
         for heading, *_ in sections
-        for adr_id in re.findall(r"ADR-\d+", heading, re.IGNORECASE)
+        for adr_id in re.findall(r"adr-\d+", heading, re.IGNORECASE)
     })
-    results = [(PASS, f"Found {len(adr_ids)} ADR ID(s): {', '.join(adr_ids)}")]
+    results = [(PASS, f"Found {len(adr_ids)} adr ID(s): {', '.join(adr_ids)}")]
     incomplete_adrs = [
         section_content
         for section_content in adr_sections
@@ -452,9 +457,9 @@ def check_adrs(sections):
         or not TRADE_OFF_PATTERN.search(section_content)
     ]
     if incomplete_adrs:
-        results.append((FAIL, "One or more ADRs are missing Context, Decision, Consequences, or Trade-offs."))
+        results.append((FAIL, "One or more adrs are missing Context, Decision, Consequences, or Trade-offs."))
     else:
-        results.append((PASS, "ADR structural elements complete (Context, Decision, Consequences, Trade-offs)."))
+        results.append((PASS, "adr structural elements complete (Context, Decision, Consequences, Trade-offs)."))
     return results
 
 
@@ -543,7 +548,7 @@ def validate(content: str, draft: bool = False):
         ("Requirements & EARS Syntax Check", check_requirements(body)),
         ("Unique Identifiers", check_unique_ids(body, sections)),
         ("Risk Matrix Check", check_risks(body)),
-        ("Architecture Decision Records (ADR) Check", check_adrs(sections)),
+        ("Architecture Decision Records (adr) Check", check_adrs(sections)),
         ("MoSCoW MVP Scoping Check", check_moscow(body, sections)),
         ("Template Placeholders", check_placeholders(body, draft)),
         ("User Approval Check", check_user_approval(content, sections, draft)),

@@ -93,9 +93,9 @@ Evaluating Backend API Framework Options:
 
 ---
 
-## 5. Architecture Decision Records (ADRs)
+## 5. Architecture Decision Records (adrs)
 
-### `ADR-001`: Use FastAPI and PyTorch in a Unified Python Runtime
+### `adr-001`: Use FastAPI and PyTorch in a Unified Python Runtime
 
 - **Context**: The application requires scientific data extraction from FITS files (`Astropy`, `SciPy`), deep learning inference (`PyTorch ResNet1D`), and real-time REST API serving. Cross-language IPC (e.g. Node.js calling Python scripts) introduces serialization overhead and deployment complexity.
 - **Decision**: Adopt FastAPI (Python 3.12) as the unified backend framework, running model inference and data preprocessing in the same Python process.
@@ -162,4 +162,4 @@ Impact and Probability use 1 (Low) to 3 (High); Score = Impact × Probability. A
 - **Approved by**: Product Owner (example)
 - **First approved on**: 2026-01-15
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:d366f33725e66d88b51f5bf8da540fe7490f97ceb42171a0826be79ce77d5676`
+- **Approved content**: `sha256:9e09a85532c7ce949c35abdfd54aa06c30208b6cd834cd49c4f16b86a63bd585`

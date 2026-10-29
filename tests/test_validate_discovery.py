@@ -68,7 +68,7 @@ class DiscoveryTest(unittest.TestCase):
             product = self.sample.replace("Trade-offs", spelling)
             self.assertEqual(self.validate(product, "--draft").returncode, 0, spelling)
         product = self.sample.replace("Trade-offs", "Compromises")
-        self.assertFails(self.validate(product, "--draft"), "One or more ADRs are missing")
+        self.assertFails(self.validate(product, "--draft"), "One or more adrs are missing")
 
     def test_fr_001_is_reserved_for_initialization(self):
         product = self.sample.replace("| `FR-002` |", "| `FR-001` |")
@@ -79,10 +79,23 @@ class DiscoveryTest(unittest.TestCase):
         product = self.sample.replace("| `FR-003` |", "| `FR-002` |")
         self.assertFails(self.validate(product, "--draft"), "Duplicate ID definition(s): FR-002")
         product = self.sample.replace("## 6. Development Environment Setup", (
+            "### `adr-001`: A second record\n\nContext, decision, consequences, trade-offs.\n\n"
+            "## 6. Development Environment Setup"
+        ))
+        self.assertFails(self.validate(product, "--draft"), "Duplicate ID definition(s): adr-001")
+
+    def test_adr_ids_are_case_insensitive_and_reported_in_lowercase(self):
+        upper = self.sample.replace("adr-001", "ADR-001")
+        self.assertEqual(self.validate(upper, "--draft").returncode, 0)
+        mixed = self.sample.replace("## 6. Development Environment Setup", (
             "### `ADR-001`: A second record\n\nContext, decision, consequences, trade-offs.\n\n"
             "## 6. Development Environment Setup"
         ))
-        self.assertFails(self.validate(product, "--draft"), "Duplicate ID definition(s): ADR-001")
+        self.assertFails(self.validate(mixed, "--draft"), "Duplicate ID definition(s): adr-001")
+        short = self.sample.replace("### `adr-001`", "### `adr-01`")
+        self.assertFails(self.validate(short, "--draft"), "IDs use three digits (e.g. UC-001): adr-01")
+        self.assertEqual(validate_discovery.normalize_id("ADR-001"), "adr-001")
+        self.assertEqual(validate_discovery.normalize_id("fr-002"), "FR-002")
 
     def test_sub_items_of_an_id_are_not_duplicates(self):
         # The sample's "Exception Flow `UC-001-EX1`" sits under "Use Case `UC-001`".
@@ -239,13 +252,13 @@ class DiscoveryTest(unittest.TestCase):
     def test_traceability_rows_outside_owning_sections_are_references(self):
         # Reviewer's repro: a traceability matrix gave EARS, duplicate, and MoSCoW failures.
         matrix = (
-            "### Traceability\n\n| ID | ADR |\n| :--- | :--- |\n"
-            "| `FR-002` | `ADR-001` |\n| `RSK-001` | `ADR-001` |\n\n"
+            "### Traceability\n\n| ID | adr |\n| :--- | :--- |\n"
+            "| `FR-002` | `adr-001` |\n| `RSK-001` | `adr-001` |\n\n"
         )
         product = self.approved(self.sample.replace("## 6. Development Environment", matrix + "## 6. Development Environment"))
         result = self.validate(product)
         self.assertEqual(result.returncode, 0, result.stdout)
-        unresolved = product.replace("| `FR-002` | `ADR-001` |", "| `FR-009` | `ADR-001` |")
+        unresolved = product.replace("| `FR-002` | `adr-001` |", "| `FR-009` | `adr-001` |")
         self.assertFails(self.validate(unresolved, "--draft"), "Reference(s) to undefined ID(s): FR-009")
 
     def test_guidance_notes_are_skipped_by_id_checks(self):
@@ -272,7 +285,7 @@ class DiscoveryTest(unittest.TestCase):
     def test_enclosing_heading_does_not_satisfy_empty_sections(self):
         product = (
             "# Use Case, Functional Requirement, User Story, Tech Stack, Architecture Decision, "
-            "Dev Environment, Risk, Governance Package\n\nUC-001 FR-001 US-001 ADR-001 RSK-001 MVP\n\n"
+            "Dev Environment, Risk, Governance Package\n\nUC-001 FR-001 US-001 adr-001 RSK-001 MVP\n\n"
             "## Use Cases\n\n## User Stories\n\n## Risks\n"
         )
         result = self.validate(product, "--draft")

@@ -1,8 +1,8 @@
-# Architecture Decision Records (ADRs)
+# Architecture Decision Records (adrs)
 
-> Output template for the root `ADR.md`, the live record of architecture decisions. Standalone file: unlike the other templates it is not a fragment of `product-template.md`. In `ADR.md`, replace this guidance block with one line: "Live ADR log. Rules: the constitution's Architecture decisions section. Discovery snapshot: `docs/PRODUCT.md` § 5." That constitution section holds the rules for proposing, validating, and superseding ADRs; `SKILL.md` (Phases 4 and 6) holds the procedure that seeds this file from `docs/PRODUCT.md` § 5 (fragment `adr-template.md`) and accepts the seeded ADRs.
+> Output template for the root `adr.md`, the live record of architecture decisions. Standalone file: unlike the other templates it is not a fragment of `product-template.md`. In `adr.md`, replace this guidance block with one line: "Live adr log. Rules: the constitution's Architecture decisions section. Discovery snapshot: `docs/PRODUCT.md` § 5." That constitution section holds the rules for proposing, validating, and superseding adrs; `SKILL.md` (Phases 4 and 6) holds the procedure that seeds this file from `docs/PRODUCT.md` § 5 (fragment `adr-template.md`) and accepts the seeded adrs.
 >
-> Each row adds to the fields of the status it names; every other status-dependent field holds `N/A`. Moves: `Proposed` to `Accepted` or `Rejected`, `Accepted` to `Deprecated` or `Superseded`. When an ADR becomes `Accepted`, each ADR it supersedes becomes `Superseded` and gets this ID in `Superseded By`; if it is `Rejected`, they are unchanged.
+> Each row adds to the fields of the status it names; every other status-dependent field holds `N/A`. Moves: `Proposed` to `Accepted` or `Rejected`, `Accepted` to `Deprecated` or `Superseded`. When an adr becomes `Accepted`, each adr it supersedes becomes `Superseded` and gets this ID in `Superseded By`; if it is `Rejected`, they are unchanged.
 >
 > | Status | Fields set |
 > | :--- | :--- |
@@ -14,10 +14,10 @@
 >
 > IDs use three digits. Repeat the `###` block for each decision.
 
-### `ADR-001`: [Concise, descriptive title]
+### `adr-001`: [Concise, descriptive title]
 
 - **Status**: [Proposed | Accepted | Rejected | Deprecated | Superseded]
-- **Proposed on**: [YYYY-MM-DD the block was written to `ADR.md`]
+- **Proposed on**: [YYYY-MM-DD the block was written to `adr.md`]
 - **Approved by**: [Name or role of the user who accepted it, or N/A]
 - **Approved on**: [YYYY-MM-DD, or N/A]
 - **Rejected by**: [Name or role of the user who rejected it, or N/A]
@@ -26,8 +26,8 @@
 - **Deprecated by**: [Name or role of the user who deprecated it, or N/A]
 - **Deprecated on**: [YYYY-MM-DD, or N/A]
 - **Deprecation reason**: [Why it is no longer relevant, or N/A]
-- **Supersedes**: [ADR ID(s), or N/A]
-- **Superseded By**: [ADR ID, or N/A]
+- **Supersedes**: [adr ID(s), or N/A]
+- **Superseded By**: [adr ID, or N/A]
 - **Context**: [Technical context, business drivers, quality attributes, and forces at play. Explain why a decision is needed now.]
 - **Decision Drivers**:
   - **Business goal**: [e.g., minimize deployment complexity]
@@ -41,6 +41,6 @@
 - **Consequences (Positive)**: [Benefits of the chosen option]
 - **Consequences (Trade-offs)**: [Costs of the chosen option]
 - **Mitigation**: [How the trade-offs are contained]
-- **Rejected Options**: [Alternatives considered and not chosen, with key benefits and drawbacks. Not this ADR's own rejection: see `Rejected by`]
+- **Rejected Options**: [Alternatives considered and not chosen, with key benefits and drawbacks. Not this adr's own rejection: see `Rejected by`]
 - **Traceability**: [`FR-002`, `UC-001`: only the IDs this decision serves]
 - **External Docs**: [Benchmarks, framework docs, or internal spikes]
