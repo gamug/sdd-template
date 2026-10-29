@@ -150,10 +150,10 @@ The user remains the decision authority. The agent may recommend options and per
 
 ### Upgrading a fork created before the rename
 
-A fork initialized before the lowercase `adr` rename may still have `ADR.md`:
+A fork initialized before the lowercase `adr` rename may still have `ADR.md`. Merge or close any open pull request that edits `ADR.md` first, or do the rename in a pull request of its own, because a rename conflicts with those edits.
 
-1. Rename the file in two steps, because Windows and macOS treat `ADR.md` and `adr.md` as the same file: `git mv ADR.md adr.tmp && git mv adr.tmp adr.md`.
-2. Update what points at the old name. Run `git grep -l "ADR.md"`; the rendered `constitution.md`, `SPEC.md`, `PLAN.md`, and `TASKS.md` usually need the new name, which an amendment records for the constitution.
+1. Before renaming, list what points at the old name with `git grep -l "ADR.md"`. The rendered `constitution.md` names the file, and the constitution is the governing contract, so changing that name needs an approved amendment; update `SPEC.md`, `PLAN.md`, and `TASKS.md` alongside it.
+2. Rename the file in two steps, because Windows and macOS treat `ADR.md` and `adr.md` as the same file: `git mv ADR.md adr.tmp && git mv adr.tmp adr.md`.
 3. `adr-001` style IDs are matched case-insensitively, so existing `ADR-001` headings still validate. The validator now reports them as `adr-001`, so update any test of your own that asserts the old uppercase messages, such as `Duplicate ID definition(s): ADR-001`.
 
 Until the rename is done, on a case-sensitive filesystem the docs and agents refer to a different file than the one you have.
