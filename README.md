@@ -180,6 +180,7 @@ Before changing a fork:
 - Obtain approval before expanding scope covered by the constitution.
 - Update documentation and architecture records (`ADR.md`) when implementation changes their documented state.
 - Never weaken a check, fabricate repository state, commit secrets, or hide a failure to make a change pass.
+- Write Markdown with one paragraph or list item per line; do not hard-wrap at a column. `tests/test_markdown_format.py` enforces this in CI.
 
 Commits that maintain this template itself (validators, skill, docs, tests) use plain Conventional Commits, `type(scope): summary`, without the `[FR][WI][TASK]` suffix. That suffix traces a fork's FR-001 initialization and product work, and template maintenance is not part of it.
 
