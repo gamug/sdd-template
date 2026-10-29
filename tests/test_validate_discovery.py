@@ -84,6 +84,19 @@ class DiscoveryTest(unittest.TestCase):
         ))
         self.assertFails(self.validate(product, "--draft"), "Duplicate ID definition(s): adr-001")
 
+    def test_adr_ids_are_case_insensitive_and_reported_in_lowercase(self):
+        upper = self.sample.replace("adr-001", "ADR-001")
+        self.assertEqual(self.validate(upper, "--draft").returncode, 0)
+        mixed = self.sample.replace("## 6. Development Environment Setup", (
+            "### `ADR-001`: A second record\n\nContext, decision, consequences, trade-offs.\n\n"
+            "## 6. Development Environment Setup"
+        ))
+        self.assertFails(self.validate(mixed, "--draft"), "Duplicate ID definition(s): adr-001")
+        short = self.sample.replace("### `adr-001`", "### `adr-01`")
+        self.assertFails(self.validate(short, "--draft"), "IDs use three digits (e.g. UC-001): adr-01")
+        self.assertEqual(validate_discovery.normalize_id("ADR-001"), "adr-001")
+        self.assertEqual(validate_discovery.normalize_id("fr-002"), "FR-002")
+
     def test_sub_items_of_an_id_are_not_duplicates(self):
         # The sample's "Exception Flow `UC-001-EX1`" sits under "Use Case `UC-001`".
         self.assertIn("UC-001-EX1", self.sample)

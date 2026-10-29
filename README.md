@@ -105,6 +105,8 @@ Create the approved folders and non-programmatic dependencies in WI-004. Set up 
 
 ## Getting started after forking
 
+A fork created before the lowercase rename may still have `ADR.md`. Rename it to `adr.md` with `git mv ADR.md adr.tmp && git mv adr.tmp adr.md`; the two steps are needed because Windows and macOS treat the names as the same file. Until then, on a case-sensitive filesystem the docs and agents refer to a different file than the one you have.
+
 This repository is an agent-guided initialization framework. A fork is not initialized by manually following a checklist alone; a coding agent must read the SDD artifacts, execute the tasks, update the artifacts, and ask for human decisions when the workflow reaches an unresolved input.
 
 ### Prerequisites

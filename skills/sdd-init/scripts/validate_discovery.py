@@ -408,7 +408,7 @@ def check_unique_ids(content: str, sections):
     of a use case) is part of that definition, not a second one.
     """
     malformed = sorted({
-        match.group(0).upper() for match in ID_PATTERN.finditer(content) if len(match.group(1)) != 3
+        normalize_id(match.group(0)) for match in ID_PATTERN.finditer(content) if len(match.group(1)) != 3
     })
     if malformed:
         return [(FAIL, f"IDs use three digits (e.g. UC-001): {', '.join(malformed)}")]
