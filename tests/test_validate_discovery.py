@@ -68,7 +68,7 @@ class DiscoveryTest(unittest.TestCase):
             product = self.sample.replace("Trade-offs", spelling)
             self.assertEqual(self.validate(product, "--draft").returncode, 0, spelling)
         product = self.sample.replace("Trade-offs", "Compromises")
-        self.assertFails(self.validate(product, "--draft"), "One or more adrs are missing")
+        self.assertFails(self.validate(product, "--draft"), "One or more ADRs are missing")
 
     def test_fr_001_is_reserved_for_initialization(self):
         product = self.sample.replace("| `FR-002` |", "| `FR-001` |")
@@ -88,7 +88,7 @@ class DiscoveryTest(unittest.TestCase):
         upper = self.sample.replace("adr-001", "ADR-001")
         result = self.validate(upper, "--draft")
         self.assertEqual(result.returncode, 0)
-        self.assertIn("Found 1 adr ID(s): adr-001", result.stdout)
+        self.assertIn("Found 1 ADR ID(s): adr-001", result.stdout)
         mixed = self.sample.replace("## 6. Development Environment Setup", (
             "### `ADR-001`: A second record\n\nContext, decision, consequences, trade-offs.\n\n"
             "## 6. Development Environment Setup"
@@ -254,7 +254,7 @@ class DiscoveryTest(unittest.TestCase):
     def test_traceability_rows_outside_owning_sections_are_references(self):
         # Reviewer's repro: a traceability matrix gave EARS, duplicate, and MoSCoW failures.
         matrix = (
-            "### Traceability\n\n| ID | adr |\n| :--- | :--- |\n"
+            "### Traceability\n\n| ID | ADR |\n| :--- | :--- |\n"
             "| `FR-002` | `adr-001` |\n| `RSK-001` | `adr-001` |\n\n"
         )
         product = self.approved(self.sample.replace("## 6. Development Environment", matrix + "## 6. Development Environment"))

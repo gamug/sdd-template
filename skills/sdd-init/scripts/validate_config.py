@@ -80,7 +80,7 @@ SOURCE_HINTS = {
     "quality": "Governance & Workflow",
     "code_git": "Governance & Workflow",
     "known_constraints": "Risk Assessment / Architecture Decision Records",
-    "domain_sections": "Use Cases / Functional Requirements / adrs",
+    "domain_sections": "Use Cases / Functional Requirements / ADRs",
     "governance": "Governance & Workflow",
 }
 

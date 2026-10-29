@@ -6,7 +6,7 @@ This script inspects a discovery specification Markdown file or directory
 to verify compliance with the SDD discovery framework.
 Checks for mandatory sections, requirement IDs (FR-001 is reserved for
 initialization), three-digit FR/UC/US/adr/RSK IDs defined once, EARS syntax,
-adr completeness, the risk matrix (Score = Impact x Probability, and a
+ADR completeness, the risk matrix (Score = Impact x Probability, and a
 mitigation plan for scores of 6 or more), and MoSCoW prioritization.
 validate() returns the results; validate_config.py uses it in-process as the
 discovery gate.
@@ -447,7 +447,7 @@ def check_adrs(sections):
         for heading, *_ in sections
         for adr_id in re.findall(r"adr-\d+", heading, re.IGNORECASE)
     })
-    results = [(PASS, f"Found {len(adr_ids)} adr ID(s): {', '.join(adr_ids)}")]
+    results = [(PASS, f"Found {len(adr_ids)} ADR ID(s): {', '.join(adr_ids)}")]
     incomplete_adrs = [
         section_content
         for section_content in adr_sections
@@ -457,9 +457,9 @@ def check_adrs(sections):
         or not TRADE_OFF_PATTERN.search(section_content)
     ]
     if incomplete_adrs:
-        results.append((FAIL, "One or more adrs are missing Context, Decision, Consequences, or Trade-offs."))
+        results.append((FAIL, "One or more ADRs are missing Context, Decision, Consequences, or Trade-offs."))
     else:
-        results.append((PASS, "adr structural elements complete (Context, Decision, Consequences, Trade-offs)."))
+        results.append((PASS, "ADR structural elements complete (Context, Decision, Consequences, Trade-offs)."))
     return results
 
 
@@ -548,7 +548,7 @@ def validate(content: str, draft: bool = False):
         ("Requirements & EARS Syntax Check", check_requirements(body)),
         ("Unique Identifiers", check_unique_ids(body, sections)),
         ("Risk Matrix Check", check_risks(body)),
-        ("Architecture Decision Records (adr) Check", check_adrs(sections)),
+        ("Architecture Decision Records (ADR) Check", check_adrs(sections)),
         ("MoSCoW MVP Scoping Check", check_moscow(body, sections)),
         ("Template Placeholders", check_placeholders(body, draft)),
         ("User Approval Check", check_user_approval(content, sections, draft)),

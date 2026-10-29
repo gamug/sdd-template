@@ -38,7 +38,7 @@ The template is based on these principles:
 ├── .github/dependabot.yml          # Proposes updates to the pinned actions and PyYAML
 ├── .github/CODEOWNERS              # Code owner of the template repository
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
-├── adr.md                          # Created by WI-001: the live adr record, seeded from docs/PRODUCT.md § 5
+├── adr.md                          # Created by WI-001: the live ADR record, seeded from docs/PRODUCT.md § 5
 ├── LICENSE                         # MIT license of the template and the skill
 └── README.md
 ```
@@ -84,14 +84,14 @@ Discovery always runs first. Run [`skills/sdd-init/SKILL.md`](./skills/sdd-init/
 - development-environment, governance, and workflow decisions; and
 - risks, validation, and roadmap.
 
-The output is `docs/PRODUCT.md`, built from the skill's [`product-template.md`](./skills/sdd-init/templates/product-template.md) with three-digit IDs (`UC-001`, `FR-002`, …), and the root `adr.md`, seeded in Phase 4 from the adrs in `docs/PRODUCT.md` section 5 with the skill's [`adr-log-template.md`](./skills/sdd-init/templates/adr-log-template.md). The skill must ask focused questions and must not invent missing product, technical, or operational decisions. Open decisions are marked `UNRESOLVED:` and must all be resolved with the user, who then approves the document in its `## Approval` section. The approval records who, when it was first approved, when it was last approved, and a hash of the approved content:
+The output is `docs/PRODUCT.md`, built from the skill's [`product-template.md`](./skills/sdd-init/templates/product-template.md) with three-digit IDs (`UC-001`, `FR-002`, …), and the root `adr.md`, seeded in Phase 4 from the ADRs in `docs/PRODUCT.md` section 5 with the skill's [`adr-log-template.md`](./skills/sdd-init/templates/adr-log-template.md). The skill must ask focused questions and must not invent missing product, technical, or operational decisions. Open decisions are marked `UNRESOLVED:` and must all be resolved with the user, who then approves the document in its `## Approval` section. The approval records who, when it was first approved, when it was last approved, and a hash of the approved content:
 
 ```bash
 python skills/sdd-init/scripts/validate_discovery.py --hash docs/PRODUCT.md
 python skills/sdd-init/scripts/validate_discovery.py docs/PRODUCT.md
 ```
 
-`validate_config.py` refuses to run until this passes. It does not check `adr.md`; accepting the seeded adrs is a manual step before WI-002, described in Phase 6 step 5 of the skill. Editing `docs/PRODUCT.md` after approval, outside the Approval and Configuration Decisions sections, invalidates the approval until the user approves again. A re-approval updates `Approved on` and the hash but keeps `First approved on`, so configuration decisions recorded since the first approval stay valid.
+`validate_config.py` refuses to run until this passes. It does not check `adr.md`; accepting the seeded ADRs is a manual step before WI-002, described in Phase 6 step 5 of the skill. Editing `docs/PRODUCT.md` after approval, outside the Approval and Configuration Decisions sections, invalidates the approval until the user approves again. A re-approval updates `Approved on` and the hash but keeps `First approved on`, so configuration decisions recorded since the first approval stay valid.
 
 ### WI-002: create the configuration
 
@@ -140,7 +140,7 @@ The text above is an execution instruction, not a brainstorming prompt. The skil
 
 The agent must:
 
-1. Execute WI-001 and use [`skills/sdd-init/SKILL.md`](./skills/sdd-init/SKILL.md) to create `docs/PRODUCT.md` and the root `adr.md`, and to accept the seeded adrs once the user approves `docs/PRODUCT.md`.
+1. Execute WI-001 and use [`skills/sdd-init/SKILL.md`](./skills/sdd-init/SKILL.md) to create `docs/PRODUCT.md` and the root `adr.md`, and to accept the seeded ADRs once the user approves `docs/PRODUCT.md`.
 2. Execute WI-002 to build root `config.yaml` with [`validate_config.py`](./skills/sdd-init/scripts/validate_config.py), recording the source of every value (`docs/PRODUCT.md` or an explicit user decision).
 3. Execute WI-003 to render `.sdd/constitution.md` with `validate_config.py render` and create `.sdd/SPEC.md`, `.sdd/PLAN.md`, `.sdd/TASKS.md`, and `.sdd/CHANGELOG.md`.
 4. Execute WI-004 through WI-006 to create the approved project structure, configure the environment, and automate its reproduction.
@@ -170,7 +170,7 @@ After initialization, every product change follows this cycle:
 6. Update affected SDD and architecture artifacts. A change to `config.yaml` also updates its `Configuration Decisions` row and is followed by `validate_config.py render`; a change to the approved content of `docs/PRODUCT.md` needs the user's re-approval.
 7. Check each completed task's box in `.sdd/TASKS.md` and, once all its tasks are checked, its Work Item's box; then move completed work to `.sdd/CHANGELOG.md`.
 
-An architecture change (for example a new runtime version, framework, library, storage engine, API contract, or schema) also needs an adr in `adr.md`, which the user accepts before the change is implemented; the constitution's "Architecture decisions" section has the rule. `docs/PRODUCT.md` section 5 stays a frozen discovery snapshot.
+An architecture change (for example a new runtime version, framework, library, storage engine, API contract, or schema) also needs an ADR in `adr.md`, which the user accepts before the change is implemented; the constitution's "Architecture decisions" section has the rule. `docs/PRODUCT.md` section 5 stays a frozen discovery snapshot.
 
 The validators, the template tests and the sample check prepare the repository; the pre-commit hook and CI that WI-006 configures run the project's own quality gates, not the skill's.
 

@@ -31,10 +31,10 @@ Each criterion uses the constitution's executable GIVEN-WHEN-THEN form. A criter
   ```
 
   ```gherkin
-  SCENARIO: Discovery adrs accepted
+  SCENARIO: Discovery ADRs accepted
     GIVEN `docs/PRODUCT.md` is approved
-    WHEN the seeded adrs are accepted
-    THEN the root `adr.md` holds the discovery adrs
+    WHEN the seeded ADRs are accepted
+    THEN the root `adr.md` holds the discovery ADRs
     AND each is `Accepted` with `Approved by` and `Approved on` filled from the approver and first approval date recorded in `docs/PRODUCT.md`
   ```
 
