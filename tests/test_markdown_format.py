@@ -2,13 +2,15 @@
 
 Known limit: a line that starts with `<` is treated as an HTML block and is not checked.
 Indented code blocks, setext heading underlines, thematic breaks, and link reference
-definitions are not paragraph text and are skipped.
+definitions are not paragraph text and are skipped. Definition lists (`Term` then
+`: definition`) are flagged; no file uses them.
 """
 
 import os
 import re
 import subprocess
 import unittest
+from unittest import mock
 
 from fixtures import ROOT
 
@@ -87,6 +89,12 @@ class MarkdownFormatTest(unittest.TestCase):
         self.assertEqual(wrapped_lines("[x]: http://a\n[y]: http://b\n"), [])
         self.assertEqual(wrapped_lines("- a\n\n  b c\n"), [])
         self.assertEqual(wrapped_lines("| a | b |\n| - | - |\n| c | d |\n"), [])
+
+    def test_falls_back_to_walking_files_without_git(self):
+        with mock.patch("subprocess.check_output", side_effect=OSError):
+            paths = tracked_markdown()
+        self.assertIn("README.md", paths)
+        self.assertFalse([p for p in paths if p.startswith(".") or os.sep + "." in p])
 
     def test_repository_markdown_is_not_hard_wrapped(self):
         for path in tracked_markdown():
