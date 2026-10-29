@@ -217,3 +217,5 @@ This template and the `sdd-init` skill are released under the [MIT License](./LI
 To contribute, fork the repository, make the change on a branch in your fork, and open a pull request against `master`. Follow the [working agreement](#working-agreement-for-contributors-and-coding-agents), and make sure the CI checks pass. Issues are welcome for questions, bugs, and suggestions. There is no separate security channel: open an issue and leave exploit details out.
 
 A fork keeps `LICENSE` and adds its own copyright line to it, and replaces `.github/CODEOWNERS` with its own owners. This section describes the template; a fork replaces it with its own.
+
+Hello, and thanks to every developer who uses this template or contributes to it.
