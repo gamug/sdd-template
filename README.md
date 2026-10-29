@@ -218,4 +218,4 @@ To contribute, fork the repository, make the change on a branch in your fork, an
 
 A fork keeps `LICENSE` and adds its own copyright line to it, and replaces `.github/CODEOWNERS` with its own owners. This section describes the template; a fork replaces it with its own.
 
-Hello, and thanks to every developer who uses this template or contributes to it.
+Optional: a fork may credit this template, for example "Built from [SDD Template](https://github.com/gamug/sdd-template) by Gabriel Jaime Múnera González". The MIT License only requires keeping the copyright notice; a citation is appreciated but not required.
