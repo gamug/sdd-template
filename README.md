@@ -152,7 +152,7 @@ The user remains the decision authority. The agent may recommend options and per
 
 A fork initialized before the lowercase `adr` rename may still have `ADR.md`. Merge or close any open pull request that edits `ADR.md` first, or do the rename in a pull request of its own, because a rename conflicts with those edits.
 
-1. Before renaming, list what points at the old name with `git grep -l "ADR.md"`. The rendered `constitution.md` names the file, and the constitution is the governing contract, so changing that name needs an approved amendment; update `SPEC.md`, `PLAN.md`, and `TASKS.md` alongside it.
+1. Before renaming, list what points at the old name with `git grep -l "ADR.md"`. Do not edit `.sdd/constitution.md` by hand: copy the template's updated `skills/sdd-init/memory/constitution.md`, then run `validate_config.py render` and `render --verify` so the rendered file is regenerated. Update the references in `.sdd/SPEC.md`, `.sdd/PLAN.md`, and `.sdd/TASKS.md` directly, and follow your own Governance section if it requires an amendment for the change.
 2. Rename the file in two steps, because Windows and macOS treat `ADR.md` and `adr.md` as the same file: `git mv ADR.md adr.tmp && git mv adr.tmp adr.md`.
 3. `adr-001` style IDs are matched case-insensitively, so existing `ADR-001` headings still validate. The validator now reports them as `adr-001`, so update any test of your own that asserts the old uppercase messages, such as `Duplicate ID definition(s): ADR-001`.
 
