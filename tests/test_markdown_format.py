@@ -1,17 +1,21 @@
-"""Markdown convention: one paragraph or list item per line, never hard-wrapped."""
+"""Markdown convention: one paragraph or list item per line, never hard-wrapped.
 
-import glob
-import os
+Known limit: a line that starts with `<` is treated as an HTML block and is not checked.
+"""
+
 import re
+import subprocess
 import unittest
 
 from fixtures import ROOT
 
-BLOCK_START = re.compile(r"^\s*([-*+]|\d+[.)])\s|^\s*(#|\||>|<|```|~~~)|^\s*(-{3,}|\*{3,}|_{3,})\s*$")
+LIST_ITEM = re.compile(r"([-*+]|\d+[.)])\s")
+OPAQUE = re.compile(r"(#|\||<|```|~~~)|(-{3,}|\*{3,}|_{3,})$")
+QUOTE = re.compile(r"^\s*>\s?")
 
 
 def wrapped_lines(text):
-    """Line numbers where a paragraph or list item continues on a plain next line."""
+    """Line numbers where a paragraph, list item, or quote continues on a plain next line."""
     found, fence, comment, prev = [], False, False, None
     lines = text.split("\n")
     front = lines[0] == "---" and "---" in lines[1:]
@@ -19,44 +23,53 @@ def wrapped_lines(text):
         if front:
             front = number == 1 or line != "---"
             continue
-        stripped = line.strip()
         if re.match(r"^\s*(```|~~~)", line):
             fence = not fence
             prev = None
             continue
         if fence:
             continue
-        if stripped.startswith("{{!--"):
+        if line.strip().startswith("{{!--"):
             comment = True
         if comment:
-            comment = "--}}" not in stripped
+            comment = "--}}" not in line
             prev = None
             continue
-        if not stripped or BLOCK_START.match(line):
-            prev = None
-        elif prev is not None:
+        quoted = bool(QUOTE.match(line))
+        stripped = QUOTE.sub("", line, count=1).strip()
+        starts_block = bool(LIST_ITEM.match(stripped)) or bool(OPAQUE.match(stripped))
+        if stripped and not starts_block and prev == quoted:
             found.append(number)
-        if stripped and not stripped.startswith(("---", "#", "|", "<")) and not line.endswith(("  ", "\\")):
-            prev = number
+        if stripped and not OPAQUE.match(stripped) and not line.endswith(("  ", "\\")):
+            prev = quoted
         else:
             prev = None
     return found
 
 
+def tracked_markdown():
+    out = subprocess.check_output(["git", "ls-files", "*.md"], cwd=ROOT, text=True)
+    return out.split()
+
+
 class MarkdownFormatTest(unittest.TestCase):
-    def test_detector_flags_wrapped_paragraph_and_list_item(self):
+    def test_detector_flags_wrapped_paragraph_list_item_and_quote(self):
         self.assertEqual(wrapped_lines("a b\nc d\n"), [2])
         self.assertEqual(wrapped_lines("- a b\n  c d\n"), [2])
+        self.assertEqual(wrapped_lines("> a b\n> c d\n"), [2])
+        self.assertEqual(wrapped_lines("> a b\nc d\n"), [])
+
+    def test_detector_ignores_intentional_line_structure(self):
         self.assertEqual(wrapped_lines("a b  \nc d\n\n```\nx\ny\n```\n"), [])
+        self.assertEqual(wrapped_lines("---\nname: x\ndescription: y\n---\n\nbody\n"), [])
+        self.assertEqual(wrapped_lines("{{!--\nline one\nline two\n--}}\n\nbody\n"), [])
+        self.assertEqual(wrapped_lines("| a | b |\n| - | - |\n| c | d |\n"), [])
 
     def test_repository_markdown_is_not_hard_wrapped(self):
-        paths = glob.glob(os.path.join(ROOT, "**", "*.md"), recursive=True)
-        for path in sorted(paths):
-            if os.sep + "." in path[len(ROOT):]:
-                continue
-            with open(path, encoding="utf-8") as f:
+        for path in tracked_markdown():
+            with open(f"{ROOT}/{path}", encoding="utf-8") as f:
                 text = f.read().replace("\r\n", "\n")
-            with self.subTest(file=os.path.relpath(path, ROOT)):
+            with self.subTest(file=path):
                 self.assertEqual(wrapped_lines(text), [], "join wrapped lines into one line per paragraph or list item")
 
 

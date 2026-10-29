@@ -1,6 +1,4 @@
-> Fragment for `## 4. Technology Stack Selection & MCDM Matrix` in
-> [`product-template.md`](./product-template.md). Repeat the matrix for each
-> technology category that needs a decision.
+> Fragment for `## 4. Technology Stack Selection & MCDM Matrix` in [`product-template.md`](./product-template.md). Repeat the matrix for each technology category that needs a decision.
 
 ### Multi-Criteria Decision-Making (MCDM) Evaluation
 

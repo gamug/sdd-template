@@ -1,19 +1,8 @@
 # Architecture Decision Records (ADRs)
 
-> Output template for the root `ADR.md`, the live record of architecture
-> decisions. Standalone file: unlike the other templates it is not a fragment
-> of `product-template.md`. In `ADR.md`, replace this guidance block with one
-> line: "Live ADR log. Rules: the constitution's Architecture decisions
-> section. Discovery snapshot: `docs/PRODUCT.md` § 5." That constitution
-> section holds the rules for proposing, validating, and superseding ADRs;
-> `SKILL.md` (Phases 4 and 6) holds the procedure that seeds this file from
-> `docs/PRODUCT.md` § 5 (fragment `adr-template.md`) and accepts the seeded ADRs.
+> Output template for the root `ADR.md`, the live record of architecture decisions. Standalone file: unlike the other templates it is not a fragment of `product-template.md`. In `ADR.md`, replace this guidance block with one line: "Live ADR log. Rules: the constitution's Architecture decisions section. Discovery snapshot: `docs/PRODUCT.md` § 5." That constitution section holds the rules for proposing, validating, and superseding ADRs; `SKILL.md` (Phases 4 and 6) holds the procedure that seeds this file from `docs/PRODUCT.md` § 5 (fragment `adr-template.md`) and accepts the seeded ADRs.
 >
-> Each row adds to the fields of the status it names; every other
-> status-dependent field holds `N/A`. Moves: `Proposed` to `Accepted` or
-> `Rejected`, `Accepted` to `Deprecated` or `Superseded`. When an ADR becomes
-> `Accepted`, each ADR it supersedes becomes `Superseded` and gets this ID in
-> `Superseded By`; if it is `Rejected`, they are unchanged.
+> Each row adds to the fields of the status it names; every other status-dependent field holds `N/A`. Moves: `Proposed` to `Accepted` or `Rejected`, `Accepted` to `Deprecated` or `Superseded`. When an ADR becomes `Accepted`, each ADR it supersedes becomes `Superseded` and gets this ID in `Superseded By`; if it is `Rejected`, they are unchanged.
 >
 > | Status | Fields set |
 > | :--- | :--- |

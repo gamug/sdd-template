@@ -1,8 +1,4 @@
-> Fragment for `## 3. Functional Requirements & User Stories` in
-> [`product-template.md`](./product-template.md). The problem statement,
-> vision, success metrics, and personas go in `## 1. Executive Summary & Vision`.
-> `FR-001` is reserved for the SDD initialization requirement: number product
-> requirements from `FR-002`. IDs use three digits and are each defined once.
+> Fragment for `## 3. Functional Requirements & User Stories` in [`product-template.md`](./product-template.md). The problem statement, vision, success metrics, and personas go in `## 1. Executive Summary & Vision`. `FR-001` is reserved for the SDD initialization requirement: number product requirements from `FR-002`. IDs use three digits and are each defined once.
 
 ### Functional Requirements (EARS Syntax)
 

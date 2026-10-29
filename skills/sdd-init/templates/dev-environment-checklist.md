@@ -1,8 +1,4 @@
-> Fragments for two sections of [`product-template.md`](./product-template.md):
-> `## 6. Development Environment Setup` and `## 8. Governance & Workflow`.
-> Replace each bracket with the decision the user made, or a line containing
-> `UNRESOLVED:` and the question to ask. Setting the environment up happens
-> later, in WI-005.
+> Fragments for two sections of [`product-template.md`](./product-template.md): `## 6. Development Environment Setup` and `## 8. Governance & Workflow`. Replace each bracket with the decision the user made, or a line containing `UNRESOLVED:` and the question to ask. Setting the environment up happens later, in WI-005.
 
 ## Development Environment Setup
 

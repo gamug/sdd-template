@@ -1,7 +1,4 @@
-> Fragment for `## 2. Use Case Specifications` in
-> [`product-template.md`](./product-template.md). Repeat this `###` block for
-> each use case. The ID stays in the heading and uses three digits; flows
-> extend it (`UC-001-ALT1`, `UC-001-EX1`).
+> Fragment for `## 2. Use Case Specifications` in [`product-template.md`](./product-template.md). Repeat this `###` block for each use case. The ID stays in the heading and uses three digits; flows extend it (`UC-001-ALT1`, `UC-001-EX1`).
 
 ### Use Case `UC-001`: [Active Verb + Noun Phrase]
 
