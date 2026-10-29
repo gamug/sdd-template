@@ -105,8 +105,6 @@ Create the approved folders and non-programmatic dependencies in WI-004. Set up 
 
 ## Getting started after forking
 
-A fork created before the lowercase rename may still have `ADR.md`. Rename it to `adr.md` with `git mv ADR.md adr.tmp && git mv adr.tmp adr.md`; the two steps are needed because Windows and macOS treat the names as the same file. Until then, on a case-sensitive filesystem the docs and agents refer to a different file than the one you have.
-
 This repository is an agent-guided initialization framework. A fork is not initialized by manually following a checklist alone; a coding agent must read the SDD artifacts, execute the tasks, update the artifacts, and ask for human decisions when the workflow reaches an unresolved input.
 
 ### Prerequisites
@@ -147,6 +145,16 @@ The agent must:
 5. Validate each result, preserve task traceability, and leave a clear handoff when user input or external access blocks progress.
 
 The user remains the decision authority. The agent may recommend options and perform approved changes, but it must not silently select the project's purpose, scope, stack, architecture, environment, or constitutional values.
+
+### Upgrading a fork created before the rename
+
+A fork initialized before the lowercase `adr` rename may still have `ADR.md`:
+
+1. Rename the file in two steps, because Windows and macOS treat `ADR.md` and `adr.md` as the same file: `git mv ADR.md adr.tmp && git mv adr.tmp adr.md`.
+2. Update what points at the old name. Run `git grep -l "ADR.md"`; the rendered `constitution.md`, `SPEC.md`, `PLAN.md`, and `TASKS.md` usually need the new name, which an amendment records for the constitution.
+3. `adr-001` style IDs are matched case-insensitively, so existing `ADR-001` headings still validate. The validator now reports them as `adr-001`, so update any test of your own that asserts the old uppercase messages, such as `Duplicate ID definition(s): ADR-001`.
+
+Until the rename is done, on a case-sensitive filesystem the docs and agents refer to a different file than the one you have.
 
 ## Ongoing development workflow
 
