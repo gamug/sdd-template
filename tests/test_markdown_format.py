@@ -18,6 +18,7 @@ LIST_ITEM = re.compile(r"([-*+]|\d+[.)])\s")
 OPAQUE = re.compile(r"(#|\||<|```|~~~)|([-*_])(\s*\2){2,}$|(=+|-+)$|\[[^\]]+\]:\s")
 QUOTE = re.compile(r"^\s*>\s?")
 LOWERCASE_ADR = re.compile(r"(?<![\w./-])adrs?(?![\w-]|\.\w)")
+# Must match the ID-prefix list in skills/sdd-init/SKILL.md, where `adr` stays lowercase.
 ID_PREFIX_LIST = re.compile(r"FR, UC, US, adr, and RSK")
 CODE_OR_LINK_TARGET = re.compile(r"`[^`]*`|\]\([^)]*\)")
 

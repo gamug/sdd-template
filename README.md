@@ -156,8 +156,6 @@ A fork initialized before the lowercase `adr` rename may still have `ADR.md`. Me
 2. Rename the file in two steps, because Windows and macOS treat `ADR.md` and `adr.md` as the same file: `git mv ADR.md adr.tmp && git mv adr.tmp adr.md`.
 3. `adr-001` style IDs are matched case-insensitively, so existing `ADR-001` headings still validate. The validator now reports them as `adr-001`, so update any test of your own that asserts the old uppercase messages, such as `Duplicate ID definition(s): ADR-001`.
 
-Every fork that merges a template update that changes `skills/sdd-init/memory/constitution.md` must also re-run `validate_config.py render`, because `render --verify` fails while `.sdd/constitution.md` is out of date.
-
 Until the rename is done, on a case-sensitive filesystem the docs and agents refer to a different file than the one you have.
 
 ## Ongoing development workflow
@@ -173,6 +171,8 @@ After initialization, every product change follows this cycle:
 7. Check each completed task's box in `.sdd/TASKS.md` and, once all its tasks are checked, its Work Item's box; then move completed work to `.sdd/CHANGELOG.md`.
 
 An architecture change (for example a new runtime version, framework, library, storage engine, API contract, or schema) also needs an ADR in `adr.md`, which the user accepts before the change is implemented; the constitution's "Architecture decisions" section has the rule. `docs/PRODUCT.md` section 5 stays a frozen discovery snapshot.
+
+When a fork merges a template update that changes `skills/sdd-init/memory/constitution.md`, it must also re-run `validate_config.py render`, because `render --verify` fails while `.sdd/constitution.md` is out of date.
 
 The validators, the template tests and the sample check prepare the repository; the pre-commit hook and CI that WI-006 configures run the project's own quality gates, not the skill's.
 
@@ -195,7 +195,7 @@ Before changing a fork:
 - Update documentation and architecture records (`adr.md`) when implementation changes their documented state.
 - Never weaken a check, fabricate repository state, commit secrets, or hide a failure to make a change pass.
 - Write Markdown with one paragraph or list item per line; do not hard-wrap at a column. This is a template-maintenance rule: `tests/test_markdown_format.py` enforces it in CI for the tracked `.md` files, and a fork that keeps `tests/` inherits it. The constitution does not impose it on projects.
-- Write ADR in uppercase in running text, headings, and messages; keep `adr` lowercase in filenames (`adr.md`), IDs (`adr-001`), and code identifiers. `tests/test_markdown_format.py` flags a lowercase `adr` in the tracked `.md` prose.
+- Write ADR in uppercase in Markdown prose and headings; keep `adr` lowercase in filenames (`adr.md`), IDs (`adr-001`), and code identifiers. `tests/test_markdown_format.py` flags a lowercase `adr` in the tracked `.md` prose; the validator messages are covered by the assertions in `tests/test_validate_discovery.py`.
 
 Commits that maintain this template itself (validators, skill, docs, tests) use plain Conventional Commits, `type(scope): summary`, without the `[FR][WI][TASK]` suffix. That suffix traces a fork's FR-001 initialization and product work, and template maintenance is not part of it.
 
