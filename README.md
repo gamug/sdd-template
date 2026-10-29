@@ -36,7 +36,9 @@ The template is based on these principles:
 ├── tests/                          # Regression tests for the validators
 ├── .github/workflows/validators.yml  # Validates the sample, runs the tests (actions pinned to SHAs)
 ├── .github/dependabot.yml          # Proposes updates to the pinned actions and PyYAML
+├── .github/CODEOWNERS              # Code owner of the template repository
 ├── docs/                           # Created by WI-001 (docs/PRODUCT.md)
+├── LICENSE                         # MIT license of the template and the skill
 ├── adr.md                          # Created by WI-001: the live adr record, seeded from docs/PRODUCT.md § 5
 └── README.md
 ```
@@ -208,8 +210,10 @@ uv run --no-project --with-requirements skills/sdd-init/scripts/requirements.txt
 
 ## License and ownership
 
-This template and the `sdd-init` skill are released under the [MIT License](./LICENSE). Copyright (c) 2026 Gabriel Jaime Múnera González.
+This template and the `sdd-init` skill are released under the [MIT License](./LICENSE). Copyright (c) 2026 Gabriel Jaime Múnera González. Contributions are accepted under the same license.
 
-[@gamug](https://github.com/gamug) owns and maintains this repository and is the code owner in [`.github/CODEOWNERS`](./.github/CODEOWNERS).
+[@gamug](https://github.com/gamug) owns and maintains this template repository and is its code owner in [`.github/CODEOWNERS`](./.github/CODEOWNERS).
 
-To contribute, fork the repository, make the change on a branch in your fork, and open a pull request against `master`. Issues are welcome for questions, bugs, and suggestions.
+To contribute, fork the repository, make the change on a branch in your fork, and open a pull request against `master`. Follow the [working agreement](#working-agreement-for-contributors-and-coding-agents), and make sure the CI checks pass. Issues are welcome for questions, bugs, and suggestions. There is no separate security channel: open an issue and leave exploit details out.
+
+A fork keeps `LICENSE` and adds its own copyright line to it, and replaces `.github/CODEOWNERS` with its own owners. This section describes the template; a fork replaces it with its own.
