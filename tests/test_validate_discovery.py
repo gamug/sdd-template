@@ -86,7 +86,9 @@ class DiscoveryTest(unittest.TestCase):
 
     def test_adr_ids_are_case_insensitive_and_reported_in_lowercase(self):
         upper = self.sample.replace("adr-001", "ADR-001")
-        self.assertEqual(self.validate(upper, "--draft").returncode, 0)
+        result = self.validate(upper, "--draft")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("Found 1 adr ID(s): adr-001", result.stdout)
         mixed = self.sample.replace("## 6. Development Environment Setup", (
             "### `ADR-001`: A second record\n\nContext, decision, consequences, trade-offs.\n\n"
             "## 6. Development Environment Setup"
