@@ -198,7 +198,7 @@ Keep real environment files out of Git:
 
 The tests live outside the skill: the skill ships only what a project needs to start, while `tests/` and `.github/workflows/validators.yml` maintain this template.
 
-The validators carry a stdlib `unittest` regression suite under `tests/`, which `.github/workflows/validators.yml` runs on Python 3.10 and the latest Python for every pull request:
+The validators carry a stdlib `unittest` regression suite under `tests/` (validator behaviour, plus `test_markdown_format.py`, which fails on hard-wrapped Markdown), which `.github/workflows/validators.yml` runs on Python 3.10 and the latest Python for every pull request:
 
 ```bash
 uv run --no-project --with-requirements skills/sdd-init/scripts/requirements.txt python -m unittest discover -s tests
