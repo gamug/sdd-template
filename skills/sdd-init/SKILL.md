@@ -66,9 +66,7 @@ The discovery process is executed in six sequential phases and produces `docs/PR
 4. **Output format**: Section 2 of the product template, one block per use case from `templates/use-case-template.md`.
 
 ### Phase 2: Functional Requirements & User Stories
-1. Convert high-level goals into precise functional requirements using EARS (Easy Approach to Requirements Syntax) rules (*Event-Driven*, *State-Driven*, *Ubiquitous*, *Optional*, *Unwanted*).
-   `FR-001` is reserved for the SDD initialization requirement: number product
-   requirements from `FR-002`.
+1. Convert high-level goals into precise functional requirements using EARS (Easy Approach to Requirements Syntax) rules (*Event-Driven*, *State-Driven*, *Ubiquitous*, *Optional*, *Unwanted*). `FR-001` is reserved for the SDD initialization requirement: number product requirements from `FR-002`.
 2. Create User Stories following the 3 C's framework (*Card, Conversation, Confirmation*): `As a [persona], I want [goal], so that [benefit]`.
 3. Define testable Acceptance Criteria for every user story.
 4. Apply MoSCoW prioritization (*Must have*, *Should have*, *Could have*, *Won't have*).
@@ -88,163 +86,72 @@ The discovery process is executed in six sequential phases and produces `docs/PR
 2. Detail the context, decision rationale, trade-offs, and positive/negative consequences.
 3. Ensure bidirectional traceability between requirements and decisions.
 4. **Output format**: Section 5 of the product template, one block per decision from `templates/adr-template.md`.
-5. **Seed `ADR.md`**: create the root `ADR.md` from
-   [`templates/adr-log-template.md`](templates/adr-log-template.md), with one
-   block per ADR written in section 5, as follows:
-   - Section 5 blocks carry no `Status`: set `Status` to `Proposed` on every
-     seeded block, and set `Proposed on` to the date the block is written. If a
-     section 5 block carries a `Status` or `Superseded By` anyway, remove it
-     from section 5 before approval; the seeded block still gets
-     `Status: Proposed`.
-   - Add the fields section 5 lacks (`Approved by`, `Approved on`,
-     `Rejected by`, `Rejected on`, `Rejection reason`, `Deprecated by`,
-     `Deprecated on`, `Deprecation reason`, `Supersedes`, `Superseded By`) as
-     `N/A`.
-   - Copy `Traceability`, `Decision Drivers`, `Considered Options`,
-     `Mitigation`, `Rejected Options`, and `External Docs` from section 5 when
-     it has them; write `N/A` when it does not. Never leave a template
-     placeholder.
-   - Replace the template's guidance block with the one-line pointer it
-     describes.
-   - Until `docs/PRODUCT.md` is approved, apply every change to an ADR in
-     section 5 to its `ADR.md` block in the same step: the ID, title, and
-     decision content stay identical.
+5. **Seed `ADR.md`**: create the root `ADR.md` from [`templates/adr-log-template.md`](templates/adr-log-template.md), with one block per ADR written in section 5, as follows:
+   - Section 5 blocks carry no `Status`: set `Status` to `Proposed` on every seeded block, and set `Proposed on` to the date the block is written. If a section 5 block carries a `Status` or `Superseded By` anyway, remove it from section 5 before approval; the seeded block still gets `Status: Proposed`.
+   - Add the fields section 5 lacks (`Approved by`, `Approved on`, `Rejected by`, `Rejected on`, `Rejection reason`, `Deprecated by`, `Deprecated on`, `Deprecation reason`, `Supersedes`, `Superseded By`) as `N/A`.
+   - Copy `Traceability`, `Decision Drivers`, `Considered Options`, `Mitigation`, `Rejected Options`, and `External Docs` from section 5 when it has them; write `N/A` when it does not. Never leave a template placeholder.
+   - Replace the template's guidance block with the one-line pointer it describes.
+   - Until `docs/PRODUCT.md` is approved, apply every change to an ADR in section 5 to its `ADR.md` block in the same step: the ID, title, and decision content stay identical.
 
 ### Phase 5: Development Environment Setup
 1. Define local and team developer environment standards: IDE setup, version control, language runtimes, version managers, package managers, and container isolation (e.g., Docker).
 2. Set up linters, formatters, environment variable configurations (`.env.example`), and CI/CD pipelines.
-3. Record the repository governance and workflow decisions the project
-   constitution needs: integration branch and commit policy, the commit hook and
-   secret scanner, CI gate order (run in the inherited `validators.yml`),
-   canonical tool configuration, the coding-agent framework and its instruction
-   file, scope-expansion approvals, whether agents leave the working tree on the
-   pushed PR branch, and the initial governance version.
+3. Record the repository governance and workflow decisions the project constitution needs: integration branch and commit policy, the commit hook and secret scanner, CI gate order (run in the inherited `validators.yml`), canonical tool configuration, the coding-agent framework and its instruction file, scope-expansion approvals, whether agents leave the working tree on the pushed PR branch, and the initial governance version.
 4. **Output format**: Sections 6 and 8 of the product template, from `templates/dev-environment-checklist.md`.
 
 ### Phase 6: Feasibility, Risk Assessment & MVP Roadmap
-1. Assess technical, delivery, and organizational risks in the risk matrix
-   (`RSK-001`, …): Score = Impact × Probability on 1-3 scales, and every score
-   of 6 or more needs a mitigation plan.
+1. Assess technical, delivery, and organizational risks in the risk matrix (`RSK-001`, …): Score = Impact × Probability on 1-3 scales, and every score of 6 or more needs a mitigation plan.
 2. Define the Minimum Viable Product (MVP) boundary and establish a phased project roadmap.
-3. **Output format**: Section 7 of the product template. `docs/PRODUCT.md`
-   now holds every phase's decisions, including `## 8. Governance & Workflow`
-   from Phase 5. Mark every open decision with a line containing
-   `UNRESOLVED:` and the question to ask.
-4. **Approval**: Resolve every `UNRESOLVED:` item with the user, then close
-   the approved content of `docs/PRODUCT.md` with an `## Approval` section
-   (`validate_config.py scaffold` later appends `## Configuration Decisions`
-   after it) containing `Approved by: <name or role>`,
-   `First approved on: YYYY-MM-DD`, `Approved on: YYYY-MM-DD`, and
-   `Approved content: <hash>`, where `<hash>`
-   is the output of `validate_discovery.py --hash docs/PRODUCT.md` for the
-   version the user approved. Any later edit outside the Approval and
-   Configuration Decisions sections fails validation until the user approves
-   again; a re-approval updates `Approved on` and the hash and keeps
-   `First approved on`. Configuration
-   (WI-002) cannot start until this validates and step 5 is complete.
-5. **Accept the seeded ADRs**: once the approved `docs/PRODUCT.md` validates
-   and before starting WI-002:
-   - Reconcile the two records in both directions: every ADR in section 5 has
-     a matching `ADR.md` block, and every seeded `ADR.md` block has a matching
-     section 5 ADR (same ID, title, and decision content, as the Phase 4 sync
-     rule requires), and each ADR ID appears in exactly one `ADR.md` block.
-     Section 5 is approved and frozen, so change `ADR.md` to match it, never
-     section 5, and remove a seeded block that has no section 5 counterpart.
-   - Set every seeded `Proposed` ADR to `Accepted` and copy the approval's
-     `Approved by` and `First approved on` into its `Approved by` and
-     `Approved on`.
-   - Re-read `ADR.md` before treating the approval as complete: every seeded
-     ADR must be `Accepted` with `Approved by` and `Approved on` filled; apply
-     this step to any that is not.
-   - After approval, section 5 must stay a frozen snapshot and `ADR.md` is the
-     live record: see "After initialization" below.
+3. **Output format**: Section 7 of the product template. `docs/PRODUCT.md` now holds every phase's decisions, including `## 8. Governance & Workflow` from Phase 5. Mark every open decision with a line containing `UNRESOLVED:` and the question to ask.
+4. **Approval**: Resolve every `UNRESOLVED:` item with the user, then close the approved content of `docs/PRODUCT.md` with an `## Approval` section (`validate_config.py scaffold` later appends `## Configuration Decisions` after it) containing `Approved by: <name or role>`, `First approved on: YYYY-MM-DD`, `Approved on: YYYY-MM-DD`, and `Approved content: <hash>`, where `<hash>` is the output of `validate_discovery.py --hash docs/PRODUCT.md` for the version the user approved. Any later edit outside the Approval and Configuration Decisions sections fails validation until the user approves again; a re-approval updates `Approved on` and the hash and keeps `First approved on`. Configuration (WI-002) cannot start until this validates and step 5 is complete.
+5. **Accept the seeded ADRs**: once the approved `docs/PRODUCT.md` validates and before starting WI-002:
+   - Reconcile the two records in both directions: every ADR in section 5 has a matching `ADR.md` block, and every seeded `ADR.md` block has a matching section 5 ADR (same ID, title, and decision content, as the Phase 4 sync rule requires), and each ADR ID appears in exactly one `ADR.md` block. Section 5 is approved and frozen, so change `ADR.md` to match it, never section 5, and remove a seeded block that has no section 5 counterpart.
+   - Set every seeded `Proposed` ADR to `Accepted` and copy the approval's `Approved by` and `First approved on` into its `Approved by` and `Approved on`.
+   - Re-read `ADR.md` before treating the approval as complete: every seeded ADR must be `Accepted` with `Approved by` and `Approved on` filled; apply this step to any that is not.
+   - After approval, section 5 must stay a frozen snapshot and `ADR.md` is the live record: see "After initialization" below.
 
 ---
 
 ## Initialization Workflow (WI-001 to WI-006)
 
-This skill is the whole initialization procedure. The immutable template
-inputs live in [`memory/`](memory/): `constitution.md`, `SPEC.md`, `PLAN.md`,
-`TASKS.md`, and `CHANGELOG.md`. Read them first; do not modify them.
+This skill is the whole initialization procedure. The immutable template inputs live in [`memory/`](memory/): `constitution.md`, `SPEC.md`, `PLAN.md`, `TASKS.md`, and `CHANGELOG.md`. Read them first; do not modify them.
 
 ### Rules
 
-- Execute the tasks in `memory/TASKS.md` in dependency order, starting with
-  TASK-001 under WI-001. `memory/PLAN.md` defines FR-001 and its six Work
-  Items. Do not skip tasks, invent unresolved decisions, or implement
-  application code before the plan allows it.
-- The hierarchy is strict: `FR > WI > Task`. Every Work Item belongs to a
-  functional requirement and every task to exactly one Work Item. `FR-001` is
-  reserved for initialization; product requirements start at `FR-002`.
-- After each task: record decisions in the required SDD artifact; run the
-  relevant validation; then, once `.sdd/TASKS.md` exists (TASK-010 creates it
-  and checks TASK-001 through TASK-009; before that, report progress in the
-  handoff), check the task's box there and, once every task of its Work Item
-  is checked, the Work Item's box; and report what changed and what evidence
-  was produced.
-- When information is missing, stop and ask one clear question that explains
-  the decision, its impact, and the acceptable answers. Continue only after
-  the user resolves it.
+- Execute the tasks in `memory/TASKS.md` in dependency order, starting with TASK-001 under WI-001. `memory/PLAN.md` defines FR-001 and its six Work Items. Do not skip tasks, invent unresolved decisions, or implement application code before the plan allows it.
+- The hierarchy is strict: `FR > WI > Task`. Every Work Item belongs to a functional requirement and every task to exactly one Work Item. `FR-001` is reserved for initialization; product requirements start at `FR-002`.
+- After each task: record decisions in the required SDD artifact; run the relevant validation; then, once `.sdd/TASKS.md` exists (TASK-010 creates it and checks TASK-001 through TASK-009; before that, report progress in the handoff), check the task's box there and, once every task of its Work Item is checked, the Work Item's box; and report what changed and what evidence was produced.
+- When information is missing, stop and ask one clear question that explains the decision, its impact, and the acceptable answers. Continue only after the user resolves it.
 
 ### Running the tooling
 
-Paths are relative to this skill. `$SKILL_DIR` is the directory containing
-this `SKILL.md` (`skills/sdd-init` in a fork of this template); run the
-commands from the project root, where `docs/PRODUCT.md`, `config.yaml` and
-`.sdd/` live. `validate_discovery.py` needs only the standard library and runs
-with plain `python`. `validate_config.py` needs the PyYAML version pinned in
-`scripts/requirements.txt`:
+Paths are relative to this skill. `$SKILL_DIR` is the directory containing this `SKILL.md` (`skills/sdd-init` in a fork of this template); run the commands from the project root, where `docs/PRODUCT.md`, `config.yaml` and `.sdd/` live. `validate_discovery.py` needs only the standard library and runs with plain `python`. `validate_config.py` needs the PyYAML version pinned in `scripts/requirements.txt`:
 
 ```bash
 uv run --with-requirements "$SKILL_DIR/scripts/requirements.txt" python "$SKILL_DIR/scripts/validate_config.py" <mode>
 ```
 
-Below, `validate_config.py <mode>` stands for this command, run from the
-project root. The defaults are `config.yaml`, `docs/PRODUCT.md` and the skill's
-`memory/constitution.md`; `--config`, `--product` and `--template` (placed
-before the mode) override them. `scaffold --force` overwrites an existing
-`config.yaml`, and `render --output PATH` changes where the constitution is
-written (default `.sdd/constitution.md`).
+Below, `validate_config.py <mode>` stands for this command, run from the project root. The defaults are `config.yaml`, `docs/PRODUCT.md` and the skill's `memory/constitution.md`; `--config`, `--product` and `--template` (placed before the mode) override them. `scaffold --force` overwrites an existing `config.yaml`, and `render --output PATH` changes where the constitution is written (default `.sdd/constitution.md`).
 
 ### WI-002: create the configuration
 
-The constitution template is generic. Every placeholder it contains is a
-decision the project must make. Generate the root configuration skeleton:
+The constitution template is generic. Every placeholder it contains is a decision the project must make. Generate the root configuration skeleton:
 
 ```bash
 validate_config.py scaffold
 ```
 
-This writes `config.yaml`, with the PRODUCT.md section each key usually comes
-from, and appends a `Configuration Decisions` table (key, value, source) to
-`docs/PRODUCT.md`. Then:
+This writes `config.yaml`, with the PRODUCT.md section each key usually comes from, and appends a `Configuration Decisions` table (key, value, source) to `docs/PRODUCT.md`. Then:
 
-1. Fill the values `docs/PRODUCT.md` states, with source
-   `PRODUCT.md § <section>`. The cited section must exist and contain the
-   value (every item, for lists and maps) as a whole token. Lists and maps
-   are recorded as compact JSON, and `|` in a value is escaped as `\|`.
-2. Define the project's domain sections (`domain_sections`: a `title` and
-   `rules` each), such as models, services, storage, or evaluation, from the
-   use cases, requirements, and ADRs, and confirm them with the user. Their
-   source is always `user, YYYY-MM-DD`.
-3. Ask the user for every other value, including the coding-agent instruction
-   file (for example `CLAUDE.md`, `AGENTS.md`, or
-   `.github/copilot-instructions.md`). Values PRODUCT.md only implies are
-   proposed and confirmed, never written silently. Record answers with source
-   `user, YYYY-MM-DD`.
+1. Fill the values `docs/PRODUCT.md` states, with source `PRODUCT.md § <section>`. The cited section must exist and contain the value (every item, for lists and maps) as a whole token. Lists and maps are recorded as compact JSON, and `|` in a value is escaped as `\|`.
+2. Define the project's domain sections (`domain_sections`: a `title` and `rules` each), such as models, services, storage, or evaluation, from the use cases, requirements, and ADRs, and confirm them with the user. Their source is always `user, YYYY-MM-DD`.
+3. Ask the user for every other value, including the coding-agent instruction file (for example `CLAUDE.md`, `AGENTS.md`, or `.github/copilot-instructions.md`). Values PRODUCT.md only implies are proposed and confirmed, never written silently. Record answers with source `user, YYYY-MM-DD`.
 
 ```bash
 validate_config.py check
 ```
 
-The check fails on missing or empty keys, sources that are malformed or cite
-a section that doesn't contain the value, `user` dates that are invalid, in
-the future, or earlier than PRODUCT.md's `First approved on`, recorded values (including
-collections) that differ from `config.yaml`, and malformed table rows. A cited
-section must have no subsections, and the Approval and Configuration Decisions
-sections are never evidence.
-Values are read as written, so dates and versions such as `1.10` render
-unchanged.
+The check fails on missing or empty keys, sources that are malformed or cite a section that doesn't contain the value, `user` dates that are invalid, in the future, or earlier than PRODUCT.md's `First approved on`, recorded values (including collections) that differ from `config.yaml`, and malformed table rows. A cited section must have no subsections, and the Approval and Configuration Decisions sections are never evidence. Values are read as written, so dates and versions such as `1.10` render unchanged.
 
 ### WI-003: render the constitution and create the SDD objects
 
@@ -252,10 +159,7 @@ unchanged.
 validate_config.py render
 ```
 
-`render` re-runs `check`, then writes `.sdd/constitution.md` and fails on any
-leftover placeholder. Never edit the rendered file by hand. After any
-`config.yaml` change, update its `Configuration Decisions` row and render
-again; `render --verify` fails when the file is out of date.
+`render` re-runs `check`, then writes `.sdd/constitution.md` and fails on any leftover placeholder. Never edit the rendered file by hand. After any `config.yaml` change, update its `Configuration Decisions` row and render again; `render --verify` fails when the file is out of date.
 
 Then create the remaining canonical objects from `docs/PRODUCT.md`:
 
@@ -266,20 +170,11 @@ Then create the remaining canonical objects from `docs/PRODUCT.md`:
 .sdd/CHANGELOG.md
 ```
 
-Preserve the hierarchy above and acceptance-criteria traceability.
-`FR-001` stays the initialization requirement, and product requirements are
-numbered from `FR-002` (discovery rejects an `FR-001` row in `docs/PRODUCT.md`).
-Do not modify the template inputs in `$SKILL_DIR/memory/`: progress is not
-tracked before this step, and `.sdd/TASKS.md` starts tracking it with the
-completed initialization tasks and Work Items checked.
+Preserve the hierarchy above and acceptance-criteria traceability. `FR-001` stays the initialization requirement, and product requirements are numbered from `FR-002` (discovery rejects an `FR-001` row in `docs/PRODUCT.md`). Do not modify the template inputs in `$SKILL_DIR/memory/`: progress is not tracked before this step, and `.sdd/TASKS.md` starts tracking it with the completed initialization tasks and Work Items checked.
 
 ### WI-004 through WI-006: prepare and reproduce the environment
 
-Create the approved folders and non-programmatic dependencies in WI-004. Set
-up the approved devcontainer, Docker, host-only, or no-container environment
-in WI-005. In WI-006, create `scripts/init.sh` or the approved equivalent so
-the environment can be reproduced from a clean checkout, and add the
-initialization checks to the fork's pre-commit hook and CI.
+Create the approved folders and non-programmatic dependencies in WI-004. Set up the approved devcontainer, Docker, host-only, or no-container environment in WI-005. In WI-006, create `scripts/init.sh` or the approved equivalent so the environment can be reproduced from a clean checkout, and add the initialization checks to the fork's pre-commit hook and CI.
 
 ---
 
@@ -297,51 +192,26 @@ python "$SKILL_DIR/scripts/validate_discovery.py" docs/PRODUCT.md
 ```
 
 The script verifies:
-- Presence of required sections in `docs/PRODUCT.md` (Use Cases, Functional
-  Requirements, User Stories, Tech Stack, ADRs, Dev Environment, Risks,
-  Governance & Workflow).
-- EARS syntax compliance, product requirements numbered from `FR-002`
-  (`FR-001` is reserved for initialization), and three-digit FR, UC, US, ADR,
-  and RSK IDs that are each defined once. FR rows define requirements only in
-  the Functional Requirements section and RSK rows only in the Risk section;
-  elsewhere (e.g. a traceability matrix) they are references.
+- Presence of required sections in `docs/PRODUCT.md` (Use Cases, Functional Requirements, User Stories, Tech Stack, ADRs, Dev Environment, Risks, Governance & Workflow).
+- EARS syntax compliance, product requirements numbered from `FR-002` (`FR-001` is reserved for initialization), and three-digit FR, UC, US, ADR, and RSK IDs that are each defined once. FR rows define requirements only in the Functional Requirements section and RSK rows only in the Risk section; elsewhere (e.g. a traceability matrix) they are references.
 - ADR completeness (Context, Decision, Trade-offs, Consequences).
-- The risk matrix: at least one `RSK-xxx` row, Score = Impact × Probability on
-  1-3 scales, and a mitigation plan for every score of 6 or more.
-- MoSCoW: every FR and user story has exactly one valid priority, at least
-  one is Must Have, and Won't Have is stated (as a priority or a
-  `Won't Have:` line).
-- Each FR's EARS pattern column matches its statement (WHEN, WHILE, WHERE,
-  IF … THEN, or none for Ubiquitous), and every referenced ID is defined.
-- No template `[...]` placeholders are left outside code (a warning with
-  `--draft`). Links, task boxes, numeric citations (`[1]`, `[1, 2]`,
-  `[1-3]`), and footnotes (`[^1]`) are not placeholders.
-- User approval: an `Approval` section with an approver that is not a
-  template placeholder, real `First approved on` and `Approved on` dates (the
-  first no later than the second), and a content hash on their own lines that
-  matches the current document, and no remaining `UNRESOLVED:` markers
-  (skipped with `--draft`).
+- The risk matrix: at least one `RSK-xxx` row, Score = Impact × Probability on 1-3 scales, and a mitigation plan for every score of 6 or more.
+- MoSCoW: every FR and user story has exactly one valid priority, at least one is Must Have, and Won't Have is stated (as a priority or a `Won't Have:` line).
+- Each FR's EARS pattern column matches its statement (WHEN, WHILE, WHERE, IF … THEN, or none for Ubiquitous), and every referenced ID is defined.
+- No template `[...]` placeholders are left outside code (a warning with `--draft`). Links, task boxes, numeric citations (`[1]`, `[1, 2]`, `[1-3]`), and footnotes (`[^1]`) are not placeholders.
+- User approval: an `Approval` section with an approver that is not a template placeholder, real `First approved on` and `Approved on` dates (the first no later than the second), and a content hash on their own lines that matches the current document, and no remaining `UNRESOLVED:` markers (skipped with `--draft`).
 
-Lines starting with `>` are template guidance: every content check skips
-them, but the approval hash covers them.
+Lines starting with `>` are template guidance: every content check skips them, but the approval hash covers them.
 
-The scripts do not check `ADR.md`. Phase 6 step 5 (reconcile with section 5,
-accept, re-read) is its check, and `docs/PRODUCT.md` section 5 stays covered by
-the approval hash.
+The scripts do not check `ADR.md`. Phase 6 step 5 (reconcile with section 5, accept, re-read) is its check, and `docs/PRODUCT.md` section 5 stays covered by the approval hash.
 
-When validating from a directory, pass the project root or a directory that
-contains exactly one generated `PRODUCT.md`; bundled templates, references,
-and examples are not discovery output and are not aggregated.
+When validating from a directory, pass the project root or a directory that contains exactly one generated `PRODUCT.md`; bundled templates, references, and examples are not discovery output and are not aggregated.
 
 ---
 
 ## After initialization
 
-The root `ADR.md` is the live record of architecture decisions.
-`docs/PRODUCT.md` section 5 is a frozen snapshot of the discovery ADRs: a
-re-approval of `docs/PRODUCT.md` must not change its ADR blocks and must not
-rewrite `ADR.md`. New and changed decisions, and architecture changes, follow
-the constitution's "Architecture decisions" section.
+The root `ADR.md` is the live record of architecture decisions. `docs/PRODUCT.md` section 5 is a frozen snapshot of the discovery ADRs: a re-approval of `docs/PRODUCT.md` must not change its ADR blocks and must not rewrite `ADR.md`. New and changed decisions, and architecture changes, follow the constitution's "Architecture decisions" section.
 
 ---
 

@@ -17,16 +17,12 @@ Risks are categorized into three domains:
 | **Organizational Risk** | Team capacity, skill gaps, or domain compliance requirements. | *Team lacks deep PyTorch/GPU optimization experience.* | *Conduct technical spikes in Sprint 0 and use pre-trained model APIs.* |
 
 ### Risk Matrix Scoring
-Give each risk a three-digit ID (`RSK-001`, `RSK-002`, …) and a row in the
-risk matrix with the columns
-`| Risk ID | Description | Impact | Probability | Score | Mitigation Plan |`:
+Give each risk a three-digit ID (`RSK-001`, `RSK-002`, …) and a row in the risk matrix with the columns `| Risk ID | Description | Impact | Probability | Score | Mitigation Plan |`:
 - **Impact**: Low (1), Medium (2), High (3)
 - **Probability**: Low (1), Medium (2), High (3)
-- **Score**: Impact × Probability. A score of 6 or more requires a mitigation
-  plan before Sprint 1.
+- **Score**: Impact × Probability. A score of 6 or more requires a mitigation plan before Sprint 1.
 
-`validate_discovery.py` enforces the ID format, the score arithmetic, and the
-mitigation plan for scores of 6 or more.
+`validate_discovery.py` enforces the ID format, the score arithmetic, and the mitigation plan for scores of 6 or more.
 
 ---
 
@@ -39,8 +35,7 @@ mitigation plan for scores of 6 or more.
 
 ### Phased Roadmap Structure
 
-A phase may be split into sprints. Use phases, sprints, or both, as long as the
-MVP boundary stays explicit.
+A phase may be split into sprints. Use phases, sprints, or both, as long as the MVP boundary stays explicit.
 
 1. **Phase 0: Discovery & Technical Spikes (Weeks 1–3)**: Finalize architecture, setup dev environments, conduct POC spikes on high-risk components.
 2. **Phase 1: MVP Core Build (Weeks 4–10)**: Implement core use cases, primary API endpoints, and essential UI flows.

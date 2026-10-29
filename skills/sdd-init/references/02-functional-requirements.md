@@ -27,8 +27,7 @@ The EARS notation provides five structured patterns to write clear, unambiguous 
 User stories focus on the end-user value rather than purely technical specifications.
 
 ### The 3 C's Model
-- **Card**: The physical or digital record containing the core story phrasing:
-  `As a [type of user], I want [some goal], so that [some benefit/reason].`
+- **Card**: The physical or digital record containing the core story phrasing: `As a [type of user], I want [some goal], so that [some benefit/reason].`
 - **Conversation**: Ongoing discussion between developers, product owners, and stakeholders to clarify nuances.
 - **Confirmation**: The acceptance criteria that define when the story is complete and verified ("Definition of Done").
 

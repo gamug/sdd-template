@@ -124,8 +124,7 @@ SCENARIO: [Scenario name]
 
 ### Risk Matrix
 
-Impact and Probability use 1 (Low) to 3 (High); Score = Impact × Probability.
-A score of 6 or more requires a mitigation plan.
+Impact and Probability use 1 (Low) to 3 (High); Score = Impact × Probability. A score of 6 or more requires a mitigation plan.
 
 | Risk ID | Description | Impact | Probability | Score | Mitigation Plan |
 | :--- | :--- | :---: | :---: | :---: | :--- |
