@@ -1,6 +1,6 @@
 ---
 name: sdd-init
-description: Initializes a Specification-Driven Development project end to end. Runs the six-phase discovery (use cases, requirements, stack selection, ADRs, environment, risks and roadmap) to produce an approved docs/PRODUCT.md, then builds config.yaml, renders the constitution, creates the SDD objects and sets up a reproducible environment. Use when taking a project idea from concept to an initialized, specification-driven repository.
+description: Initializes a Specification-Driven Development project end to end. Runs the six-phase discovery (use cases, requirements, stack selection, adrs, environment, risks and roadmap) to produce an approved docs/PRODUCT.md, then builds config.yaml, renders the constitution, creates the SDD objects and sets up a reproducible environment. Use when taking a project idea from concept to an initialized, specification-driven repository.
 ---
 
 # SDD Initialization Skill
@@ -26,7 +26,7 @@ Before initiating the discovery workflow, gather the following initial inputs fr
 
 ## Step-by-Step Discovery Workflow
 
-The discovery process is executed in six sequential phases and produces `docs/PRODUCT.md`, built from [`templates/product-template.md`](templates/product-template.md), and the root `ADR.md` seeded from it in Phase 4. For each phase, consult the referenced guide in `./references/` and fill the matching numbered section of the product template using the phase's fragment in `./templates/`. Every ID uses three digits (`UC-001`, `FR-002`, `US-001`, `ADR-001`, `RSK-001`), sits in the item's heading or the first table column, and is defined once.
+The discovery process is executed in six sequential phases and produces `docs/PRODUCT.md`, built from [`templates/product-template.md`](templates/product-template.md), and the root `adr.md` seeded from it in Phase 4. For each phase, consult the referenced guide in `./references/` and fill the matching numbered section of the product template using the phase's fragment in `./templates/`. Every ID uses three digits (`UC-001`, `FR-002`, `US-001`, `adr-001`, `RSK-001`), sits in the item's heading or the first table column, and is defined once.
 
 ```
   ┌───────────────────────────────┐
@@ -45,7 +45,7 @@ The discovery process is executed in six sequential phases and produces `docs/PR
                  │
                  ▼
   ┌───────────────────────────────┐
-  │  Phase 4: Architectural ADRs  │ ──> See references/04-architecture-decision-records.md
+  │  Phase 4: Architectural adrs  │ ──> See references/04-architecture-decision-records.md
   └──────────────┬────────────────┘
                  │
                  ▼
@@ -81,17 +81,17 @@ The discovery process is executed in six sequential phases and produces `docs/PR
 2. Build a Multi-Criteria Decision-Making (MCDM) matrix to score options objectively.
 3. **Output format**: Section 4 of the product template, from `templates/tech-stack-evaluation-matrix.md`.
 
-### Phase 4: Architecture Decision Recording (ADR)
-1. Document every significant technical choice as an Architecture Decision Record (ADR).
+### Phase 4: Architecture Decision Recording (adr)
+1. Document every significant technical choice as an Architecture Decision Record (adr).
 2. Detail the context, decision rationale, trade-offs, and positive/negative consequences.
 3. Ensure bidirectional traceability between requirements and decisions.
 4. **Output format**: Section 5 of the product template, one block per decision from `templates/adr-template.md`.
-5. **Seed `ADR.md`**: create the root `ADR.md` from [`templates/adr-log-template.md`](templates/adr-log-template.md), with one block per ADR written in section 5, as follows:
+5. **Seed `adr.md`**: create the root `adr.md` from [`templates/adr-log-template.md`](templates/adr-log-template.md), with one block per adr written in section 5, as follows:
    - Section 5 blocks carry no `Status`: set `Status` to `Proposed` on every seeded block, and set `Proposed on` to the date the block is written. If a section 5 block carries a `Status` or `Superseded By` anyway, remove it from section 5 before approval; the seeded block still gets `Status: Proposed`.
    - Add the fields section 5 lacks (`Approved by`, `Approved on`, `Rejected by`, `Rejected on`, `Rejection reason`, `Deprecated by`, `Deprecated on`, `Deprecation reason`, `Supersedes`, `Superseded By`) as `N/A`.
    - Copy `Traceability`, `Decision Drivers`, `Considered Options`, `Mitigation`, `Rejected Options`, and `External Docs` from section 5 when it has them; write `N/A` when it does not. Never leave a template placeholder.
    - Replace the template's guidance block with the one-line pointer it describes.
-   - Until `docs/PRODUCT.md` is approved, apply every change to an ADR in section 5 to its `ADR.md` block in the same step: the ID, title, and decision content stay identical.
+   - Until `docs/PRODUCT.md` is approved, apply every change to an adr in section 5 to its `adr.md` block in the same step: the ID, title, and decision content stay identical.
 
 ### Phase 5: Development Environment Setup
 1. Define local and team developer environment standards: IDE setup, version control, language runtimes, version managers, package managers, and container isolation (e.g., Docker).
@@ -104,11 +104,11 @@ The discovery process is executed in six sequential phases and produces `docs/PR
 2. Define the Minimum Viable Product (MVP) boundary and establish a phased project roadmap.
 3. **Output format**: Section 7 of the product template. `docs/PRODUCT.md` now holds every phase's decisions, including `## 8. Governance & Workflow` from Phase 5. Mark every open decision with a line containing `UNRESOLVED:` and the question to ask.
 4. **Approval**: Resolve every `UNRESOLVED:` item with the user, then close the approved content of `docs/PRODUCT.md` with an `## Approval` section (`validate_config.py scaffold` later appends `## Configuration Decisions` after it) containing `Approved by: <name or role>`, `First approved on: YYYY-MM-DD`, `Approved on: YYYY-MM-DD`, and `Approved content: <hash>`, where `<hash>` is the output of `validate_discovery.py --hash docs/PRODUCT.md` for the version the user approved. Any later edit outside the Approval and Configuration Decisions sections fails validation until the user approves again; a re-approval updates `Approved on` and the hash and keeps `First approved on`. Configuration (WI-002) cannot start until this validates and step 5 is complete.
-5. **Accept the seeded ADRs**: once the approved `docs/PRODUCT.md` validates and before starting WI-002:
-   - Reconcile the two records in both directions: every ADR in section 5 has a matching `ADR.md` block, and every seeded `ADR.md` block has a matching section 5 ADR (same ID, title, and decision content, as the Phase 4 sync rule requires), and each ADR ID appears in exactly one `ADR.md` block. Section 5 is approved and frozen, so change `ADR.md` to match it, never section 5, and remove a seeded block that has no section 5 counterpart.
-   - Set every seeded `Proposed` ADR to `Accepted` and copy the approval's `Approved by` and `First approved on` into its `Approved by` and `Approved on`.
-   - Re-read `ADR.md` before treating the approval as complete: every seeded ADR must be `Accepted` with `Approved by` and `Approved on` filled; apply this step to any that is not.
-   - After approval, section 5 must stay a frozen snapshot and `ADR.md` is the live record: see "After initialization" below.
+5. **Accept the seeded adrs**: once the approved `docs/PRODUCT.md` validates and before starting WI-002:
+   - Reconcile the two records in both directions: every adr in section 5 has a matching `adr.md` block, and every seeded `adr.md` block has a matching section 5 adr (same ID, title, and decision content, as the Phase 4 sync rule requires), and each adr ID appears in exactly one `adr.md` block. Section 5 is approved and frozen, so change `adr.md` to match it, never section 5, and remove a seeded block that has no section 5 counterpart.
+   - Set every seeded `Proposed` adr to `Accepted` and copy the approval's `Approved by` and `First approved on` into its `Approved by` and `Approved on`.
+   - Re-read `adr.md` before treating the approval as complete: every seeded adr must be `Accepted` with `Approved by` and `Approved on` filled; apply this step to any that is not.
+   - After approval, section 5 must stay a frozen snapshot and `adr.md` is the live record: see "After initialization" below.
 
 ---
 
@@ -144,7 +144,7 @@ validate_config.py scaffold
 This writes `config.yaml`, with the PRODUCT.md section each key usually comes from, and appends a `Configuration Decisions` table (key, value, source) to `docs/PRODUCT.md`. Then:
 
 1. Fill the values `docs/PRODUCT.md` states, with source `PRODUCT.md § <section>`. The cited section must exist and contain the value (every item, for lists and maps) as a whole token. Lists and maps are recorded as compact JSON, and `|` in a value is escaped as `\|`.
-2. Define the project's domain sections (`domain_sections`: a `title` and `rules` each), such as models, services, storage, or evaluation, from the use cases, requirements, and ADRs, and confirm them with the user. Their source is always `user, YYYY-MM-DD`.
+2. Define the project's domain sections (`domain_sections`: a `title` and `rules` each), such as models, services, storage, or evaluation, from the use cases, requirements, and adrs, and confirm them with the user. Their source is always `user, YYYY-MM-DD`.
 3. Ask the user for every other value, including the coding-agent instruction file (for example `CLAUDE.md`, `AGENTS.md`, or `.github/copilot-instructions.md`). Values PRODUCT.md only implies are proposed and confirmed, never written silently. Record answers with source `user, YYYY-MM-DD`.
 
 ```bash
@@ -192,9 +192,9 @@ python "$SKILL_DIR/scripts/validate_discovery.py" docs/PRODUCT.md
 ```
 
 The script verifies:
-- Presence of required sections in `docs/PRODUCT.md` (Use Cases, Functional Requirements, User Stories, Tech Stack, ADRs, Dev Environment, Risks, Governance & Workflow).
-- EARS syntax compliance, product requirements numbered from `FR-002` (`FR-001` is reserved for initialization), and three-digit FR, UC, US, ADR, and RSK IDs that are each defined once. FR rows define requirements only in the Functional Requirements section and RSK rows only in the Risk section; elsewhere (e.g. a traceability matrix) they are references.
-- ADR completeness (Context, Decision, Trade-offs, Consequences).
+- Presence of required sections in `docs/PRODUCT.md` (Use Cases, Functional Requirements, User Stories, Tech Stack, adrs, Dev Environment, Risks, Governance & Workflow).
+- EARS syntax compliance, product requirements numbered from `FR-002` (`FR-001` is reserved for initialization), and three-digit FR, UC, US, adr, and RSK IDs that are each defined once. FR rows define requirements only in the Functional Requirements section and RSK rows only in the Risk section; elsewhere (e.g. a traceability matrix) they are references.
+- adr completeness (Context, Decision, Trade-offs, Consequences).
 - The risk matrix: at least one `RSK-xxx` row, Score = Impact × Probability on 1-3 scales, and a mitigation plan for every score of 6 or more.
 - MoSCoW: every FR and user story has exactly one valid priority, at least one is Must Have, and Won't Have is stated (as a priority or a `Won't Have:` line).
 - Each FR's EARS pattern column matches its statement (WHEN, WHILE, WHERE, IF … THEN, or none for Ubiquitous), and every referenced ID is defined.
@@ -203,7 +203,7 @@ The script verifies:
 
 Lines starting with `>` are template guidance: every content check skips them, but the approval hash covers them.
 
-The scripts do not check `ADR.md`. Phase 6 step 5 (reconcile with section 5, accept, re-read) is its check, and `docs/PRODUCT.md` section 5 stays covered by the approval hash.
+The scripts do not check `adr.md`. Phase 6 step 5 (reconcile with section 5, accept, re-read) is its check, and `docs/PRODUCT.md` section 5 stays covered by the approval hash.
 
 When validating from a directory, pass the project root or a directory that contains exactly one generated `PRODUCT.md`; bundled templates, references, and examples are not discovery output and are not aggregated.
 
@@ -211,7 +211,7 @@ When validating from a directory, pass the project root or a directory that cont
 
 ## After initialization
 
-The root `ADR.md` is the live record of architecture decisions. `docs/PRODUCT.md` section 5 is a frozen snapshot of the discovery ADRs: a re-approval of `docs/PRODUCT.md` must not change its ADR blocks and must not rewrite `ADR.md`. New and changed decisions, and architecture changes, follow the constitution's "Architecture decisions" section.
+The root `adr.md` is the live record of architecture decisions. `docs/PRODUCT.md` section 5 is a frozen snapshot of the discovery adrs: a re-approval of `docs/PRODUCT.md` must not change its adr blocks and must not rewrite `adr.md`. New and changed decisions, and architecture changes, follow the constitution's "Architecture decisions" section.
 
 ---
 
@@ -221,7 +221,7 @@ The root `ADR.md` is the live record of architecture decisions. `docs/PRODUCT.md
 - [01-use-case-definition.md](references/01-use-case-definition.md): Use case scoping, actor identification, and boundary setting.
 - [02-functional-requirements.md](references/02-functional-requirements.md): EARS syntax, User Stories (3 C's), acceptance criteria, and MoSCoW prioritization.
 - [03-tech-stack-selection.md](references/03-tech-stack-selection.md): Multi-Criteria Decision-Making (MCDM) framework across technical, organizational, strategic, and AI dimensions.
-- [04-architecture-decision-records.md](references/04-architecture-decision-records.md): ADR lifecycle, structure, and traceability management.
+- [04-architecture-decision-records.md](references/04-architecture-decision-records.md): adr lifecycle, structure, and traceability management.
 - [05-dev-environment-setup.md](references/05-dev-environment-setup.md): Local dev environment, runtimes, containers, code quality tools, and CI/CD.
 - [06-risk-and-roadmap.md](references/06-risk-and-roadmap.md): Feasibility analysis, risk matrices, and MVP roadmap planning.
 
@@ -230,8 +230,8 @@ The root `ADR.md` is the live record of architecture decisions. `docs/PRODUCT.md
 - [use-case-template.md](templates/use-case-template.md): Fragment for section 2, one block per use case.
 - [prd-user-stories-template.md](templates/prd-user-stories-template.md): Fragment for section 3, requirements and user stories.
 - [tech-stack-evaluation-matrix.md](templates/tech-stack-evaluation-matrix.md): Fragment for section 4, the MCDM matrix.
-- [adr-template.md](templates/adr-template.md): Fragment for section 5, one block per ADR; each block is also seeded into `ADR.md`.
-- [adr-log-template.md](templates/adr-log-template.md): Structure of the root `ADR.md`, the live ADR record seeded from section 5 in Phase 4. Standalone, not a fragment of the product template.
+- [adr-template.md](templates/adr-template.md): Fragment for section 5, one block per adr; each block is also seeded into `adr.md`.
+- [adr-log-template.md](templates/adr-log-template.md): Structure of the root `adr.md`, the live adr record seeded from section 5 in Phase 4. Standalone, not a fragment of the product template.
 - [dev-environment-checklist.md](templates/dev-environment-checklist.md): Fragments for sections 6 and 8, environment and governance decisions.
 
 ### Initialization inputs

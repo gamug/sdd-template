@@ -16,22 +16,22 @@ The acceptance criteria `AC-FR001-01` through `AC-FR001-06` are defined in [`SPE
 **Depends on:** none  
 **Acceptance criteria:** AC-FR001-01
 
-Run [`SKILL.md`](../SKILL.md) through all six phases. Collect the user's problem definition, actors, workflows, requirements, user stories, stack evaluation, ADRs, environment and governance decisions, risks, and roadmap in `docs/PRODUCT.md`, built from the skill's `templates/product-template.md`, and seed the root `ADR.md` from its ADRs. Discovery runs first: no other FR-001 work starts before it, and `validate_config.py` refuses to run until `docs/PRODUCT.md` is approved; it does not check `ADR.md`, so the acceptance of the seeded ADRs is a manual exit criterion below.
+Run [`SKILL.md`](../SKILL.md) through all six phases. Collect the user's problem definition, actors, workflows, requirements, user stories, stack evaluation, adrs, environment and governance decisions, risks, and roadmap in `docs/PRODUCT.md`, built from the skill's `templates/product-template.md`, and seed the root `adr.md` from its adrs. Discovery runs first: no other FR-001 work starts before it, and `validate_config.py` refuses to run until `docs/PRODUCT.md` is approved; it does not check `adr.md`, so the acceptance of the seeded adrs is a manual exit criterion below.
 
 The skill must ask focused questions interactively. It must not guess missing inputs. When an answer is required, the question must state what decision is needed, why it affects the project, and what concrete options or examples the user should consider.
 
-**Exit criteria:** Every `UNRESOLVED:` decision has been resolved with the user, `docs/PRODUCT.md` records the user's approval and the hash of the approved content in its `## Approval` section, `validate_discovery.py docs/PRODUCT.md` passes without `--draft`, and every seeded ADR in `ADR.md` is `Accepted` with `Approved by` and `Approved on` filled from the approver and first approval date recorded in `docs/PRODUCT.md`.
+**Exit criteria:** Every `UNRESOLVED:` decision has been resolved with the user, `docs/PRODUCT.md` records the user's approval and the hash of the approved content in its `## Approval` section, `validate_discovery.py docs/PRODUCT.md` passes without `--draft`, and every seeded adr in `adr.md` is `Accepted` with `Approved by` and `Approved on` filled from the approver and first approval date recorded in `docs/PRODUCT.md`.
 
 ### WI-002 — Create config.yaml
 
 **Parent:** FR-001  
-**Depends on:** WI-001 (approved `docs/PRODUCT.md` and accepted seeded ADRs)  
+**Depends on:** WI-001 (approved `docs/PRODUCT.md` and accepted seeded adrs)  
 **Acceptance criteria:** AC-FR001-02
 
 Build root `config.yaml` from scratch with `validate_config.py scaffold`, which lists every key required by the generic `$SKILL_DIR/memory/constitution.md` template and the PRODUCT.md section each one usually comes from.
 
 1. Fill values that `docs/PRODUCT.md` states explicitly, with source `PRODUCT.md § <section>`. The cited section must have no subsections and contain each value (every item, for lists and maps) as a whole token.
-2. Define the project's domain sections (`domain_sections`) from the use cases, requirements, ADRs, and risks, and confirm them with the user. The template carries no domain rules of its own. Their source is always `user, YYYY-MM-DD`.
+2. Define the project's domain sections (`domain_sections`) from the use cases, requirements, adrs, and risks, and confirm them with the user. The template carries no domain rules of its own. Their source is always `user, YYYY-MM-DD`.
 3. Ask the user for every other value. A value PRODUCT.md only implies is proposed and confirmed, never written silently. Record answers with source `user, YYYY-MM-DD`.
 
 Every value and its source is recorded in the `Configuration Decisions` table of `docs/PRODUCT.md`. `validate_config.py check` must pass.
