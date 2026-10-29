@@ -4,8 +4,7 @@
 
 ### FR-001 — Discover and initialize the project
 
-The project must complete the ordered Work Items in
-[`PLAN.md`](./PLAN.md). The hierarchy is strictly:
+The project must complete the ordered Work Items in [`PLAN.md`](./PLAN.md). The hierarchy is strictly:
 
 ```text
 FR-001
@@ -13,17 +12,11 @@ FR-001
     └── Tasks
 ```
 
-FR-001 does not define the project's purpose, scope, product, stack, or
-architecture in advance. Those decisions are discovered through WI-001 and
-then applied by the remaining Work Items. FR-001 is reserved for
-initialization: the product requirements discovered in WI-001 are numbered
-from `FR-002`, and `validate_discovery.py` rejects an `FR-001` row in
-`docs/PRODUCT.md`.
+FR-001 does not define the project's purpose, scope, product, stack, or architecture in advance. Those decisions are discovered through WI-001 and then applied by the remaining Work Items. FR-001 is reserved for initialization: the product requirements discovered in WI-001 are numbered from `FR-002`, and `validate_discovery.py` rejects an `FR-001` row in `docs/PRODUCT.md`.
 
 ## Acceptance criteria
 
-Each criterion uses the constitution's executable GIVEN-WHEN-THEN form. A criterion
-may have several scenarios under the same ID.
+Each criterion uses the constitution's executable GIVEN-WHEN-THEN form. A criterion may have several scenarios under the same ID.
 
 - **AC-FR001-01:**
 
@@ -110,10 +103,8 @@ may have several scenarios under the same ID.
 ## Traceability
 
 - FR-001 contains WI-001 through WI-006.
-- WI-001 through WI-006 implement `AC-FR001-01` through `AC-FR001-06`,
-  respectively.
-- Each WI contains its own implementation tasks in
-  [`TASKS.md`](./TASKS.md).
+- WI-001 through WI-006 implement `AC-FR001-01` through `AC-FR001-06`, respectively.
+- Each WI contains its own implementation tasks in [`TASKS.md`](./TASKS.md).
 - Every task must identify exactly one parent WI.
 - Every task must reference the acceptance-criteria ID it implements.
 - No task may exist without a WI, and no WI may exist without FR-001.

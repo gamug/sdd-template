@@ -127,8 +127,7 @@ Evaluating Backend API Framework Options:
 
 ### Risk Matrix
 
-Impact and Probability use 1 (Low) to 3 (High); Score = Impact × Probability.
-A score of 6 or more requires a mitigation plan.
+Impact and Probability use 1 (Low) to 3 (High); Score = Impact × Probability. A score of 6 or more requires a mitigation plan.
 
 | Risk ID | Description | Impact | Probability | Score | Mitigation Plan |
 | :--- | :--- | :---: | :---: | :---: | :--- |
@@ -163,4 +162,4 @@ A score of 6 or more requires a mitigation plan.
 - **Approved by**: Product Owner (example)
 - **First approved on**: 2026-01-15
 - **Approved on**: 2026-01-15
-- **Approved content**: `sha256:4bce521a1660556f1038b2dbb65dd8ffe3495de6ff430c10602a6f67b759e66f`
+- **Approved content**: `sha256:d366f33725e66d88b51f5bf8da540fe7490f97ceb42171a0826be79ce77d5676`

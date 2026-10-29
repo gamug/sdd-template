@@ -1,0 +1,9 @@
+root = true
+
+[*.md]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+# One paragraph, list item, or quote line per line: do not hard-wrap.
+max_line_length = off
+trim_trailing_whitespace = false

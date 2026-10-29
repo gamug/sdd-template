@@ -1,19 +1,10 @@
 # SDD Tasks
 
-Task register for the hierarchy `FR-001 > WI > Task` defined in
-[`PLAN.md`](./PLAN.md). Every task has exactly one parent Work Item.
+Task register for the hierarchy `FR-001 > WI > Task` defined in [`PLAN.md`](./PLAN.md). Every task has exactly one parent Work Item.
 
-`$SKILL_DIR` is the directory containing the `sdd-init` skill's `SKILL.md`
-(see "Running the tooling" there); commands run from the project root.
+`$SKILL_DIR` is the directory containing the `sdd-init` skill's `SKILL.md` (see "Running the tooling" there); commands run from the project root.
 
-Every Work Item and task carries a checkbox: `[ ]` is the template value and
-`[x]` means done. A Work Item is checked only when every task under it is
-checked, in the same change as its last task. This register is immutable, so
-progress is not tracked before TASK-010: TASK-010 carries it into
-`.sdd/TASKS.md`, checks TASK-001 through TASK-009 and the Work Items they
-complete (WI-001 and WI-002), and WI-003 is checked when TASK-010 is. Progress
-is tracked there from then on. Work Items and tasks added to `.sdd/TASKS.md`
-carry the same boxes and follow the same rule.
+Every Work Item and task carries a checkbox: `[ ]` is the template value and `[x]` means done. A Work Item is checked only when every task under it is checked, in the same change as its last task. This register is immutable, so progress is not tracked before TASK-010: TASK-010 carries it into `.sdd/TASKS.md`, checks TASK-001 through TASK-009 and the Work Items they complete (WI-001 and WI-002), and WI-003 is checked when TASK-010 is. Progress is tracked there from then on. Work Items and tasks added to `.sdd/TASKS.md` carry the same boxes and follow the same rule.
 
 ## WI-001 — Run the discovery skill and create PRODUCT.md
 
@@ -25,11 +16,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-001
 - **Depends on:** none
 - **Acceptance criteria:** AC-FR001-01
-- **Action:** Run all six phases of `$SKILL_DIR/SKILL.md`,
-  including the Governance & Workflow checklist, except that writing
-  `docs/PRODUCT.md` and seeding `ADR.md` are TASK-003, and approving
-  PRODUCT.md and accepting the seeded ADRs are TASK-004. Nothing else in
-  FR-001 may start before this task.
+- **Action:** Run all six phases of `$SKILL_DIR/SKILL.md`, including the Governance & Workflow checklist, except that writing `docs/PRODUCT.md` and seeding `ADR.md` are TASK-003, and approving PRODUCT.md and accepting the seeded ADRs are TASK-004. Nothing else in FR-001 may start before this task.
 
 ### TASK-002 — Collect discovery outputs
 
@@ -37,9 +24,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-001
 - **Depends on:** TASK-001
 - **Acceptance criteria:** AC-FR001-01
-- **Action:** Assemble use cases, requirements, user stories, stack evaluation,
-  ADRs (seeded into the root `ADR.md` in TASK-003), environment and
-  governance decisions, risks, and roadmap.
+- **Action:** Assemble use cases, requirements, user stories, stack evaluation, ADRs (seeded into the root `ADR.md` in TASK-003), environment and governance decisions, risks, and roadmap.
 
 ### TASK-003 — Write PRODUCT.md
 
@@ -47,17 +32,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-001
 - **Depends on:** TASK-002
 - **Acceptance criteria:** AC-FR001-01
-- **Action:** Write `docs/PRODUCT.md` from
-  `$SKILL_DIR/templates/product-template.md`, filling each
-  numbered section from its phase fragment. Seed the root `ADR.md` from the
-  ADRs in section 5 as Phase 4 step 5 of `$SKILL_DIR/SKILL.md` describes, and
-  keep it in sync while iterating. Use three-digit IDs, each defined
-  once and every reference resolving; give each FR an EARS pattern that matches
-  its statement and one MoSCoW priority; score risks as Impact × Probability.
-  Mark every open decision with `UNRESOLVED:`, and run
-  `python "$SKILL_DIR/scripts/validate_discovery.py" --draft docs/PRODUCT.md`
-  until it passes. Draft mode lists the template placeholders still to
-  replace; approval fails while any remain.
+- **Action:** Write `docs/PRODUCT.md` from `$SKILL_DIR/templates/product-template.md`, filling each numbered section from its phase fragment. Seed the root `ADR.md` from the ADRs in section 5 as Phase 4 step 5 of `$SKILL_DIR/SKILL.md` describes, and keep it in sync while iterating. Use three-digit IDs, each defined once and every reference resolving; give each FR an EARS pattern that matches its statement and one MoSCoW priority; score risks as Impact × Probability. Mark every open decision with `UNRESOLVED:`, and run `python "$SKILL_DIR/scripts/validate_discovery.py" --draft docs/PRODUCT.md` until it passes. Draft mode lists the template placeholders still to replace; approval fails while any remain.
 
 ### TASK-004 — Resolve open decisions and record approval
 
@@ -65,20 +40,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-001
 - **Depends on:** TASK-003
 - **Acceptance criteria:** AC-FR001-01
-- **Action:** Ask the user about every `UNRESOLVED:` item and update
-  `docs/PRODUCT.md`, applying any change to a section 5 ADR to its `ADR.md`
-  block in the same step. Present the document for approval and record it in its
-  `## Approval` section (`Approved by:`, `First approved on: YYYY-MM-DD`,
-  `Approved on: YYYY-MM-DD`, and `Approved content:` with the hash printed by `validate_discovery.py --hash
-  docs/PRODUCT.md` once the user has approved). Run the validator without
-  `--draft`; it must pass. Any later edit outside the Approval and
-  Configuration Decisions sections invalidates the approval until the user
-  approves again. This is the entry gate of WI-002, enforced by
-  `validate_config.py`. Then accept the seeded ADRs as Phase 6 step 5 of
-  `$SKILL_DIR/SKILL.md` describes (reconcile with section 5, accept, re-read).
-  `validate_config.py` does not check the ADR acceptance; it is a manual
-  gate. This task is not done, and TASK-005 does not start, until every seeded
-  ADR in `ADR.md` is `Accepted` with `Approved by` and `Approved on` filled.
+- **Action:** Ask the user about every `UNRESOLVED:` item and update `docs/PRODUCT.md`, applying any change to a section 5 ADR to its `ADR.md` block in the same step. Present the document for approval and record it in its `## Approval` section (`Approved by:`, `First approved on: YYYY-MM-DD`, `Approved on: YYYY-MM-DD`, and `Approved content:` with the hash printed by `validate_discovery.py --hash docs/PRODUCT.md` once the user has approved). Run the validator without `--draft`; it must pass. Any later edit outside the Approval and Configuration Decisions sections invalidates the approval until the user approves again. This is the entry gate of WI-002, enforced by `validate_config.py`. Then accept the seeded ADRs as Phase 6 step 5 of `$SKILL_DIR/SKILL.md` describes (reconcile with section 5, accept, re-read). `validate_config.py` does not check the ADR acceptance; it is a manual gate. This task is not done, and TASK-005 does not start, until every seeded ADR in `ADR.md` is `Accepted` with `Approved by` and `Approved on` filled.
 
 ## WI-002 — Create config.yaml
 
@@ -90,15 +52,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-002
 - **Depends on:** TASK-004
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** Run `validate_config.py scaffold`. It writes the `config.yaml` skeleton,
-  with the PRODUCT.md section each key usually comes from, and appends the
-  `Configuration Decisions` table to `docs/PRODUCT.md`. Fill only values that
-  `docs/PRODUCT.md` states explicitly, and record each one in the table with
-  source `PRODUCT.md § <section>`; `check` verifies that the section exists,
-  has no subsections, and contains the value (every item, for lists and maps)
-  as a whole token, so `3.1` is not evidence for "3.12.2". The Approval and
-  Configuration Decisions sections are never evidence. Record lists and maps as compact JSON
-  and escape `|` in values as `\|`.
+- **Action:** Run `validate_config.py scaffold`. It writes the `config.yaml` skeleton, with the PRODUCT.md section each key usually comes from, and appends the `Configuration Decisions` table to `docs/PRODUCT.md`. Fill only values that `docs/PRODUCT.md` states explicitly, and record each one in the table with source `PRODUCT.md § <section>`; `check` verifies that the section exists, has no subsections, and contains the value (every item, for lists and maps) as a whole token, so `3.1` is not evidence for "3.12.2". The Approval and Configuration Decisions sections are never evidence. Record lists and maps as compact JSON and escape `|` in values as `\|`.
 
 ### TASK-006 — Define domain sections
 
@@ -106,14 +60,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-002
 - **Depends on:** TASK-005
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** From the use cases, functional requirements, ADRs, and risks in
-  `docs/PRODUCT.md`, propose the domain-specific constitution sections (for
-  example models, services, storage, AI behavior, evaluation) as
-  `domain_sections` entries with a `title` and `rules`. Confirm them with the
-  user, write them to `config.yaml`, and record the `domain_sections` row as
-  compact JSON with source `user, YYYY-MM-DD` (`check` rejects a
-  `PRODUCT.md §` source here) so `check` detects any later change. An
-  empty list is valid only when the user confirms the project needs none.
+- **Action:** From the use cases, functional requirements, ADRs, and risks in `docs/PRODUCT.md`, propose the domain-specific constitution sections (for example models, services, storage, AI behavior, evaluation) as `domain_sections` entries with a `title` and `rules`. Confirm them with the user, write them to `config.yaml`, and record the `domain_sections` row as compact JSON with source `user, YYYY-MM-DD` (`check` rejects a `PRODUCT.md §` source here) so `check` detects any later change. An empty list is valid only when the user confirms the project needs none.
 
 ### TASK-007 — Ask the user for every remaining value
 
@@ -121,13 +68,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-002
 - **Depends on:** TASK-006
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** This task is the only place configuration questions are asked.
-  For every value `docs/PRODUCT.md` does not state, ask a context-rich
-  question. A value the document only implies is proposed to the user and
-  confirmed, never written silently. Record each answer in the table with
-  source `user, YYYY-MM-DD`. Propose `.github/workflows/validators.yml` as
-  `quality.ci_file`: the project's quality gates replace the template's
-  maintenance steps in that workflow, so it stays the single CI file.
+- **Action:** This task is the only place configuration questions are asked. For every value `docs/PRODUCT.md` does not state, ask a context-rich question. A value the document only implies is proposed to the user and confirmed, never written silently. Record each answer in the table with source `user, YYYY-MM-DD`. Propose `.github/workflows/validators.yml` as `quality.ci_file`: the project's quality gates replace the template's maintenance steps in that workflow, so it stays the single CI file.
 
 ### TASK-008 — Validate config.yaml
 
@@ -135,9 +76,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-002
 - **Depends on:** TASK-007
 - **Acceptance criteria:** AC-FR001-02
-- **Action:** Run `validate_config.py check`. It fails on missing or empty keys, keys
-  without a valid recorded source, and recorded values that differ from
-  `config.yaml`. Return to TASK-007 for every reported key.
+- **Action:** Run `validate_config.py check`. It fails on missing or empty keys, keys without a valid recorded source, and recorded values that differ from `config.yaml`. Return to TASK-007 for every reported key.
 
 ## WI-003 — Render constitution.md and synchronize SDD objects
 
@@ -149,11 +88,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-003
 - **Depends on:** TASK-008
 - **Acceptance criteria:** AC-FR001-03
-- **Action:** Run `validate_config.py render` to create `.sdd/constitution.md` from root
-  `config.yaml` and the immutable `$SKILL_DIR/memory/constitution.md`. Rendering
-  re-runs `check` and fails on any missing value or leftover placeholder. Do
-  not edit the rendered file by hand; re-run `render` after any
-  `config.yaml` change.
+- **Action:** Run `validate_config.py render` to create `.sdd/constitution.md` from root `config.yaml` and the immutable `$SKILL_DIR/memory/constitution.md`. Rendering re-runs `check` and fails on any missing value or leftover placeholder. Do not edit the rendered file by hand; re-run `render` after any `config.yaml` change.
 
 ### TASK-010 — Synchronize all SDD objects
 
@@ -161,13 +96,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-003
 - **Depends on:** TASK-009
 - **Acceptance criteria:** AC-FR001-03
-- **Action:** Create or update `.sdd/SPEC.md`, `.sdd/PLAN.md`, `.sdd/TASKS.md`,
-  and `.sdd/CHANGELOG.md` to match the approved `docs/PRODUCT.md` and preserve
-  traceability. Keep `FR-001` and its Work Items as the initialization
-  requirement and add the product requirements from `docs/PRODUCT.md`, which
-  are numbered from `FR-002`. Carry this task register into `.sdd/TASKS.md`
-  with TASK-001 through TASK-009, WI-001, and WI-002 checked; progress is
-  tracked there from now on. Finish with `validate_config.py render --verify`.
+- **Action:** Create or update `.sdd/SPEC.md`, `.sdd/PLAN.md`, `.sdd/TASKS.md`, and `.sdd/CHANGELOG.md` to match the approved `docs/PRODUCT.md` and preserve traceability. Keep `FR-001` and its Work Items as the initialization requirement and add the product requirements from `docs/PRODUCT.md`, which are numbered from `FR-002`. Carry this task register into `.sdd/TASKS.md` with TASK-001 through TASK-009, WI-001, and WI-002 checked; progress is tracked there from now on. Finish with `validate_config.py render --verify`.
 
 ## WI-004 — Create folders and non-programmatic dependencies
 
@@ -179,8 +108,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-004
 - **Depends on:** TASK-010
 - **Acceptance criteria:** AC-FR001-04
-- **Action:** Create approved folders, configuration locations, documentation
-  paths, environment templates, and other non-programmatic dependencies.
+- **Action:** Create approved folders, configuration locations, documentation paths, environment templates, and other non-programmatic dependencies.
 
 ### TASK-012 — Verify non-programmatic dependencies
 
@@ -188,8 +116,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-004
 - **Depends on:** TASK-011
 - **Acceptance criteria:** AC-FR001-04
-- **Action:** Check that the structure matches PRODUCT.md and constitution.md
-  without adding application source code.
+- **Action:** Check that the structure matches PRODUCT.md and constitution.md without adding application source code.
 
 ## WI-005 — Set up the system environment
 
@@ -201,8 +128,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-005
 - **Depends on:** TASK-012
 - **Acceptance criteria:** AC-FR001-05
-- **Action:** Configure the approved devcontainer, Docker, host-only, or
-  explicitly no-container environment.
+- **Action:** Configure the approved devcontainer, Docker, host-only, or explicitly no-container environment.
 
 ### TASK-014 — Run baseline environment checks
 
@@ -210,8 +136,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-005
 - **Depends on:** TASK-013
 - **Acceptance criteria:** AC-FR001-05
-- **Action:** Create the environment and run the documented baseline checks
-  without committing secrets.
+- **Action:** Create the environment and run the documented baseline checks without committing secrets.
 
 ## WI-006 — Automate environment reproduction
 
@@ -223,12 +148,7 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-006
 - **Depends on:** TASK-014
 - **Acceptance criteria:** AC-FR001-06
-- **Action:** Create `scripts/init.sh` or the approved equivalent to reproduce
-  the environment from a clean checkout. Configure the project's pre-commit
-  hook (the configured `quality.commit_hook`, which also enforces the commit
-  convention) and its CI workflow with the project's own quality gates. The
-  discovery and configuration validators serve initialization only; they are
-  run during WI-001 to WI-003 and are not part of the project's hook or CI.
+- **Action:** Create `scripts/init.sh` or the approved equivalent to reproduce the environment from a clean checkout. Configure the project's pre-commit hook (the configured `quality.commit_hook`, which also enforces the commit convention) and its CI workflow with the project's own quality gates. The discovery and configuration validators serve initialization only; they are run during WI-001 to WI-003 and are not part of the project's hook or CI.
 
 ### TASK-016 — Verify reproducibility and document recovery
 
@@ -236,5 +156,4 @@ carry the same boxes and follow the same rule.
 - **Work Item:** WI-006
 - **Depends on:** TASK-015
 - **Acceptance criteria:** AC-FR001-06
-- **Action:** Re-run initialization, verify actionable failures, and document
-  the recovery/reproduction procedure for contributors.
+- **Action:** Re-run initialization, verify actionable failures, and document the recovery/reproduction procedure for contributors.

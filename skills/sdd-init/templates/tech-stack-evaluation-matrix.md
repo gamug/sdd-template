@@ -1,12 +1,8 @@
-> Fragment for `## 4. Technology Stack Selection & MCDM Matrix` in
-> [`product-template.md`](./product-template.md). Repeat the matrix for each
-> technology category that needs a decision.
+> Fragment for `## 4. Technology Stack Selection & MCDM Matrix` in [`product-template.md`](./product-template.md). Repeat the matrix for each technology category that needs a decision.
 
 ### Multi-Criteria Decision-Making (MCDM) Evaluation
 
-Weights (1-5) reflect project priorities: **5** critical to project success,
-**3** important for operations or developer speed, **1** minor preference.
-Scores are 1-5; the weighted total is the sum of weight × score.
+Weights (1-5) reflect project priorities: **5** critical to project success, **3** important for operations or developer speed, **1** minor preference. Scores are 1-5; the weighted total is the sum of weight × score.
 
 #### Category: [e.g., Backend Web Framework]
 

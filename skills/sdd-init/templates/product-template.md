@@ -1,11 +1,6 @@
 # Technical Discovery Specification Package
 
-> Output template for `docs/PRODUCT.md`. Keep the numbered `##` sections and
-> fill each one from the phase fragment it names. IDs go in the item heading or
-> the first table column and use three digits (`UC-001`, `FR-002`, `US-001`,
-> `ADR-001`, `RSK-001`); `FR-001` is reserved for SDD initialization, and each
-> ID is defined once. Mark every open decision with a line containing
-> `UNRESOLVED:` and the question to ask.
+> Output template for `docs/PRODUCT.md`. Keep the numbered `##` sections and fill each one from the phase fragment it names. IDs go in the item heading or the first table column and use three digits (`UC-001`, `FR-002`, `US-001`, `ADR-001`, `RSK-001`); `FR-001` is reserved for SDD initialization, and each ID is defined once. Mark every open decision with a line containing `UNRESOLVED:` and the question to ask.
 
 ## Application: [Project Name]
 
@@ -90,9 +85,7 @@ SCENARIO: [Scenario name]
 
 ## 5. Architecture Decision Records (ADRs)
 
-> Fragment: [`adr-template.md`](./adr-template.md), one `###` block per decision.
-> In Phase 4 each block is also seeded into the root `ADR.md` (see
-> `adr-log-template.md`).
+> Fragment: [`adr-template.md`](./adr-template.md), one `###` block per decision. In Phase 4 each block is also seeded into the root `ADR.md` (see `adr-log-template.md`).
 
 ### `ADR-001`: [Decision Title]
 
@@ -124,8 +117,7 @@ SCENARIO: [Scenario name]
 
 ### Risk Matrix
 
-Impact and Probability use 1 (Low) to 3 (High); Score = Impact × Probability.
-A score of 6 or more requires a mitigation plan.
+Impact and Probability use 1 (Low) to 3 (High); Score = Impact × Probability. A score of 6 or more requires a mitigation plan.
 
 | Risk ID | Description | Impact | Probability | Score | Mitigation Plan |
 | :--- | :--- | :---: | :---: | :---: | :--- |
