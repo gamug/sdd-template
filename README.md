@@ -219,6 +219,10 @@ The validators carry a stdlib `unittest` regression suite under `tests/`. It als
 uv run --no-project --with-requirements skills/sdd-init/scripts/requirements.txt python -m unittest discover -s tests
 ```
 
+## Versions
+
+Releases are tagged `vMAJOR.MINOR.PATCH`; the notes for each are on the [Releases page](https://github.com/gamug/sdd-template/releases).
+
 ## License and ownership
 
 This template and the `sdd-init` skill are released under the [MIT License](./LICENSE). Copyright (c) 2026 Gabriel Jaime Múnera González. Contributions are accepted under the same license.
