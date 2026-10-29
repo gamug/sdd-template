@@ -219,6 +219,14 @@ The validators carry a stdlib `unittest` regression suite under `tests/`. It als
 uv run --no-project --with-requirements skills/sdd-init/scripts/requirements.txt python -m unittest discover -s tests
 ```
 
+## Versions
+
+The template follows [Semantic Versioning](https://semver.org). Releases are Git tags (`v1.0.0` is the first stable one) with notes on the [Releases page](https://github.com/gamug/sdd-template/releases).
+
+A major version changes something a fork has to adapt to: a template file or folder name, the shape of `config.yaml` or `docs/PRODUCT.md`, an ID format, or what the validators accept. A minor version adds capability without breaking an initialized fork, and a patch fixes wording or bugs. The release notes say whether a fork must re-run `validate_config.py render` after merging.
+
+Create a new fork from a tag rather than from the tip of `master`, and record the tag in the fork's first commit message so a later upgrade knows its starting point.
+
 ## License and ownership
 
 This template and the `sdd-init` skill are released under the [MIT License](./LICENSE). Copyright (c) 2026 Gabriel Jaime Múnera González. Contributions are accepted under the same license.
